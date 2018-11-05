@@ -55,7 +55,7 @@ c = 299792.458 # km/s
 def main(catalog, index, sample_table=False) :
     
     IDs = list( galaxies.keys() ) # the object name/identifier
-    ras = Angle([ galaxy['RA'] for galaxy in galaxies.values() ], u.hour)
+    ras = Angle([ galaxy['RA'] for galaxy in galaxies.values() ], u.deg)
     decs = Angle([ galaxy['dec'] for galaxy in galaxies.values() ], u.deg)
     zs = np.array([ galaxy['z'] for galaxy in galaxies.values() ])
     
