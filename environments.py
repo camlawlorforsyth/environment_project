@@ -60,15 +60,18 @@ def main(catalog, index, sample_table=False) :
               'Mpc\u207B\u00B9, \u03A9\u2098 = 0.3\n')
         
         table = Table([IDs, ras.to_string(unit=u.hour),
-                       decs.to_string(unit=u.degree), zs, zs*c*u.km/u.s, dists],
-                      names=('Object Name','RA','Dec','z','Velocity','D_A') )
+                       decs.to_string(unit=u.degree), zs, zs*c*u.km/u.s,
+                       dists, radii],
+                      names=('Object Name','RA','Dec','z','Velocity','D_A',
+                             '2 Mpc Radius') )
         table['Object Name'].format = '14s'
         table['RA'].format = '13s'
         table['z'].format = '10.6f'
         table['Velocity'].format = '8.0f'
         table['D_A'].format = '8.2f'
-        table.sort('z') # sort the table by the separation
-        print(table)
+        table['2 Mpc Radius'].format = '12.3f'
+#        table.sort('z')
+        table.pprint(max_lines=-1, max_width=-1)
     
     if (catalog == 'SDSS') :
         catname = 'SDSS'
