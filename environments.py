@@ -32,7 +32,7 @@ galaxies = {'HE0040-1105':{'RA':'10.65358672','dec':'-10.82278912','z':0.041962}
            'HE2222-0026':{'RA':'336.14705331','dec':'-0.18441524','z':0.059114},
            'Mrk926':{'RA':'346.18116153','dec':'-8.68572479','z':0.046860},
            'Mrk590':{'RA':'33.63982968','dec':'-0.76672567','z':0.026385}
-        } # coordinates from SDSS DR7 catalog
+        } # coordinates from SDSS DR7 catalog, redshifts from NED
 #galaxies = {'HE0040-1105':{'RA':'00:42:36.860','dec':'-10:49:22.03','z':0.041962},
 #           'RBS175':{'RA':'01:17:03.587','dec':'+00:00:27.41','z':0.045605},
 #           'Mrk1503':{'RA':'01:21:59.827','dec':'-01:02:24.08','z':0.054341},
@@ -45,7 +45,7 @@ galaxies = {'HE0040-1105':{'RA':'10.65358672','dec':'-10.82278912','z':0.041962}
 #           'HE2222-0026':{'RA':'22:24:35.292','dec':'-00:11:03.89','z':0.059114},
 #           'Mrk926':{'RA':'23:04:43.478','dec':'-08:41:08.62','z':0.046860},
 #           'Mrk590':{'RA':'02:14:33.562','dec':'-00:46:00.09','z':0.026385}
-#        } # coordinates from NED, note that the ras must be changed to u.hour
+#        } # coordinates/z from NED, note that the ras must be changed to u.hour
 
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
