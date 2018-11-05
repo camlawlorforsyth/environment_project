@@ -45,7 +45,7 @@ galaxies = {'HE0040-1105':{'RA':'10.65358672','dec':'-10.82278912','z':0.041962}
 #           'HE2222-0026':{'RA':'22:24:35.292','dec':'-00:11:03.89','z':0.059114},
 #           'Mrk926':{'RA':'23:04:43.478','dec':'-08:41:08.62','z':0.046860},
 #           'Mrk590':{'RA':'02:14:33.562','dec':'-00:46:00.09','z':0.026385}
-#        } # coordinates from NED
+#        } # coordinates from NED, note that the ras must be changed to u.hour
 
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
@@ -171,9 +171,9 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
                    redshifts[mask], redshifts[mask]*c*u.km/u.s, distances[mask],
                    d2d[mask]*60*u.arcmin/u.deg],
                   names=('RA','Dec','z','Velocity','D_A','Separation') )
-    table.add_row( [RA_c.to_string(unit=u.hour)+'*',
-            Dec_c.to_string(unit=u.degree), zs_c, zs_c*c,
-            dists_c/u.Mpc, 0.0] ) # add the galaxy of interest to the table
+#    table.add_row( [RA_c.to_string(unit=u.hour)+'*',
+#            Dec_c.to_string(unit=u.degree), zs_c, zs_c*c,
+#            dists_c/u.Mpc, 0.0] ) # add the galaxy of interest to the table
     table['RA'].format = '15s'
     table['z'].format = '10.6f'
     table['Velocity'].format = '8.0f'
