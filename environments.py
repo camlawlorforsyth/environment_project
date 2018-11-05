@@ -4,7 +4,7 @@
     ASSIGNMENT: Search for physically close companions to CARS host galaxies
     AUTHOR:     Cam Lawlor-Forsyth (lawlorfc@myumanitoba.ca)
     SUPERVISOR: Chris O'Dea
-    VERSION:    2018-Nov-4
+    VERSION:    2018-Nov-5
     
     PURPOSE: Search for physically close companion objects to CARS host
              galaxies, within 2 Mpc projected, and +/-1500 km/s along the LOS.
@@ -186,4 +186,10 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
     return
 #...............................................................end of functions
 
-main('SDSS', 0)
+main('SDSS', 0, sample_table=True)
+
+for i in range(1, 12) :
+    main('SDSS', i)
+
+for i in [4,5,7] :
+    main('GAMA', i)
