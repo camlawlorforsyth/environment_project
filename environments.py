@@ -24,8 +24,8 @@ galaxies = {'HE0040-1105':{'RA':'00:42:36.860','dec':'-10:49:22.03','z':0.041962
            'RBS175':{'RA':'01:17:03.587','dec':'+00:00:27.41','z':0.045605},
            'Mrk1503':{'RA':'01:21:59.827','dec':'-01:02:24.08','z':0.054341},
            'Mrk1018':{'RA':'02:06:15.990','dec':'-00:17:29.20','z':0.042436},
-           'Mrk1044':{'RA':'02:30:05.525','dec':'-08:59:53.29','z':0.016451}, # in GAMA
-           'Mrk1048':{'RA':'02:34:37.769','dec':'-08:47:15.44','z':0.043143}, # in GAMA
+           'Mrk1044':{'RA':'02:30:05.525','dec':'-08:59:53.29','z':0.016451}, # in GAMA?
+           'Mrk1048':{'RA':'02:34:37.769','dec':'-08:47:15.44','z':0.043143}, # in GAMA?
            'HE0345+0056':{'RA':'03:47:40.188','dec':'+01:05:14.02','z':0.031000},
            'HE0853+0102':{'RA':'08:55:54.268','dec':'+00:51:10.60','z':0.052000}, # in GAMA
            'Mrk707':{'RA':'09:37:01.030','dec':'+01:05:43.48','z':0.050338},
@@ -74,7 +74,7 @@ def main(catalog, index, sample_table=False) :
         catname = 'SDSS'
         
         # open the SDSS catalog and populate relevant information
-        SDSS_catalog = fits.open('SDSS_-_gal_info_dr7_v5_2.fit.gz') # SDSS DR7
+        SDSS_catalog = fits.open('gal_info_dr7_v5_2.fit.gz') # SDSS DR7
 #        info = SDSS_catalog.info()
 #        header = SDSS_catalog[1].header
 #        print(header) # to see what is in the actual data table
@@ -103,7 +103,7 @@ def main(catalog, index, sample_table=False) :
         catname = 'GAMA'
         
         # open the GAMA catalog and populate relevant information
-        GAMA_catalog = fits.open('GAMA_-_GaussFitSimple.fits') # SpecLineSFRv05
+        GAMA_catalog = fits.open('GaussFitSimple.fits') # SpecLineSFRv05
 #        info = GAMA_catalog.info()
 #        header = GAMA_catalog[1].header
 #        print(header)
@@ -170,4 +170,4 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
     return
 #...............................................................end of functions
 
-main('GAMA', 4)
+main('SDSS', 0)
