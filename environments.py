@@ -74,7 +74,7 @@ def main(catalog, index, sample_table=False) :
         catname = 'SDSS'
         
         # open the SDSS catalog and populate relevant information
-        SDSS_catalog = fits.open('SDSS_-_gal_info_dr7_v5_2.fit.gz') # SDSS DR7
+        SDSS_catalog = fits.open('gal_info_dr7_v5_2.fit.gz') # SDSS DR7
 #        info = SDSS_catalog.info()
 #        header = SDSS_catalog[1].header
 #        print(header) # to see what is in the actual data table
@@ -103,7 +103,7 @@ def main(catalog, index, sample_table=False) :
         catname = 'GAMA'
         
         # open the GAMA catalog and populate relevant information
-        GAMA_catalog = fits.open('GAMA_-_GaussFitSimple.fits') # SpecLineSFRv05
+        GAMA_catalog = fits.open('GaussFitSimple.fits') # SpecLineSFRv05
 #        info = GAMA_catalog.info()
 #        header = GAMA_catalog[1].header
 #        print(header)
@@ -170,4 +170,4 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
     return
 #...............................................................end of functions
 
-main('GAMA', 4)
+main('SDSS', 0)
