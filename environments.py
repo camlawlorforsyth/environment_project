@@ -18,21 +18,25 @@ from astropy.io import fits
 from astropy.table import Table
 import astropy.units as u
 import numpy as np
+import warnings
+warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
+# taking z/z_err >= 3, and ignore integration warning for the cosmology
 
 # the following are all in SDSS as per Bernd
-galaxies = {'HE0040-1105':{'RA':'10.65358672','dec':'-10.82278912','z':0.041962},
-           'RBS175':{'RA':'19.26494998','dec':'7.61312E-3','z':0.045605},
-           'Mrk1503':{'RA':'20.49921832','dec':'-1.04010828','z':0.054341},
-           'Mrk1018':{'RA':'31.56661419','dec':'-0.29144322','z':0.042436},
-           'Mrk1044':{'RA':'37.52302021','dec':'-8.99813544','z':0.016451}, # in GAMA?
-           'Mrk1048':{'RA':'38.6576586','dec':'-8.78777681','z':0.043143}, # in GAMA?
-           'HE0345+0056':{'RA':'56.91745592','dec':'1.08722631','z':0.031000},
-           'HE0853+0102':{'RA':'133.97612964','dec':'0.85305195','z':0.052000}, # in GAMA
-           'Mrk707':{'RA':'144.25436927','dec':'1.09547822','z':0.050338},
-           'HE2222-0026':{'RA':'336.14705331','dec':'-0.18441524','z':0.059114},
-           'Mrk926':{'RA':'346.18116153','dec':'-8.68572479','z':0.046860},
-           'Mrk590':{'RA':'33.63982968','dec':'-0.76672567','z':0.026385}
-        } # coordinates from SDSS DR7 catalog, redshifts from NED
+galaxies = {'HE0040-1105':{'RA':'10.65358542','dec':'-10.82278903','z':0.04199},
+           'RBS175':{'RA':'19.26495342','dec':'7.63966751E-3','z':0.04563},
+           'Mrk1503':{'RA':'20.49924553','dec':'-1.04009986','z':0.05435},
+           'Mrk1018':{'RA':'31.56660166','dec':'-0.29145178','z':0.04298},
+           'Mrk1044':{'RA':'37.52302517','dec':'-8.99810955','z':0.016451}, # in GAMA?, no DR7,8 spectrum
+           'Mrk1048':{'RA':'38.65766625','dec':'-8.78779752','z':0.043143}, # in GAMA?, no DR7,8 spectrum
+           'HE0345+0056':{'RA':'56.9174638','dec':'1.0872126','z':0.031000}, # no DR7,8 spectrum
+           'HE0853+0102':{'RA':'133.97614006','dec':'0.85306112','z':0.05247,
+                          'GAMA_CATAID':278841}, # in GAMA
+           'Mrk707':{'RA':'144.25436933','dec':'1.0954803','z':0.05025},
+           'HE2222-0026':{'RA':'336.14705483','dec':'-0.18442192','z':0.05873},
+           'Mrk926':{'RA':'346.18116195','dec':'-8.68573563','z':0.04702},
+           'Mrk590':{'RA':'33.63983722','dec':'-0.76672072','z':0.02609} # no DR7 spectrum
+        } # coordinates from SDSS DR8 catalog, redshifts from SDSS DR8, otherwise NED
 #galaxies = {'HE0040-1105':{'RA':'00:42:36.860','dec':'-10:49:22.03','z':0.041962},
 #           'RBS175':{'RA':'01:17:03.587','dec':'+00:00:27.41','z':0.045605},
 #           'Mrk1503':{'RA':'01:21:59.827','dec':'-01:02:24.08','z':0.054341},
@@ -90,7 +94,8 @@ def main(catalog, index, sample_table=False) :
         catname = 'SDSS'
         
         # open the SDSS catalog and populate relevant information
-        SDSS_catalog = fits.open('gal_info_dr7_v5_2.fit.gz') # SDSS DR7
+#        SDSS_catalog = fits.open('gal_info_dr7_v5_2.fit.gz') # SDSS DR7
+        SDSS_catalog = fits.open('galSpecInfo-dr8.fits') # SDSS DR8
 #        info = SDSS_catalog.info()
 #        header = SDSS_catalog[1].header
 #        print(header) # to see what is in the actual data table
@@ -181,7 +186,7 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
     table['Separation'].format = '10.3f'
     table.sort('Separation') # sort the table by the separation
     table.pprint(max_lines=-1) # print full table, use print(table) for regular
-    print("\nNote: '*' in the first line denotes the object of interest.")
+#    print("\nNote: '*' in the first line denotes the object of interest.")
     
     return
 #...............................................................end of functions
@@ -191,5 +196,5 @@ main('SDSS', 0, sample_table=True)
 for i in range(1, 12) :
     main('SDSS', i)
 
-for i in [4,5,7] :
-    main('GAMA', i)
+#for i in [4,5,7] :
+#    main('GAMA', i)
