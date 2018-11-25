@@ -188,8 +188,8 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
 
 main('SDSS', 0, sample_table=True)
 
-for i in range(1, 12) :
-    main('SDSS', i)
+#for i in range(1, 12) :
+#    main('SDSS', i)
 
-for i in [4,5,7] :
-    main('GAMA', i)
+#for i in [4,5,7] :
+#    main('GAMA', i)
