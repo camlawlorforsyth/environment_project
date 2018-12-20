@@ -4,20 +4,22 @@
     ASSIGNMENT: Search for physically close companions to CARS host galaxies
     AUTHOR:     Cam Lawlor-Forsyth (lawlorfc@myumanitoba.ca)
     SUPERVISOR: Chris O'Dea
-    VERSION:    2018-Nov-5
+    VERSION:    2018-Dec-20
     
     PURPOSE: Search for physically close companion objects to CARS host
              galaxies, within 2 Mpc projected, and +/-1500 km/s along the LOS.
 """
 
 # imports
+import numpy as np
+
+import astropy.constants as const
 from astropy.coordinates import Angle
 from astropy.coordinates import SkyCoord
 from astropy.cosmology import FlatLambdaCDM
 from astropy.io import fits
 from astropy.table import Table
 import astropy.units as u
-import numpy as np
 import warnings
 warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 # taking z/z_err >= 3, and ignore integration warning for the cosmology
@@ -27,35 +29,41 @@ galaxies = {'HE0040-1105':{'RA':'10.65358542','dec':'-10.82278903','z':0.04199},
            'RBS175':{'RA':'19.26495342','dec':'7.63966751E-3','z':0.04563},
            'Mrk1503':{'RA':'20.49924553','dec':'-1.04009986','z':0.05435},
            'Mrk1018':{'RA':'31.56660166','dec':'-0.29145178','z':0.04298},
-           'Mrk1044':{'RA':'37.52302517','dec':'-8.99810955','z':0.016451}, # in GAMA?, no DR7,8 spectrum
-           'Mrk1048':{'RA':'38.65766625','dec':'-8.78779752','z':0.043143}, # in GAMA?, no DR7,8 spectrum
-           'HE0345+0056':{'RA':'56.9174638','dec':'1.0872126','z':0.031000}, # no DR7,8 spectrum
+           'Mrk1044':{'RA':'37.52302517','dec':'-8.99810955','z':0.016451},
+               # in GAMA?, no DR7,8 spectrum
+           'Mrk1048':{'RA':'38.65766625','dec':'-8.78779752','z':0.043143},
+               # in GAMA?, no DR7,8 spectrum
+           'HE0345+0056':{'RA':'56.9174638','dec':'1.0872126','z':0.031000},
+               # no DR7,8 spectrum
            'HE0853+0102':{'RA':'133.97614006','dec':'0.85306112','z':0.05247,
                           'GAMA_CATAID':278841}, # in GAMA
            'Mrk707':{'RA':'144.25436933','dec':'1.0954803','z':0.05025},
            'HE2222-0026':{'RA':'336.14705483','dec':'-0.18442192','z':0.05873},
            'Mrk926':{'RA':'346.18116195','dec':'-8.68573563','z':0.04702},
-           'Mrk590':{'RA':'33.63983722','dec':'-0.76672072','z':0.02609} # no DR7 spectrum
-        } # coordinates from SDSS DR8 catalog, redshifts from SDSS DR8, otherwise NED
+           'Mrk590':{'RA':'33.63983722','dec':'-0.76672072','z':0.02609}
+               # no DR7 spectrum
+        } # coordinates from SDSS DR8 catalog, z from SDSS DR8, otherwise NED
 #galaxies = {'HE0040-1105':{'RA':'00:42:36.860','dec':'-10:49:22.03','z':0.041962},
 #           'RBS175':{'RA':'01:17:03.587','dec':'+00:00:27.41','z':0.045605},
 #           'Mrk1503':{'RA':'01:21:59.827','dec':'-01:02:24.08','z':0.054341},
 #           'Mrk1018':{'RA':'02:06:15.990','dec':'-00:17:29.20','z':0.042436},
-#           'Mrk1044':{'RA':'02:30:05.525','dec':'-08:59:53.29','z':0.016451}, # in GAMA?
-#           'Mrk1048':{'RA':'02:34:37.769','dec':'-08:47:15.44','z':0.043143}, # in GAMA?
+#           'Mrk1044':{'RA':'02:30:05.525','dec':'-08:59:53.29','z':0.016451},
+                # in GAMA?
+#           'Mrk1048':{'RA':'02:34:37.769','dec':'-08:47:15.44','z':0.043143},
+                # in GAMA?
 #           'HE0345+0056':{'RA':'03:47:40.188','dec':'+01:05:14.02','z':0.031000},
-#           'HE0853+0102':{'RA':'08:55:54.268','dec':'+00:51:10.60','z':0.052000}, # in GAMA
+#           'HE0853+0102':{'RA':'08:55:54.268','dec':'+00:51:10.60','z':0.052000},
+                # in GAMA
 #           'Mrk707':{'RA':'09:37:01.030','dec':'+01:05:43.48','z':0.050338},
 #           'HE2222-0026':{'RA':'22:24:35.292','dec':'-00:11:03.89','z':0.059114},
 #           'Mrk926':{'RA':'23:04:43.478','dec':'-08:41:08.62','z':0.046860},
 #           'Mrk590':{'RA':'02:14:33.562','dec':'-00:46:00.09','z':0.026385}
-#        } # coordinates/z from NED, note that the ras must be changed to u.hour
+#        } # coordinates/z from NED, note that 'ras' must be changed to u.hour
 
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
-c = 299792.458 # km/s
 
-#...........................................................................main
+#..........................................................................main
 def main(catalog, index, sample_table=False) :
     
     IDs = list( galaxies.keys() ) # the object name/identifier
@@ -63,8 +71,8 @@ def main(catalog, index, sample_table=False) :
     decs = Angle([ galaxy['dec'] for galaxy in galaxies.values() ], u.deg)
     zs = np.array([ galaxy['z'] for galaxy in galaxies.values() ])
     
-    lower_z = np.array(zs) - 1500/c
-    upper_z = np.array(zs) + 1500/c
+    lower_z = np.array(zs) - 1500*(u.km/u.s)/const.c.to('km/s')
+    upper_z = np.array(zs) + 1500*(u.km/u.s)/const.c.to('km/s')
     
     dists = cosmo.angular_diameter_distance(zs) # compute D_A
     radii = (2*u.Mpc/dists)*(180*60*u.arcmin/np.pi) # find the radii = 2 Mpc
@@ -77,7 +85,8 @@ def main(catalog, index, sample_table=False) :
               'Mpc\u207B\u00B9, \u03A9\u2098 = 0.3\n')
         
         table = Table([IDs, ras.to_string(unit=u.hour),
-                       decs.to_string(unit=u.degree), zs, zs*c*u.km/u.s,
+                       decs.to_string(unit=u.degree), zs,
+                       zs*const.c.to('km/s'),
                        dists, radii],
                       names=('Object Name','RA','Dec','z','Velocity','D_A',
                              '2 Mpc Radius') )
@@ -107,7 +116,7 @@ def main(catalog, index, sample_table=False) :
         SDSS_catalog.close() # close the SDSS catalog fits file
         
         badIndex = np.where(Decs==-9999.0*u.deg) # the one bad RA/Dec value
-        RAs = np.delete(RAs, badIndex) # remove the bad value for all parameters
+        RAs = np.delete(RAs, badIndex) # remove bad value for all parameters
         Decs = np.delete(Decs, badIndex)
         redshifts = np.delete(redshifts, badIndex)
         z_errs = np.delete(z_errs, badIndex)
@@ -116,7 +125,7 @@ def main(catalog, index, sample_table=False) :
                 & ((redshifts / z_errs) >= 3) ) # mask the data based on
                 # velocity cuts, redshift quality
         
-        cat_search(IDs[index], ras[index], decs[index], zs[index], dists[index],
+        cat_search(IDs[index], ras[index],decs[index], zs[index], dists[index],
                    lower_z[index], upper_z[index], radii[index],
                    RAs, Decs, redshifts, catname, mask)
         
@@ -139,24 +148,24 @@ def main(catalog, index, sample_table=False) :
                 & (redshift_quality >= 3) ) # mask the data based on
                 # velocity cuts, redshift quality
         
-        cat_search(IDs[index], ras[index], decs[index], zs[index], dists[index],
+        cat_search(IDs[index], ras[index],decs[index], zs[index], dists[index],
                    lower_z[index], upper_z[index], radii[index],
                    RAs, Decs, redshifts, catname, mask)
         
     return
 
-#.....................................................................cat_search
+#....................................................................cat_search
 def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
                RAs, Decs, redshifts, catname, mask) :
     
     print('\n-----ANALYSIS FOR {0:s}-----\n'.format(galaxy_ID) )
-    center = SkyCoord(ra=RA_c, dec=Dec_c, distance=dists_c) # galaxy of interest
+    center = SkyCoord(ra=RA_c, dec=Dec_c, distance=dists_c) #galaxy of interest
     
     distances = cosmo.angular_diameter_distance(redshifts) # compute D_A
     catalog = SkyCoord(ra=RAs, dec=Decs, distance=distances,
                        unit=(u.deg, u.deg, u.Mpc) ) # create the catalog
     
-    d2d = center.separation(catalog) # find the projected separations on the sky
+    d2d = center.separation(catalog) # find projected separations on the sky
     mask = mask & ( d2d <= radius ) # mask the data based on 2D separation
     catalog = catalog[mask]
     
@@ -166,18 +175,19 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
           'Mpc\u207B\u00B9, \u03A9\u2098 = 0.3\n')
     
     print('Velocity between: {0:.0f} and {1:.0f} km/s\n'.format(
-            low_z*c, high_z*c) )
+            low_z*const.c.to('km/s'), high_z*const.c.to('km/s') ) )
     
     print('{0:g} objects found in {1:s} within {2:.3f} of {3:s}\n'.format(
             len(catalog), catname, radius, galaxy_ID) )
     
     table = Table([Angle(RAs[mask], u.deg).to_string(unit=u.hour),
                    Angle(Decs[mask], u.deg).to_string(unit=u.degree),
-                   redshifts[mask], redshifts[mask]*c*u.km/u.s, distances[mask],
+                   redshifts[mask],
+                   redshifts[mask]*const.c.to('km/s'),distances[mask],
                    d2d[mask]*60*u.arcmin/u.deg],
                   names=('RA','Dec','z','Velocity','D_A','Separation') )
 #    table.add_row( [RA_c.to_string(unit=u.hour)+'*',
-#            Dec_c.to_string(unit=u.degree), zs_c, zs_c*c,
+#            Dec_c.to_string(unit=u.degree), zs_c, zs_c*const.c.to('km/s'),
 #            dists_c/u.Mpc, 0.0] ) # add the galaxy of interest to the table
     table['RA'].format = '15s'
     table['z'].format = '10.6f'
@@ -189,9 +199,9 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
 #    print("\nNote: '*' in the first line denotes the object of interest.")
     
     return
-#...............................................................end of functions
+#..............................................................end of functions
 
-main('SDSS', 0, sample_table=True)
+main('SDSS', 0, sample_table=False)
 
 #for i in range(1, 12) :
 #    main('SDSS', i)
