@@ -20,6 +20,7 @@ from astropy.cosmology import FlatLambdaCDM
 from astropy.io import fits
 from astropy.table import Table
 import astropy.units as u
+import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 # taking z/z_err >= 3, and ignore integration warning for the cosmology
@@ -62,9 +63,11 @@ galaxies = {'HE0040-1105':{'RA':'10.65358542','dec':'-10.82278903','z':0.04199},
 
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
+currentFig = 1 # first figure will be numbered as 'Figure 1'
 
 #..........................................................................main
-def main(catalog, index, sample_table=False) :
+def main(catalog, index, sample_table=False, printtable=False,
+         return_vals=False) :
     
     IDs = list( galaxies.keys() ) # the object name/identifier
     ras = Angle([ galaxy['RA'] for galaxy in galaxies.values() ], u.deg)
@@ -125,9 +128,17 @@ def main(catalog, index, sample_table=False) :
                 & ((redshifts / z_errs) >= 3) ) # mask the data based on
                 # velocity cuts, redshift quality
         
-        cat_search(IDs[index], ras[index],decs[index], zs[index], dists[index],
-                   lower_z[index], upper_z[index], radii[index],
-                   RAs, Decs, redshifts, catname, mask)
+        if return_vals == True :
+            catlen = cat_search(IDs[index], ras[index],decs[index], zs[index],
+                                dists[index], lower_z[index], upper_z[index],
+                                radii[index], RAs, Decs, redshifts, catname,
+                                mask, printtable=printtable,
+                                return_vals=return_vals)
+        else :
+            cat_search(IDs[index], ras[index],decs[index], zs[index],
+                       dists[index], lower_z[index], upper_z[index],
+                       radii[index], RAs, Decs, redshifts, catname, mask,
+                       printtable=printtable)
         
     else :
         catname = 'GAMA'
@@ -148,17 +159,31 @@ def main(catalog, index, sample_table=False) :
                 & (redshift_quality >= 3) ) # mask the data based on
                 # velocity cuts, redshift quality
         
-        cat_search(IDs[index], ras[index],decs[index], zs[index], dists[index],
-                   lower_z[index], upper_z[index], radii[index],
-                   RAs, Decs, redshifts, catname, mask)
-        
-    return
+        if return_vals == True :
+            catlen = cat_search(IDs[index], ras[index],decs[index], zs[index],
+                                dists[index], lower_z[index], upper_z[index],
+                                radii[index], RAs, Decs, redshifts, catname,
+                                mask, printtable=printtable,
+                                return_vals=return_vals)
+        else :
+            cat_search(IDs[index], ras[index],decs[index], zs[index],
+                       dists[index], lower_z[index], upper_z[index],
+                       radii[index], RAs, Decs, redshifts, catname, mask,
+                       printtable=printtable)
+    
+    if return_vals == True :
+        close = cosmo.angular_diameter_distance(lower_z[index])
+        far = cosmo.angular_diameter_distance(upper_z[index])
+        volume = np.pi*(far-close)*(2*u.Mpc)**2
+        return zs[index], catlen, volume
+    else :
+        return
 
 #....................................................................cat_search
 def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
-               RAs, Decs, redshifts, catname, mask) :
+               RAs, Decs, redshifts, catname, mask, printtable=False,
+               return_vals=False) :
     
-    print('\n-----ANALYSIS FOR {0:s}-----\n'.format(galaxy_ID) )
     center = SkyCoord(ra=RA_c, dec=Dec_c, distance=dists_c) #galaxy of interest
     
     distances = cosmo.angular_diameter_distance(redshifts) # compute D_A
@@ -169,16 +194,19 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
     mask = mask & ( d2d <= radius ) # mask the data based on 2D separation
     catalog = catalog[mask]
     
-    print('Reference Galaxy: {}\n'.format(galaxy_ID) )
-    
-    print('Flat \u039BCDM cosmology: H\u2080 = 70 km s\u207B\u00B9 ' +
-          'Mpc\u207B\u00B9, \u03A9\u2098 = 0.3\n')
-    
-    print('Velocity between: {0:.0f} and {1:.0f} km/s\n'.format(
-            low_z*const.c.to('km/s'), high_z*const.c.to('km/s') ) )
-    
-    print('{0:g} objects found in {1:s} within {2:.3f} of {3:s}\n'.format(
-            len(catalog), catname, radius, galaxy_ID) )
+    if printtable == True :
+        print('\n-----ANALYSIS FOR {0:s}-----\n'.format(galaxy_ID) )
+        
+        print('Reference Galaxy: {}\n'.format(galaxy_ID) )
+        
+        print('Flat \u039BCDM cosmology: H\u2080 = 70 km s\u207B\u00B9 ' +
+              'Mpc\u207B\u00B9, \u03A9\u2098 = 0.3\n')
+        
+        print('Velocity between: {0:.0f} and {1:.0f} km/s\n'.format(
+                low_z*const.c.to('km/s'), high_z*const.c.to('km/s') ) )
+        
+        print('{0:g} objects found in {1:s} within {2:.3f} of {3:s}\n'.format(
+                len(catalog), catname, radius, galaxy_ID) )
     
     table = Table([Angle(RAs[mask], u.deg).to_string(unit=u.hour),
                    Angle(Decs[mask], u.deg).to_string(unit=u.degree),
@@ -195,16 +223,131 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
     table['D_A'].format = '8.2f'
     table['Separation'].format = '10.3f'
     table.sort('Separation') # sort the table by the separation
-    table.pprint(max_lines=-1) # print full table, use print(table) for regular
+    
+    if printtable == True :
+        table.pprint(max_lines=-1) # print full table, use print(table) for reg
 #    print("\nNote: '*' in the first line denotes the object of interest.")
+    
+    if return_vals == True :
+        return len(catalog)-1
+    else :
+        return
+
+#..................................................................density_plot
+def density_plot(catalog) :
+    
+    if catalog == 'both' :
+        redshifts = []
+        SDSS_companions = []
+        SDSS_volumes = []
+        GAMA_companions = []
+        GAMA_volumes = []
+        for i in range(0, 12) :
+            redshift, number, volume = main('SDSS', i, return_vals=True)
+            redshifts.append(redshift)
+            SDSS_companions.append(number)
+            SDSS_volumes.append(volume.value)
+            if i in [4,5,7] :
+                redshift, number, volume = main('GAMA', i, return_vals=True)
+                GAMA_companions.append(number)
+                GAMA_volumes.append(volume.value)
+            else :
+                GAMA_companions.append(np.nan)
+                GAMA_volumes.append(np.nan)
+        multi(redshifts, 'Redshift',
+              np.array(SDSS_companions)/np.array(SDSS_volumes),
+              np.array(GAMA_companions)/np.array(GAMA_volumes),
+              'Companions Density (Mpc$^{-3}$)')
+    
+    redshifts = []
+    number_of_companions = []
+    volumes = []
+    
+    if catalog == 'SDSS' :
+        for i in range(0, 12) :
+            redshift, number, volume = main('SDSS', i, return_vals=True)
+            redshifts.append(redshift)
+            number_of_companions.append(number)
+            volumes.append(volume.value)
+    
+    if catalog == 'GAMA' :
+        for i in [4,5,7] :
+            redshift, number, volume = main('GAMA', i, return_vals=True)
+            redshifts.append(redshift)
+            number_of_companions.append(number)
+            volumes.append(volume.value)
+    
+    plot(redshifts, 'Redshift',
+         np.array(number_of_companions)/np.array(volumes),
+         'Companions Density (Mpc$^{-3}$)')
+    
+    return
+
+#.........................................................................multi
+def multi(xvals, xlab, yvals1, yvals2, ylab, xmin=None, xmax=None, ymin=None,
+          ymax=None, location='upper left') :
+    
+    global currentFig        
+    fig = plt.figure(currentFig)  # the current figure
+    currentFig += 1
+    plt.clf() # clear the figure before each run
+    
+    ax = fig.add_subplot(111)
+    
+    ax.plot(xvals, yvals1, 'ko', label = "%s" % 'SDSS')
+    ax.plot(xvals, yvals2, 'ro', label = "%s" % 'GAMA')
+    
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+    
+    ax.set_xlabel("%s" % xlab, fontsize = 15 )
+    ax.set_ylabel("%s" % ylab, fontsize = 15 )
+    
+    plt.legend(loc = location)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return
+
+#..........................................................................plot
+def plot(xvals, xlab, yvals, ylab, xmin=None, xmax=None, ymin=None,
+         ymax=None) : #, logx=False, logy=False, linear=False) :
+    
+    global currentFig
+    fig = plt.figure(currentFig)  # the current figure
+    currentFig += 1
+    plt.clf() # clear the figure before each run
+    
+    ax = fig.add_subplot(111) # set axes, figure location
+    
+#    if (logx == True) and (logy == False) and (linear == False) :
+#        ax.semilogx(xvals, yvals, 'ko')
+#    elif (logx == False) and (logy == True) and (linear == False) :
+#        ax.semilogy(xvals, yvals, 'ko')
+#    elif (logx == False) and (logy == False) and (linear == True) :
+    ax.plot(xvals, yvals, 'ko')
+#    elif (logx == True) and (logy == True) and (linear == False) :
+#        ax.loglog(xvals, yvals, 'ko')
+#    else :
+#        ax.loglog(xvals, yvals, 'ko')
+            
+    ax.set_xlabel("%s" % xlab, fontsize = 15 )
+    ax.set_ylabel("%s" % ylab, fontsize = 15 )
+    
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+    
+    plt.tight_layout()
+    plt.show()
     
     return
 #..............................................................end of functions
 
-main('SDSS', 0, sample_table=False)
+#main('SDSS', 0, printtable=True, sample_table=True)
 
 #for i in range(1, 12) :
-#    main('SDSS', i)
+#    main('SDSS', i, printtable=True)
 
 #for i in [4,5,7] :
 #    main('GAMA', i)
