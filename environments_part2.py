@@ -28,6 +28,7 @@ warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 # GALEX
 # see here for bandpass info:
 #   https://asd.gsfc.nasa.gov/archive/galex/Documents/instrument_summary.html
+#   http://svo2.cab.inta-csic.es/svo/theory/fps3/index.php?id=GALEX/GALEX.FUV
 # data access here:
 #   http://www.gama-survey.org/dr3/data/cat/GalexPhotometry/v02/
 # data access available through online form, here:
