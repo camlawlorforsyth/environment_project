@@ -269,6 +269,9 @@ def density_plot(catalog) :
             redshifts.append(redshift)
             number_of_companions.append(number)
             volumes.append(volume.value)
+        plot(redshifts, 'Redshift',
+             np.array(number_of_companions)/np.array(volumes),
+             'Companions Density (Mpc$^{-3}$)')
     
     if catalog == 'GAMA' :
         for i in [4,5,7] :
@@ -276,10 +279,9 @@ def density_plot(catalog) :
             redshifts.append(redshift)
             number_of_companions.append(number)
             volumes.append(volume.value)
-    
-    plot(redshifts, 'Redshift',
-         np.array(number_of_companions)/np.array(volumes),
-         'Companions Density (Mpc$^{-3}$)')
+        plot(redshifts, 'Redshift',
+             np.array(number_of_companions)/np.array(volumes),
+             'Companions Density (Mpc$^{-3}$)')
     
     return
 
@@ -294,8 +296,13 @@ def multi(xvals, xlab, yvals1, yvals2, ylab, xmin=None, xmax=None, ymin=None,
     
     ax = fig.add_subplot(111)
     
-    ax.plot(xvals, yvals1, 'ko', label = "%s" % 'SDSS')
-    ax.plot(xvals, yvals2, 'ro', label = "%s" % 'GAMA')
+    ax.plot(xvals, yvals1, 'ko', label = "%s" % 'SDSS', zorder=2)
+#    ax.axhline(np.nanmean(yvals1), color='k', linestyle='-', label='mean')
+    ax.axhline(np.nanmedian(yvals1), color='k', linestyle='--', label='median',zorder=1)
+    
+    ax.plot(xvals, yvals2, 'ro', label = "%s" % 'GAMA', zorder=2)
+#    ax.axhline(np.nanmean(yvals2), color='r', linestyle='-', label='mean')
+    ax.axhline(np.nanmedian(yvals2), color='r', linestyle='--', label='median',zorder=1)
     
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
