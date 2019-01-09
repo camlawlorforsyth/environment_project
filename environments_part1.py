@@ -26,7 +26,8 @@ warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 # taking z/z_err >= 3, and ignore integration warning for the cosmology
 
 # the following are all in SDSS as per Bernd
-galaxies = {'HE0040-1105':{'RA':'10.65358542','dec':'-10.82278903','z':0.04199},
+galaxies = {
+           'HE0040-1105':{'RA':'10.65358542','dec':'-10.82278903','z':0.04199},
            'RBS175':{'RA':'19.26495342','dec':'7.63966751E-3','z':0.04563},
            'Mrk1503':{'RA':'20.49924553','dec':'-1.04009986','z':0.05435},
            'Mrk1018':{'RA':'31.56660166','dec':'-0.29145178','z':0.04298},
@@ -208,8 +209,8 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
         print('{0:g} objects found in {1:s} within {2:.3f} of {3:s}\n'.format(
                 len(catalog), catname, radius, galaxy_ID) )
     
-    table = Table([Angle(RAs[mask], u.deg).to_string(unit=u.hour),
-                   Angle(Decs[mask], u.deg).to_string(unit=u.degree),
+    table = Table([Angle(RAs[mask], u.deg), #.to_string(unit=u.hour),
+                   Angle(Decs[mask], u.deg), #.to_string(unit=u.degree),
                    redshifts[mask],
                    redshifts[mask]*const.c.to('km/s'),distances[mask],
                    d2d[mask]*60*u.arcmin/u.deg],
@@ -217,7 +218,7 @@ def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
 #    table.add_row( [RA_c.to_string(unit=u.hour)+'*',
 #            Dec_c.to_string(unit=u.degree), zs_c, zs_c*const.c.to('km/s'),
 #            dists_c/u.Mpc, 0.0] ) # add the galaxy of interest to the table
-    table['RA'].format = '15s'
+#    table['RA'].format = '15s' # only for h:m:s
     table['z'].format = '10.6f'
     table['Velocity'].format = '8.0f'
     table['D_A'].format = '8.2f'
@@ -298,11 +299,13 @@ def multi(xvals, xlab, yvals1, yvals2, ylab, xmin=None, xmax=None, ymin=None,
     
     ax.plot(xvals, yvals1, 'ko', label = "%s" % 'SDSS', zorder=2)
 #    ax.axhline(np.nanmean(yvals1), color='k', linestyle='-', label='mean')
-    ax.axhline(np.nanmedian(yvals1), color='k', linestyle='--', label='median',zorder=1)
+    ax.axhline(np.nanmedian(yvals1), color='k', linestyle='--', label='median',
+               zorder=1)
     
     ax.plot(xvals, yvals2, 'ro', label = "%s" % 'GAMA', zorder=2)
 #    ax.axhline(np.nanmean(yvals2), color='r', linestyle='-', label='mean')
-    ax.axhline(np.nanmedian(yvals2), color='r', linestyle='--', label='median',zorder=1)
+    ax.axhline(np.nanmedian(yvals2), color='r', linestyle='--', label='median',
+               zorder=1)
     
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
