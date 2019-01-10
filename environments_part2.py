@@ -29,10 +29,13 @@ warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 # see here for bandpass info:
 #   https://asd.gsfc.nasa.gov/archive/galex/Documents/instrument_summary.html
 #   http://svo2.cab.inta-csic.es/svo/theory/fps3/index.php?id=GALEX/GALEX.FUV
+#   https://galex.stsci.edu/GR6/?page=userfaq
 # data access here:
 #   http://www.gama-survey.org/dr3/data/cat/GalexPhotometry/v02/
 # data access available through online form, here:
 #   http://galex.stsci.edu/GR6/?page=mastform
+#   https://galex.stsci.edu/GR6/?page=sqlform
+# schema browser: https://galex.stsci.edu/GR6/?page=dbinfo
 
 # GAMA
 # see here for bandpass info:
@@ -48,8 +51,9 @@ warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 #   http://www.sdss3.org/instruments/camera.php#Filters
 #   http://www.sdss3.org/dr8/algorithms/sdssUBVRITransform.php
 #   http://www.sdss3.org/dr8/algorithms/magnitudes.php
-# data access here:
-#   need info/help from Yjan - where is this photometry?
+# data access available through online form, here:
+#   http://skyserver.sdss.org/dr8/en/tools/crossid/crossid.asp
+# schema browser: http://skyserver.sdss.org/dr8/en/help/browser/browser.asp
 
 # Pan-STARRS1 # uses grizy
 # more info here:
