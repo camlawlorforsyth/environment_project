@@ -360,4 +360,4 @@ def plot(xvals, xlab, yvals, ylab, xmin=None, xmax=None, ymin=None,
 #    main('SDSS', i, printtable=True)
 
 #for i in [4,5,7] :
-#    main('GAMA', i)
+#    main('GAMA', i, printtable=True)
