@@ -108,13 +108,14 @@ def main(catalog, index, sample_table=False, printtable=False,
         
         # open the SDSS catalog and populate relevant information
 #        SDSS_catalog = fits.open('gal_info_dr7_v5_2.fit.gz') # SDSS DR7
-        SDSS_catalog = fits.open('galSpecInfo-dr8.fits') # SDSS DR8
+#        SDSS_catalog = fits.open('galSpecInfo-dr8.fits') # SDSS DR8
+        SDSS_catalog = fits.open('specObj-dr12.fits') # SDSS DR12, GALEX match
 #        info = SDSS_catalog.info()
 #        header = SDSS_catalog[1].header
 #        print(header) # to see what is in the actual data table
         data = SDSS_catalog[1].data
-        RAs = data.field('RA')*u.deg # get all the RAs, Decs, redshifts, etc.
-        Decs = data.field('DEC')*u.deg
+        RAs = data.field('PLUG_RA')*u.deg # get all the RAs, Decs, redshifts, etc.
+        Decs = data.field('PLUG_DEC')*u.deg # use 'RA' and 'DEC' for DR7, DR8
         redshifts = data.field('Z')
         z_errs = data.field('Z_ERR') # we only want z/z_err >= 3
         SDSS_catalog.close() # close the SDSS catalog fits file
@@ -258,7 +259,7 @@ def density_plot(catalog) :
         multi(redshifts, 'Redshift',
               np.array(SDSS_companions)/np.array(SDSS_volumes),
               np.array(GAMA_companions)/np.array(GAMA_volumes),
-              'Companions Density (Mpc$^{-3}$)')
+              'Density of Companions (Mpc$^{-3}$)')
     
     redshifts = []
     number_of_companions = []
@@ -272,7 +273,7 @@ def density_plot(catalog) :
             volumes.append(volume.value)
         plot(redshifts, 'Redshift',
              np.array(number_of_companions)/np.array(volumes),
-             'Companions Density (Mpc$^{-3}$)')
+             'Density of Companions (Mpc$^{-3}$)')
     
     if catalog == 'GAMA' :
         for i in [4,5,7] :
@@ -282,7 +283,7 @@ def density_plot(catalog) :
             volumes.append(volume.value)
         plot(redshifts, 'Redshift',
              np.array(number_of_companions)/np.array(volumes),
-             'Companions Density (Mpc$^{-3}$)')
+             'Density of Companions (Mpc$^{-3}$)')
     
     return
 
