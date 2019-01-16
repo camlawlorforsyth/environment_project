@@ -107,9 +107,9 @@ def main(catalog, index, sample_table=False, printtable=False,
         catname = 'SDSS'
         
         # open the SDSS catalog and populate relevant information
-#        SDSS_catalog = fits.open('gal_info_dr7_v5_2.fit.gz') # SDSS DR7
-#        SDSS_catalog = fits.open('galSpecInfo-dr8.fits') # SDSS DR8
-        SDSS_catalog = fits.open('specObj-dr12.fits') # SDSS DR12, GALEX match
+#        SDSS_catalog = fits.open('SDSS_gal_info_dr7_v5_2.fit.gz') # SDSS DR7
+#        SDSS_catalog = fits.open('SDSS_galSpecInfo-dr8.fits') # SDSS DR8
+        SDSS_catalog = fits.open('SDSS_specObj-dr12.fits') # SDSS DR12, GALEX match
 #        info = SDSS_catalog.info()
 #        header = SDSS_catalog[1].header
 #        print(header) # to see what is in the actual data table
@@ -146,7 +146,7 @@ def main(catalog, index, sample_table=False, printtable=False,
         catname = 'GAMA'
         
         # open the GAMA catalog and populate relevant information
-        GAMA_catalog = fits.open('GaussFitSimple.fits') # SpecLineSFRv05
+        GAMA_catalog = fits.open('GAMA_GaussFitSimple.fits') # SpecLineSFRv05
 #        info = GAMA_catalog.info()
 #        header = GAMA_catalog[1].header
 #        print(header)
