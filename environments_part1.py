@@ -146,7 +146,8 @@ def main(catalog, index, sample_table=False, printtable=False,
         catname = 'GAMA'
         
         # open the GAMA catalog and populate relevant information
-        GAMA_catalog = fits.open('GAMA_GaussFitSimple.fits') # SpecLineSFRv05
+#        GAMA_catalog = fits.open('GAMA_GaussFitSimple.fits') # SpecLineSFRv05
+        GAMA_catalog = fits.open('GAMA_SpecObj.fits') # SpecObj
 #        info = GAMA_catalog.info()
 #        header = GAMA_catalog[1].header
 #        print(header)
