@@ -13,13 +13,14 @@
 """
 
 # imports
+import numpy as np
+
 from astropy.coordinates import Angle
 from astropy.coordinates import SkyCoord
 from astropy.cosmology import FlatLambdaCDM
 from astropy.io import fits
 from astropy.table import Table
 import astropy.units as u
-import numpy as np
 import warnings
 warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 # taking z/z_err >= 3, and ignore integration warning for the cosmology
