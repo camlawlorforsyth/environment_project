@@ -31,6 +31,7 @@ warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 #   https://asd.gsfc.nasa.gov/archive/galex/Documents/instrument_summary.html
 #   http://svo2.cab.inta-csic.es/svo/theory/fps3/index.php?id=GALEX/GALEX.FUV
 #   https://galex.stsci.edu/GR6/?page=userfaq
+#   http://adsabs.harvard.edu/abs/2007ApJS..173..682M
 # data access here:
 #   http://www.gama-survey.org/dr3/data/cat/GalexPhotometry/v02/
 # data access available through online form, here:
@@ -51,6 +52,8 @@ warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 # DR12 spectro info from here:
 #   http://data.sdss3.org/sas/dr12/sdss/spectro/redux/specObj-dr12.fits
 # see here for bandpass info:
+#   https://www.sdss.org/instruments/camera/#Filters
+#   http://adsabs.harvard.edu/abs/2010AJ....139.1628D
 #   http://www.sdss3.org/instruments/camera.php#Filters
 #   http://www.sdss3.org/dr8/algorithms/sdssUBVRITransform.php
 #   http://www.sdss3.org/dr8/algorithms/magnitudes.php
@@ -72,8 +75,6 @@ warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 #   https://catalogs.mast.stsci.edu/
 
 # 2MASS # uses 2MASS JHK_s
-#2MASS_xsc_aaa.gz # 2MASS extended source catalog (declination < 0.0°)
-#2MASS_xsc_baa.gz # 2MASS extended source catalog (declination >= 0.0°)
 # see here for bandpass info:
 #    https://old.ipac.caltech.edu/2mass/releases/allsky/doc/sec6_4a.html
 # more info here:
@@ -82,9 +83,7 @@ warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 #    https://old.ipac.caltech.edu/2mass/releases/allsky/doc/sec2_3.html
 #    https://irsa.ipac.caltech.edu/2MASS/download/allsky/format_xsc.html
 #    https://old.ipac.caltech.edu/2mass/releases/allsky/doc/sec1_4.html
-# data access available through bulk download, here:
-#    https://irsa.ipac.caltech.edu/2MASS/download/allsky/
-# or through online form, here:
+# data access available through online form, here:
 #    https://irsa.ipac.caltech.edu/applications/Gator/
 
 # WISE # uses AB system
