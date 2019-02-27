@@ -151,7 +151,7 @@ W4_wl = np.full(len(dat), 220000)
 
 # create the table to be used in SED fitting
 newdata = Table( {
-        'id':ids,
+        '#id':ids,
         'redshift':dat['Spec_z'],
         'FUV_wl':FUV_wl, 'FUV':FUV, 'FUV_err':FUV_err,
         'NUV_wl':NUV_wl, 'NUV':NUV, 'NUV_err':NUV_err,
