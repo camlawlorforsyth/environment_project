@@ -28,24 +28,19 @@ Once the Guest Additions have been installed, restart the system.
 
 ## Install Anaconda, Astropy ##
 
-As AGNfitter uses Python 2.7, it requires an older version of Astropy. The easiest way to obtain the correct version of Python and Astropy is to use the Anaconda distribution, available at:
-https://www.anaconda.com/distribution/
+As AGNfitter uses Python 2.7, it requires an older version of Astropy. The easiest way to obtain the correct version of Python and Astropy is to use the Anaconda distribution, available at: https://www.anaconda.com/distribution/
 
-Select the Python 2.7 version, and the 64-Bit (x86) Installer. Once the installer has completed downloading, follow the instructions for installation here:
-https://docs.anaconda.com/anaconda/install/linux/
+Select the Python 2.7 version, and the 64-Bit (x86) Installer. Once the installer has completed downloading, follow the instructions for installation here: https://docs.anaconda.com/anaconda/install/linux/
 
 ## Install acor ##
 
-Once the correct versions of Python and Astropy have been installed, acor then needs to be installed. See the installation instructions here:
-https://github.com/dfm/acor
+Once the correct versions of Python and Astropy have been installed, acor then needs to be installed. See the installation instructions here: https://github.com/dfm/acor
 
 ## Install AGNfitter ##
 
-Once all the required packages have been installed, follow the installation instructions here to get AGNfitter working:
-https://github.com/GabrielaCR/AGNfitter
+Once all the required packages have been installed, follow the installation instructions here to get AGNfitter working: https://github.com/GabrielaCR/AGNfitter
 
-Also see the paper by Calistro Rivera, describing the fitter itself:
-http://adsabs.harvard.edu/abs/2016ApJ...833...98C
+Also see the paper by Calistro Rivera, describing the fitter itself: http://adsabs.harvard.edu/abs/2016ApJ...833...98C
 
 ## AGNfitter Modifications ##
 
