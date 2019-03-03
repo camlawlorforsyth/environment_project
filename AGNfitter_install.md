@@ -52,13 +52,17 @@ http://adsabs.harvard.edu/abs/2016ApJ...833...98C
 ### No LaTeX ###
 
 The default AGNfitter requires LaTeX for some output files (ie. MCMC plots, SED plots) which is quite heavy if you want a lightweight system.
+
 To disable the LaTeX requirements, we need to modify the `PLOTandWRITE_AGNfitter.py` file in the `functions/` directory.
+
 Comment-out lines 290, 291, 549, and 550.
 
 ### Use c = 299792458 m/s ###
 
 The defualt AGNfitter uses a value close to the actual value for the speed of light, but not quite the real value.
+
 To correct this, we need to modify several files in the `functions/` directory, namely:
+
 Change line 18-19 of `CONSTRUCT_modelobjects.py` to:
 ```
 c = 2.99792458e10
@@ -80,12 +84,14 @@ x2 = (2.99792458e14/ x)[::-1] # Wavelength axis
 ### Smaller output changes ###
 
 Append the galaxy ID to the traces plot filename.
+
 Change line 76 of `PLOTandWRITE_AGNfitter.py` to:
 ```
 fig.savefig(data.output_folder+str(data.name)+'/traces_mcmc_' +str(data.name) + '.' + out['plot_format'])
 ```
 
 Comment-out the header rows for the output parameter file.
+
 Change line 91 of `PLOTandWRITE_AGNfitter.py` to:
 ```
 comments_ouput= '# Output for source ' +str(data.name) + '\n' +'# Rows are: 2.5, 16, 50, 84, 97.5 percentiles '+'\n'+ '#-----------------------------------------------------'+'\n' 
