@@ -93,5 +93,5 @@ comments_ouput= '# Output for source ' +str(data.name) + '\n' +'# Rows are: 2.5,
 ```
 Change line 159 of `PLOTandWRITE_AGNfitter.py` to:
 ```
-outputvalues_header= '# '.join([ i for i in np.hstack((P.names, 'log_Mstar', 'SFR_opt', self.out['intlum_names'], 'SFR_IR', '-ln_like'))] )
+outputvalues_header= ' '.join([ i for i in np.hstack((P.names, 'log_Mstar', 'SFR_opt', self.out['intlum_names'], 'SFR_IR', '-ln_like'))] )
 ```
