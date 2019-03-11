@@ -8,7 +8,7 @@ The Python script 'environments_part1.py' requires the SDSS and GAMA catalog fil
 
 ## SDSS Photometry ##
 
-As SDSS can be a bit tricky to navigate (at the best of times), instead of getting a whole photometric catalog and using Astropy to search through it based on the spectroscopic results from [environments_part1.py](environments_part1.py), the user is encouraged to use the CrossID matching tool at http://skyserver.sdss.org/dr12/en/tools/crossid/crossid.aspx, using the printed output from [environments_part1.py](environments_part1.py), along with the SQL query available in [SDSS_SQL_query_alt.txt](SDSS_SQL_query_alt.txt). Note that this search queries the SpecPhotoAll table, which combines the spectroscopic and photometric parameters of an object. It is a precomputed join between the 'PhotoObjAll' and 'SpecObjAll' tables.
+As SDSS can be a bit tricky to navigate (at the best of times), instead of getting a whole photometric catalog and using Astropy to search through it based on the spectroscopic results from [environments_part1.py](environments_part1.py), the user is encouraged to use the CrossID matching tool at http://skyserver.sdss.org/dr12/en/tools/crossid/crossid.aspx, using the printed output from [environments_part1.py](environments_part1.py), along with the SQL query available in [SDSS_SQL_query.txt](SQL_queries/SDSS_SQL_query.txt). Note that this search queries the SpecPhotoAll table, which combines the spectroscopic and photometric parameters of an object. It is a precomputed join between the 'PhotoObjAll' and 'SpecObjAll' tables.
 
 This should greatly simplify the SDSS photometric search.
 
