@@ -14,6 +14,7 @@
 
 # imports
 import numpy as np
+
 from astropy.io import ascii
 from astropy.table import Table
 
