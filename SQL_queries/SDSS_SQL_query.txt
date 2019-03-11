@@ -9,8 +9,10 @@ SELECT
    p.petroMag_z, p.petroMagErr_z,
    p.extinction_u, p.extinction_g,
    p.extinction_r, p.extinction_i,
-   p.extinction_z, p.sciencePrimary
+   p.extinction_z, r.petroRad_r
 FROM #upload u
       JOIN #x x ON x.up_id = u.up_id
       JOIN SpecPhotoAll p ON p.objID = x.objID
+      JOIN PhotoObjAll r ON r.objID = p.objID
+AND p.sciencePrimary=1
 ORDER by x.up_id
