@@ -67,10 +67,17 @@ Change lines 423 and 625 of `DICTIONARIES_AGNfitter.py` to:
 ```
 c=    2.99792458e8
 ```
-Change line 138 of `MODEL_AGNfitter.py` to:
+Change lines 138, 169, 220, 379 of `MODEL_AGNfitter.py` to (respectively):
 ```
 redd_x =  2.99792458 * 1e10 / (10**(bbb_x)* 1e-8)
+
+c = 2.99792458 * 1e8
+
+c_cm = 2.99792458e10
+
+c = 2.99792458e8
 ```
+
 Change line 580 of `PLOTandWRITE_AGNfitter.py` to:
 ```
 x2 = (2.99792458e14/ x)[::-1] # Wavelength axis
