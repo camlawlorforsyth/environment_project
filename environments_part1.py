@@ -4,7 +4,7 @@
     ASSIGNMENT: Search for physically close companions to CARS host galaxies
     AUTHOR:     Cam Lawlor-Forsyth (lawlorfc@myumanitoba.ca)
     SUPERVISOR: Chris O'Dea
-    VERSION:    2018-Dec-20
+    VERSION:    2019-Mar-10
     
     PURPOSE: Search for physically close companion objects to CARS host
              galaxies, within 2 Mpc projected, and +/-1500 km/s along the LOS.
@@ -109,7 +109,7 @@ def main(catalog, index, sample_table=False, printtable=False,
         # open the SDSS catalog and populate relevant information
 #        SDSS_catalog = fits.open('SDSS_gal_info_dr7_v5_2.fit.gz') # SDSS DR7
 #        SDSS_catalog = fits.open('SDSS_galSpecInfo-dr8.fits') # SDSS DR8
-        SDSS_catalog = fits.open('SDSS_specObj-dr12.fits') # SDSS DR12, GALEX match
+        SDSS_catalog = fits.open('catalogs/SDSS_specObj-dr12.fits') # SDSS DR12, GALEX match
 #        info = SDSS_catalog.info()
 #        header = SDSS_catalog[1].header
 #        print(header) # to see what is in the actual data table
@@ -147,7 +147,7 @@ def main(catalog, index, sample_table=False, printtable=False,
         
         # open the GAMA catalog and populate relevant information
 #        GAMA_catalog = fits.open('GAMA_GaussFitSimple.fits') # SpecLineSFRv05
-        GAMA_catalog = fits.open('GAMA_SpecObj.fits') # SpecObj
+        GAMA_catalog = fits.open('catalogs/GAMA_SpecObj.fits') # SpecObj
 #        info = GAMA_catalog.info()
 #        header = GAMA_catalog[1].header
 #        print(header)
