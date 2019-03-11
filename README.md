@@ -4,7 +4,7 @@ CARS environment project, looking at optical photometry for objects that are phy
 
 ## Required Catalog Files ##
 
-The Python script 'environments_part1.py' requires the SDSS and GAMA catalog files to be in the same directory as the script itself. The files used in the preliminary analysis can be found here: http://data.sdss3.org/sas/dr12/sdss/spectro/redux/specObj-dr12.fits for the SDSS DR12 catalog (4.53 GB), and http://www.gama-survey.org/dr3/data/cat/SpecCat/v27/SpecObj.fits for the GAMA catalog (55.8 MB).
+The Python script 'environments_part1.py' requires the SDSS and GAMA catalog files to be in the `catalog/` directory. The files used in the preliminary analysis can be found here: http://data.sdss3.org/sas/dr12/sdss/spectro/redux/specObj-dr12.fits for the SDSS DR12 catalog (4.53 GB), and http://www.gama-survey.org/dr3/data/cat/SpecCat/v27/SpecObj.fits for the GAMA catalog (55.8 MB).
 
 ## SDSS Photometry ##
 
