@@ -85,14 +85,14 @@ x2 = (2.99792458e14/ x)[::-1] # Wavelength axis
 
 ### Smaller output changes ###
 
-Append the galaxy ID to the traces plot filename.
+#### Append the galaxy ID to the traces plot filename. ####
 
 Change line 76 of `PLOTandWRITE_AGNfitter.py` to:
 ```
 fig.savefig(data.output_folder+str(data.name)+'/traces_mcmc_' +str(data.name) + '.' + out['plot_format'])
 ```
 
-Comment-out the header rows for the output parameter file.
+#### Comment-out the header rows for the output parameter file. ####
 
 Change line 91 of `PLOTandWRITE_AGNfitter.py` to:
 ```
