@@ -17,8 +17,11 @@ import numpy as np
 
 from astropy.io import ascii
 from astropy.table import Table
+import matplotlib.pyplot as plt
+import numpy.ma as ma
 
 # constants
+currentFig = 1
 pogson = np.power(100, 0.2)
 
 #.......................................................................convert
@@ -27,9 +30,28 @@ def convert(mag) :
     flux = (3631000)*np.power(10, -mag/pogson) # result in mJy
     
     return flux
+
+#.........................................................................histo
+def histo(param, label, num_bins) :
+    
+    global currentFig
+    fig = plt.figure(currentFig)
+    currentFig += 1
+    plt.clf()
+    
+    ax = fig.add_subplot(111)
+    ax.hist(param, bins=num_bins, density=True, color='k')
+    plt.xlabel("%s" % label, fontsize = 15)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return
+
 #..............................................................................
 
-dat = ascii.read('photometry.csv') # requires columns to have unique names
+dat = ascii.read('photometry_v1.csv') # requires columns to have unique names
+#histo(2*dat['petroRad_r'], r'$2r_p$', 100) # show petroRad_r distribution
 
 # GALEX
 FUV = convert( dat['fuv_mag']-dat['e_bv'] )
@@ -68,10 +90,10 @@ r = r.filled()
 r_err.fill_value = -99
 r_err = r_err.filled()
 
-i = convert( dat['petroMag_i']-dat['extinction_i'] )
-i_err = np.log(10)/pogson*i*dat['petroMagErr_i']
-i.fill_value = -99
-i = i.filled()
+i_mag = convert( dat['petroMag_i']-dat['extinction_i'] )
+i_err = np.log(10)/pogson*i_mag*dat['petroMagErr_i']
+i_mag.fill_value = -99
+i_mag = i_mag.filled()
 i_err.fill_value = -99
 i_err = i_err.filled()
 
@@ -83,22 +105,86 @@ z_err.fill_value = -99
 z_err = z_err.filled()
 
 # 2MASS
-J = convert( dat['j_m']+0.898 )
-J_err = np.log(10)/pogson*J*dat['j_cmsig']
+J, H, K = [], [], []
+J_err, H_err, K_err = [], [], []
+for i in range(len(dat)) :
+    if 2*(dat['petroRad_r'][i]) < 5 :
+        J.append(convert(dat['j_m_5'][i]+0.898))
+        J_err.append(np.log(10)/pogson*J[i]*dat['j_msig_5'][i])
+        H.append(convert(dat['h_m_5'][i]+1.381))
+        H_err.append(np.log(10)/pogson*H[i]*dat['h_msig_5'][i])
+        K.append(convert(dat['k_m_5'][i]+1.849))
+        K_err.append(np.log(10)/pogson*K[i]*dat['k_msig_5'][i])
+    elif (2*dat['petroRad_r'][i]) < 7 :
+        J.append(convert(dat['j_m_7'][i]+0.898))
+        J_err.append(np.log(10)/pogson*J[i]*dat['j_msig_7'][i])
+        H.append(convert(dat['h_m_7'][i]+1.381))
+        H_err.append(np.log(10)/pogson*H[i]*dat['h_msig_7'][i])
+        K.append(convert(dat['k_m_7'][i]+1.849))
+        K_err.append(np.log(10)/pogson*K[i]*dat['k_msig_7'][i])
+    elif (2*dat['petroRad_r'][i]) < 10 :
+        J.append(convert(dat['j_m_10'][i]+0.898))
+        J_err.append(np.log(10)/pogson*J[i]*dat['j_msig_10'][i])
+        H.append(convert(dat['h_m_10'][i]+1.381))
+        H_err.append(np.log(10)/pogson*H[i]*dat['h_msig_10'][i])
+        K.append(convert(dat['k_m_10'][i]+1.849))
+        K_err.append(np.log(10)/pogson*K[i]*dat['k_msig_10'][i])
+    elif (2*dat['petroRad_r'][i]) < 15 :
+        J.append(convert(dat['j_m_15'][i]+0.898))
+        J_err.append(np.log(10)/pogson*J[i]*dat['j_msig_15'][i])
+        H.append(convert(dat['h_m_15'][i]+1.381))
+        H_err.append(np.log(10)/pogson*H[i]*dat['h_msig_15'][i])
+        K.append(convert(dat['k_m_15'][i]+1.849))
+        K_err.append(np.log(10)/pogson*K[i]*dat['k_msig_15'][i])
+    elif (2*dat['petroRad_r'][i]) < 20 :
+        J.append(convert(dat['j_m_20'][i]+0.898))
+        J_err.append(np.log(10)/pogson*J[i]*dat['j_msig_20'][i])
+        H.append(convert(dat['h_m_20'][i]+1.381))
+        H_err.append(np.log(10)/pogson*H[i]*dat['h_msig_20'][i])
+        K.append(convert(dat['k_m_20'][i]+1.849))
+        K_err.append(np.log(10)/pogson*K[i]*dat['k_msig_20'][i])
+    elif (2*dat['petroRad_r'][i]) < 25 :
+        J.append(convert(dat['j_m_25'][i]+0.898))
+        J_err.append(np.log(10)/pogson*J[i]*dat['j_msig_25'][i])
+        H.append(convert(dat['h_m_25'][i]+1.381))
+        H_err.append(np.log(10)/pogson*H[i]*dat['h_msig_25'][i])
+        K.append(convert(dat['k_m_25'][i]+1.849))
+        K_err.append(np.log(10)/pogson*K[i]*dat['k_msig_25'][i])
+    elif (2*dat['petroRad_r'][i]) < 30 :
+        J.append(convert(dat['j_m_30'][i]+0.898))
+        J_err.append(np.log(10)/pogson*J[i]*dat['j_msig_30'][i])
+        H.append(convert(dat['h_m_30'][i]+1.381))
+        H_err.append(np.log(10)/pogson*H[i]*dat['h_msig_30'][i])
+        K.append(convert(dat['k_m_30'][i]+1.849))
+        K_err.append(np.log(10)/pogson*K[i]*dat['k_msig_30'][i])
+    elif (2*dat['petroRad_r'][i]) < 40 :
+        J.append(convert(dat['j_m_40'][i]+0.898))
+        J_err.append(np.log(10)/pogson*J[i]*dat['j_msig_40'][i])
+        H.append(convert(dat['h_m_40'][i]+1.381))
+        H_err.append(np.log(10)/pogson*H[i]*dat['h_msig_40'][i])
+        K.append(convert(dat['k_m_40'][i]+1.849))
+        K_err.append(np.log(10)/pogson*K[i]*dat['k_msig_40'][i])
+    else :
+        J.append(ma.masked)
+        J_err.append(ma.masked)
+        H.append(ma.masked)
+        H_err.append(ma.masked)
+        K.append(ma.masked)
+        K_err.append(ma.masked)
+J = ma.array(J)
+J_err= ma.array(J_err)
 J.fill_value = -99
 J = J.filled()
 J_err.fill_value = -99
 J_err = J_err.filled()
-
-H = convert( dat['h_m']+1.381 )
-H_err = np.log(10)/pogson*H*dat['h_cmsig']
+H = ma.array(H)
+H_err= ma.array(H_err)
 H.fill_value = -99
 H = H.filled()
 H_err.fill_value = -99
-H_err = H_err.filled()
-
-K = convert( dat['k_m']+1.849 )
-K_err = np.log(10)/pogson*K*dat['k_cmsig']
+H_err = H_err.filled()        
+K = ma.array(K)
+K_err= ma.array(K_err)
 K.fill_value = -99
 K = K.filled()
 K_err.fill_value = -99
@@ -134,7 +220,7 @@ W4_err.fill_value = -99
 W4_err = W4_err.filled()
 
 # wavelengths and redshifts
-ids = np.arange(1, 276)
+ids = np.arange(0, len(dat))
 FUV_wl = np.full(len(dat), 1538.6)
 NUV_wl = np.full(len(dat), 2315.7)
 u_wl = np.full(len(dat), 3551)
@@ -159,7 +245,7 @@ newdata = Table( {
         'u_wl':u_wl, 'u':u, 'u_err':u_err,
         'g_wl':g_wl, 'g':g, 'g_err':g_err,
         'r_wl':r_wl, 'r':r, 'r_err':r_err,
-        'i_wl':i_wl, 'i':i, 'i_err':i_err,
+        'i_wl':i_wl, 'i':i_mag, 'i_err':i_err,
         'z_wl':z_wl, 'z':z, 'z_err':z_err,
         'J_wl':J_wl, 'J':J, 'J_err':J_err,
         'H_wl':H_wl, 'H':H, 'H_err':H_err,
@@ -171,7 +257,7 @@ newdata = Table( {
         } )
 
 
-ascii.write(newdata, 'catalog.txt', overwrite=True)
+#ascii.write(newdata, 'catalog.txt', overwrite=True)
 
 
 #tbl = ascii.read('catalog.txt')
