@@ -4,7 +4,7 @@ Instructions to properly install Anaconda2, Astropy, acor, and AGNfitter, as req
 
 ## During CentOS 7.6 Installation ##
 
-Choose the 'Minimal' group from the install options, if using the full DVD iso.
+Choose the 'Minimal Desktop' group from the install options when using the full DVD iso.
 
 Disable Kdump in order to use as much system memory as possible.
 
