@@ -104,4 +104,7 @@ venv.bak/
 .mypy_cache/
 
 # large catalog FITS files
+*.fit
+*.fit.gz
 *.fits
+*.fits.gz
