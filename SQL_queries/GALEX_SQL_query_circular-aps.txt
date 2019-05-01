@@ -1,0 +1,33 @@
+SELECT
+   p.objid,
+   n.distance*60.0 as dstArcSec,
+   dbo.fIAUFromEq(p.ra,p.dec) as IAUName,
+   p.ra,
+   p.dec,
+   p.band,
+   p.fuv_mag, p.fuv_magerr, p.fuv_s2n, p.fuv_ambg,
+   p.nuv_mag, p.nuv_magerr, p.nuv_s2n, p.nuv_ambg,
+   p.e_bv,
+   p.FUV_MAG_APER_1, p.FUV_MAGERR_APER_1,
+   p.FUV_MAG_APER_2, p.FUV_MAGERR_APER_2,
+   p.FUV_MAG_APER_3, p.FUV_MAGERR_APER_3,
+   p.FUV_MAG_APER_4, p.FUV_MAGERR_APER_4,
+   p.FUV_MAG_APER_5, p.FUV_MAGERR_APER_5,
+   p.FUV_MAG_APER_6, p.FUV_MAGERR_APER_6,
+   p.FUV_MAG_APER_7, p.FUV_MAGERR_APER_7,
+   p.NUV_MAG_APER_1, p.NUV_MAGERR_APER_1,
+   p.NUV_MAG_APER_2, p.NUV_MAGERR_APER_2,
+   p.NUV_MAG_APER_3, p.NUV_MAGERR_APER_3,
+   p.NUV_MAG_APER_4, p.NUV_MAGERR_APER_4,
+   p.NUV_MAG_APER_5, p.NUV_MAGERR_APER_5,
+   p.NUV_MAG_APER_6, p.NUV_MAGERR_APER_6,
+   p.NUV_MAG_APER_7, p.NUV_MAGERR_APER_7
+FROM
+   PhotoObjAll as p
+LEFT OUTER JOIN
+   SpecObjAll as s on p.objid = s.objid,
+   dbo.fGetNearestObjEq(10.668867 , -10.863165 , 0.1) as n 
+WHERE
+   p.objID = n.objID
+ORDER BY
+   n.distance
