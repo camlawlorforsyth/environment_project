@@ -4,7 +4,7 @@
     ASSIGNMENT: Search for physically close companions to CARS host galaxies
     AUTHOR:     Cam Lawlor-Forsyth (lawlorfc@myumanitoba.ca)
     SUPERVISOR: Chris O'Dea
-    VERSION:    2019-Mar-10
+    VERSION:    2019-Sept-23
     
     PURPOSE: Search for physically close companion objects to CARS host
              galaxies, within 2 Mpc projected, and +/-1500 km/s along the LOS.
@@ -17,349 +17,409 @@ import astropy.constants as const
 from astropy.coordinates import Angle
 from astropy.coordinates import SkyCoord
 from astropy.cosmology import FlatLambdaCDM
-from astropy.io import fits
-from astropy.table import Table
+#from astropy.io import fits
+from astropy.table import Table, vstack
 import astropy.units as u
-import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 # taking z/z_err >= 3, and ignore integration warning for the cosmology
 
+import functions as funcs
+
 # the following are all in SDSS as per Bernd
-galaxies = {
-           'HE0040-1105':{'RA':'10.65358542','dec':'-10.82278903','z':0.04199},
-           'RBS175':{'RA':'19.26495342','dec':'7.63966751E-3','z':0.04563},
-           'Mrk1503':{'RA':'20.49924553','dec':'-1.04009986','z':0.05435},
-           'Mrk1018':{'RA':'31.56660166','dec':'-0.29145178','z':0.04298},
-           'Mrk1044':{'RA':'37.52302517','dec':'-8.99810955','z':0.016451},
-               # in GAMA?, no DR7,8 spectrum
-           'Mrk1048':{'RA':'38.65766625','dec':'-8.78779752','z':0.043143},
-               # in GAMA?, no DR7,8 spectrum
-           'HE0345+0056':{'RA':'56.9174638','dec':'1.0872126','z':0.031000},
-               # no DR7,8 spectrum
-           'HE0853+0102':{'RA':'133.97614006','dec':'0.85306112','z':0.05247,
+galaxies = { # coordinates from SDSS DR7 catalog, z from SDSS DR7, otherwise NED
+            'HE0040-1105':{'RA':'10.65358672','dec':'-10.82278912','z':0.0419},
+            'RBS175':{'RA':'19.26494998','dec':'7.61312E-3','z':0.0456},
+            'Mrk1503':{'RA':'20.49921832','dec':'-1.04010828','z':0.0542},
+            'Mrk1018':{'RA':'31.56661419','dec':'-0.29144322','z':0.0426},
+            'Mrk590':{'RA':'33.63982968','dec':'-0.76672567','z':0.0261},
+            'Mrk1044':{'RA':'37.52302021','dec':'-8.99813544','z':0.01645}, # in GAMA? no DR7/8 spectra
+            'Mrk1048':{'RA':'38.6576586','dec':'-8.78777681','z':0.04314}, # in GAMA?, no DR7/8 spectrum
+            'HE0345+0056':{'RA':'56.91745592','dec':'1.08722631','z':0.03100}, # no DR7/8 spectrum
+            'HE0853+0102':{'RA':'133.97612964','dec':'0.85305195','z':0.0524,
                           'GAMA_CATAID':278841}, # in GAMA
-           'Mrk707':{'RA':'144.25436933','dec':'1.0954803','z':0.05025},
-           'HE2222-0026':{'RA':'336.14705483','dec':'-0.18442192','z':0.05873},
-           'Mrk926':{'RA':'346.18116195','dec':'-8.68573563','z':0.04702},
-           'Mrk590':{'RA':'33.63983722','dec':'-0.76672072','z':0.02609}
-               # no DR7 spectrum
-        } # coordinates from SDSS DR8 catalog, z from SDSS DR8, otherwise NED
-#galaxies = {'HE0040-1105':{'RA':'00:42:36.860','dec':'-10:49:22.03','z':0.041962},
-#           'RBS175':{'RA':'01:17:03.587','dec':'+00:00:27.41','z':0.045605},
-#           'Mrk1503':{'RA':'01:21:59.827','dec':'-01:02:24.08','z':0.054341},
-#           'Mrk1018':{'RA':'02:06:15.990','dec':'-00:17:29.20','z':0.042436},
-#           'Mrk1044':{'RA':'02:30:05.525','dec':'-08:59:53.29','z':0.016451},
-                # in GAMA?
-#           'Mrk1048':{'RA':'02:34:37.769','dec':'-08:47:15.44','z':0.043143},
-                # in GAMA?
-#           'HE0345+0056':{'RA':'03:47:40.188','dec':'+01:05:14.02','z':0.031000},
-#           'HE0853+0102':{'RA':'08:55:54.268','dec':'+00:51:10.60','z':0.052000},
-                # in GAMA
-#           'Mrk707':{'RA':'09:37:01.030','dec':'+01:05:43.48','z':0.050338},
-#           'HE2222-0026':{'RA':'22:24:35.292','dec':'-00:11:03.89','z':0.059114},
-#           'Mrk926':{'RA':'23:04:43.478','dec':'-08:41:08.62','z':0.046860},
-#           'Mrk590':{'RA':'02:14:33.562','dec':'-00:46:00.09','z':0.026385}
-#        } # coordinates/z from NED, note that 'ras' must be changed to u.hour
+            'Mrk707':{'RA':'144.25436927','dec':'1.09547822','z':0.0505},
+            'HE2222-0026':{'RA':'336.14705331','dec':'-0.18441524','z':0.0581},
+            'Mrk926':{'RA':'346.18116153','dec':'-8.68572479','z':0.0469}
+           }
 
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
 currentFig = 1 # first figure will be numbered as 'Figure 1'
 
-#..........................................................................main
-def main(catalog, index, sample_table=False, printtable=False,
-         return_vals=False) :
-    
-    IDs = list( galaxies.keys() ) # the object name/identifier
-    ras = Angle([ galaxy['RA'] for galaxy in galaxies.values() ], u.deg)
-    decs = Angle([ galaxy['dec'] for galaxy in galaxies.values() ], u.deg)
-    zs = np.array([ galaxy['z'] for galaxy in galaxies.values() ])
-    
-    lower_z = np.array(zs) - 1500*(u.km/u.s)/const.c.to('km/s')
-    upper_z = np.array(zs) + 1500*(u.km/u.s)/const.c.to('km/s')
-    
-    dists = cosmo.angular_diameter_distance(zs) # compute D_A
-    radii = (2*u.Mpc/dists)*(180*60*u.arcmin/np.pi) # find the radii = 2 Mpc
-    
-    if (sample_table == True) :
-        
-        print('\nSample Properties\n')
-    
-        print('Flat \u039BCDM cosmology: H\u2080 = 70 km s\u207B\u00B9 ' +
-              'Mpc\u207B\u00B9, \u03A9\u2098 = 0.3\n')
-        
-        table = Table([IDs, ras.to_string(unit=u.hour),
-                       decs.to_string(unit=u.degree), zs,
-                       zs*const.c.to('km/s'),
-                       dists, radii],
-                      names=('Object Name','RA','Dec','z','Velocity','D_A',
-                             '2 Mpc Radius') )
-        table['Object Name'].format = '14s'
-        table['RA'].format = '13s'
-        table['z'].format = '10.6f'
-        table['Velocity'].format = '8.0f'
-        table['D_A'].format = '8.2f'
-        table['2 Mpc Radius'].format = '12.3f'
-#        table.sort('z')
-        table.pprint(max_lines=-1, max_width=-1)
-    
-    if (catalog == 'SDSS') :
-        catname = 'SDSS'
-        
-        # open the SDSS catalog and populate relevant information
-#        SDSS_catalog = fits.open('SDSS_gal_info_dr7_v5_2.fit.gz') # SDSS DR7
-#        SDSS_catalog = fits.open('SDSS_galSpecInfo-dr8.fits') # SDSS DR8
-        SDSS_catalog = fits.open('catalogs/SDSS_specObj-dr12.fits') # SDSS DR12, GALEX match
-#        info = SDSS_catalog.info()
-#        header = SDSS_catalog[1].header
-#        print(header) # to see what is in the actual data table
-        data = SDSS_catalog[1].data
-        RAs = data.field('PLUG_RA')*u.deg # get all the RAs, Decs, redshifts, etc.
-        Decs = data.field('PLUG_DEC')*u.deg # use 'RA' and 'DEC' for DR7, DR8
-        redshifts = data.field('Z')
-        z_errs = data.field('Z_ERR') # we only want z/z_err >= 3
-        SDSS_catalog.close() # close the SDSS catalog fits file
-        
-        badIndex = np.where(Decs==-9999.0*u.deg) # the one bad RA/Dec value
-        RAs = np.delete(RAs, badIndex) # remove bad value for all parameters
-        Decs = np.delete(Decs, badIndex)
-        redshifts = np.delete(redshifts, badIndex)
-        z_errs = np.delete(z_errs, badIndex)
-        
-        mask = ( (lower_z[index] <= redshifts) & (redshifts <= upper_z[index] )
-                & ((redshifts / z_errs) >= 3) ) # mask the data based on
-                # velocity cuts, redshift quality
-        
-        if return_vals == True :
-            catlen = cat_search(IDs[index], ras[index],decs[index], zs[index],
-                                dists[index], lower_z[index], upper_z[index],
-                                radii[index], RAs, Decs, redshifts, catname,
-                                mask, printtable=printtable,
-                                return_vals=return_vals)
-        else :
-            cat_search(IDs[index], ras[index],decs[index], zs[index],
-                       dists[index], lower_z[index], upper_z[index],
-                       radii[index], RAs, Decs, redshifts, catname, mask,
-                       printtable=printtable)
-        
-    else :
-        catname = 'GAMA'
-        
-        # open the GAMA catalog and populate relevant information
-#        GAMA_catalog = fits.open('GAMA_GaussFitSimple.fits') # SpecLineSFRv05
-        GAMA_catalog = fits.open('catalogs/GAMA_SpecObj.fits') # SpecObj
-#        info = GAMA_catalog.info()
-#        header = GAMA_catalog[1].header
-#        print(header)
-        data = GAMA_catalog[1].data
-        RAs = data.field('RA')*u.deg
-        Decs = data.field('DEC')*u.deg
-        redshifts = data.field('Z')
-        redshift_quality = data.field('NQ')
-        GAMA_catalog.close() # close the GAMA catalog fits file
-        
-        mask = ( (lower_z[index] <= redshifts) & (redshifts <= upper_z[index] )
-                & (redshift_quality >= 3) ) # mask the data based on
-                # velocity cuts, redshift quality
-        
-        if return_vals == True :
-            catlen = cat_search(IDs[index], ras[index],decs[index], zs[index],
-                                dists[index], lower_z[index], upper_z[index],
-                                radii[index], RAs, Decs, redshifts, catname,
-                                mask, printtable=printtable,
-                                return_vals=return_vals)
-        else :
-            cat_search(IDs[index], ras[index],decs[index], zs[index],
-                       dists[index], lower_z[index], upper_z[index],
-                       radii[index], RAs, Decs, redshifts, catname, mask,
-                       printtable=printtable)
-    
-    if return_vals == True :
-        close = cosmo.angular_diameter_distance(lower_z[index])
-        far = cosmo.angular_diameter_distance(upper_z[index])
-        volume = np.pi*(far-close)*(2*u.Mpc)**2
-        return zs[index], catlen, volume
-    else :
-        return
+IDs = list( galaxies.keys() ) # the object name/identifier
+ras = Angle([ galaxy['RA'] for galaxy in galaxies.values() ], u.deg)
+decs = Angle([ galaxy['dec'] for galaxy in galaxies.values() ], u.deg)
+zs = np.array([ galaxy['z'] for galaxy in galaxies.values() ])
 
-#....................................................................cat_search
-def cat_search(galaxy_ID, RA_c, Dec_c, zs_c, dists_c, low_z, high_z, radius,
-               RAs, Decs, redshifts, catname, mask, printtable=False,
-               return_vals=False) :
+dists = cosmo.angular_diameter_distance(zs) # compute D_A
+
+SDSS_path = 'catalogs/SDSS_gal_info_Mstar_SFR.fits'
+GAMA_path = 'catalogs/GAMA_GFS_Mstar.fits'
+
+# further information regarding GAMA environmental parameters
+# www.gama-survey.org/dr3/data/cat/EnvironmentMeasures/v05/EnvironmentMeasures.notes
+
+#..........................................................................main
+def main(cat_name, path, index) :
     
-    center = SkyCoord(ra=RA_c, dec=Dec_c, distance=dists_c) #galaxy of interest
+    center = SkyCoord(ra=ras[index], dec=decs[index], distance=dists[index])
+        # galaxy of interest
     
-    distances = cosmo.angular_diameter_distance(redshifts) # compute D_A
-    catalog = SkyCoord(ra=RAs, dec=Decs, distance=distances,
-                       unit=(u.deg, u.deg, u.Mpc) ) # create the catalog
+    default_catalog = catalog_search(path, cat_name, IDs[index], center,
+                                     index, zs[index], 1500, 2)
+    table = Table([default_catalog['d2d'], default_catalog['d3d']],
+                  names=('2D Separation', '3D Separation'))
+    table.sort('2D Separation')
+    table.pprint(max_lines=-1, max_width=-1)
+    print('')
     
-    d2d = center.separation(catalog) # find projected separations on the sky
-    mask = mask & ( d2d <= radius ) # mask the data based on 2D separation
+    age_par, age_par_err, age_scale = adaptive_gaussian(center, dists[index],
+                                                        default_catalog)
+#    print("%.3g +/- %.3g" % (age_par.value, age_par_err))
+    
+    surface_catalog = catalog_search(path, cat_name, IDs[index], center,
+                                     index, zs[index], 1000, 7)
+    surface_dens, surface_dens_err = surface_density(surface_catalog)
+#    print("%.3g +/- %.3g" % (surface_dens.value, surface_dens_err.value))
+    
+    cylinder_catalog = catalog_search(path, cat_name, IDs[index], center,
+                                      index, zs[index], 1000, 1)
+    counts, counts_err, overdensity = counts_in_cylinder(zs[index],
+                                                         cylinder_catalog)
+#    print("%.3g +/- %.3g, overdensity = %.3g" % (counts, counts_err, overdensity))
+    
+#    funcs.plot(companion_catalog['g_i_Mstar']/u.solMass,
+#               r'$\log(M_*/M_\odot)$ = 1.15 + 0.70($g-i$) - 0.4$M_i$',
+#               companion_catalog['MEDIAN_2'],
+#               r'$M_*$ from catalog [$\log(M_\odot)$]', cat_name)
+#    funcs.histo(companion_catalog['MEDIAN_2'], r'$M_*$ from catalog [$\log(M_\odot)$]')
+#    funcs.histo(companion_catalog['d3d']/u.Mpc, 'Physical Separation (Mpc)')
+    
+    # create small table for CARS host that contains relevent information
+    data = (IDs[index], len(default_catalog), surface_dens.value,
+            surface_dens_err.value, counts, counts_err, overdensity,
+            age_par.value, age_par_err, age_scale)
+    
+    return default_catalog, data
+
+#.............................................................adaptive_gaussian
+def adaptive_gaussian(CARS_coords, CARS_dist, catalog) :
+    
+    sigma = 2*u.Mpc
+    
+    distances = cosmo.angular_diameter_distance(catalog['Z'])
+    r_zs = abs(distances - CARS_dist)
+    
+    scale = cosmo.kpc_proper_per_arcmin(catalog['Z'])    
+    r_as = (scale*catalog['d2d']).to(u.Mpc)
+    
+    mask = ( (r_zs < sigma) & (r_as < sigma) )
+    
     catalog = catalog[mask]
+    AGEErr = np.sqrt(len(catalog)) # this calculation is currently incorrect
+    # compare with entire GAMA catalog for AGEErr and AGEPar for clarification
     
-    if printtable == True :
-        print('\n-----ANALYSIS FOR {0:s}-----\n'.format(galaxy_ID) )
-        
-        print('Reference Galaxy: {}\n'.format(galaxy_ID) )
-        
-        print('Flat \u039BCDM cosmology: H\u2080 = 70 km s\u207B\u00B9 ' +
-              'Mpc\u207B\u00B9, \u03A9\u2098 = 0.3\n')
-        
-        print('Velocity between: {0:.0f} and {1:.0f} km/s\n'.format(
-                low_z*const.c.to('km/s'), high_z*const.c.to('km/s') ) )
-        
-        print('{0:g} objects found in {1:s} within {2:.3f} of {3:s}\n'.format(
-                len(catalog), catname, radius, galaxy_ID) )
+    nn = sum(catalog['d3d'].to(u.Mpc) < sigma)
+    if nn > 10 :
+        nn = 10
+    AGEScale = 1 + 0.2*nn
     
-    table = Table([Angle(RAs[mask], u.deg), #.to_string(unit=u.hour),
-                   Angle(Decs[mask], u.deg), #.to_string(unit=u.degree),
-                   redshifts[mask],
-                   redshifts[mask]*const.c.to('km/s'),distances[mask],
-                   d2d[mask]*60*u.arcmin/u.deg],
-                  names=('RA','Dec','z','Velocity','D_A','Separation') )
-#    table.add_row( [RA_c.to_string(unit=u.hour)+'*',
-#            Dec_c.to_string(unit=u.degree), zs_c, zs_c*const.c.to('km/s'),
-#            dists_c/u.Mpc, 0.0] ) # add the galaxy of interest to the table
-#    table['RA'].format = '15s' # only for h:m:s
+    indv = np.exp( -0.5*( (r_as/sigma)**2 + (r_zs/(AGEScale*sigma))**2 ) )
+    AGEDenPar = 1/np.sqrt(2*np.pi)/sigma * np.sum(indv)
+    
+    return AGEDenPar, AGEErr, AGEScale
+
+#................................................................catalog_search
+def catalog_search(catalog_path, cat_name, CARS_host, CARS_sky_coords, index,
+                   redshift, delta_v, radius) :
+    
+    lower_z = redshift - delta_v*(u.km/u.s)/const.c.to('km/s')
+    upper_z = redshift + delta_v*(u.km/u.s)/const.c.to('km/s')
+    
+    D_A = cosmo.angular_diameter_distance(redshift)
+    radius = (radius*u.Mpc/D_A)*(180*60*u.arcmin/np.pi) # find the angular radius
+    
+    catalog = Table.read(catalog_path)
+    
+    if (cat_name == 'SDSS') :
+        mask = (
+                (lower_z <= catalog['Z']) & (catalog['Z'] <= upper_z) &
+                ((catalog['Z'] / catalog['Z_ERR']) >= 3)
+                ) # mask based on velocity cuts, redshift quality
+    if (cat_name == 'GAMA') :
+        catalog.rename_column('Z_1', 'Z')
+        mask = (
+                (lower_z <= catalog['Z']) & (catalog['Z'] <= upper_z) &
+                (catalog['NQ_1'] >= 3)
+                ) # mask based on velocity cuts, redshift quality
+    catalog = catalog[mask] # mask the catalog once to speed things up
+    
+    D_A = cosmo.angular_diameter_distance(catalog['Z'])
+    positions = SkyCoord(ra=catalog['RA'], dec=catalog['DEC'], distance=D_A,
+                         unit=(u.deg, u.deg, u.Mpc) ) # get sky positions
+    
+    d2d = CARS_sky_coords.separation(positions).to(u.arcmin) # find sky sep.s
+    new_mask = (d2d <= radius) # mask based on 2D sky separation
+    catalog = catalog[new_mask]
+    
+    d3d = CARS_sky_coords.separation_3d(positions)[new_mask] # find physical sep.s
+    
+    if (cat_name == 'SDSS') :
+        D_L = cosmo.luminosity_distance(catalog['Z']).to(u.pc)/u.pc
+        M_i = catalog['KCOR_MAG'][:,2] - 5*np.log10(D_L) + 5 # absolute i mag.
+        g_i_Mstar = (1.15 + 0.7*(catalog['KCOR_MAG'][:,0] -
+                                 catalog['KCOR_MAG'][:,2]) - 0.4*M_i)*u.solMass
+    if (cat_name == 'GAMA') :
+        g_i_Mstar = (1.15 + 0.7*catalog['gminusi'] -
+                     0.4*catalog['absmag_i'])/u.mag*u.solMass
+            # based on relation from Taylor+ 2011, MNRAS, 418, 1587
+    
+    # see required aperture correction for stellar mass or absolute magnitude
+    # http://www.gama-survey.org/dr3/data/cat/StellarMasses/v20/StellarMasses.notes
+    
+    host_list = []
+    for i in range(len(catalog)) :
+        host_list.append(str(CARS_host))
+    
+    # add the additional columns to the catalog
+    catalog['D_A'] = D_A[new_mask]
+    catalog['d2d'] = d2d[new_mask]
+    catalog['d3d'] = d3d
+    catalog['g_i_Mstar'] = g_i_Mstar
+    catalog['CARS_host'] = host_list
+    
+    return catalog
+
+#............................................................counts_in_cylinder
+def counts_in_cylinder(redshift, catalog) :
+    
+    # GAMA Counts in Cylinder Environmental Measure
+    # requires 1 Mpc radius, delta(velocity) = 1000 km/s
+    
+    CountInCyl = len(catalog)
+    CountInCylErr = np.sqrt(CountInCyl)
+    
+    lo = redshift - 1000*(u.km/u.s)/const.c.to('km/s')
+    hi = redshift + 1000*(u.km/u.s)/const.c.to('km/s')
+    D_As = cosmo.angular_diameter_distance([lo, hi])
+    volume = (np.pi)*(1*u.Mpc)*(1*u.Mpc)*abs(D_As[1] - D_As[0])
+    nbar_ref = 0.00911*u.Mpc**(-3)
+    OverDensity = CountInCyl/(nbar_ref * volume)
+    
+    return CountInCyl, CountInCylErr, OverDensity
+
+#...................................................................full_search
+def full_search(cat_name) :
+    
+    # complete the search and determine values for all CARS host galaxies
+    
+    if (cat_name == 'SDSS') :
+        indexes = range(0, 12)
+        path = SDSS_path
+    if (cat_name == 'GAMA') :
+        indexes = [8]
+        path = GAMA_path
+    
+    list_of_sub_cats = []
+    rows = []
+    for index in indexes :
+        sub_catalog, row = main(cat_name, path, index)
+        list_of_sub_cats.append(sub_catalog)
+        rows.append(row)
+    
+    # table that contains all information from the catalogs for the companions 
+#    master_table = vstack(list_of_sub_cats)
+#    master_table.pprint(max_lines=-1, max_width=-1) # print full table
+#    print(master_table) # print small table
+    
+    # table that contains the determined parameters for the CARS galaxies
+    CARS = Table(rows = rows, names=('CARS Host', '# Comp.', 'SurfaceDensity',
+                                     'SurfaceDensityErr', 'CountInCyl',
+                                     'CountInCylErr', 'Overdens.',
+                                     'AGEPar', 'AGEParErr', 'AGEScale'))
+    CARS['SurfaceDensity'] = CARS['SurfaceDensity']*u.Mpc**(-2)
+    CARS['SurfaceDensityErr'] = CARS['SurfaceDensityErr']*u.Mpc**(-2)
+    CARS['SurfaceDensity'].format = '.6f'
+    CARS['SurfaceDensityErr'].format = '.6f'
+    CARS['CountInCylErr'].format = '.3g'
+    CARS['Overdens.'].format = '.3f'
+    CARS['AGEPar'] = CARS['AGEPar']*u.Mpc**(-1)
+    CARS['AGEPar'].format = '.3f'
+    CARS['AGEParErr'].format = '.3g'
+    CARS['AGEScale'].format = '.2g'
+#    print("")
+#    CARS.pprint(max_lines = -1, max_width=-1)
+    
+#    funcs.plot(CARS['AGEPar'], 'AGEPar', CARS['AGEParErr'], 'AGEParErr')
+    
+    # see Ned Taylor's 2011 paper for mass comparison between SDSS and GAMA
+    '''
+    g_i_Mstar = master_table['g_i_Mstar']/u.solMass
+    mass = master_table['MEDIAN_2']
+    funcs.plot(g_i_Mstar, 'mass from colour', mass, 'mass from catalog')
+    
+    from scipy.optimize import curve_fit
+    from scipy.stats import chisquare
+    
+    print("\nUsing linear function with free slope")
+    popt_lin, pcov_lin = curve_fit(line, g_i_Mstar, mass)
+    print("m=%.4g  b=%.4g" % tuple(popt_lin))
+    expected = line(g_i_Mstar, popt_lin[0], popt_lin[1])
+    chisq, pval = chisquare(mass, expected)
+    print("chisq=%.4g  pval=%.4g" % (chisq, pval))
+    R_squared = 1 - np.sum((mass - expected)**2)/np.sum((mass - np.mean(g_i_Mstar))**2)
+    print("R^2=%.4g" % R_squared)
+    funcs.plot(g_i_Mstar, 'mass from colour', (mass - popt_lin[1])/popt_lin[0],
+               'corrected mass from catalog')
+    
+    print("\nUsing linear function with slope of unity")
+    popt_int, pcov_int = curve_fit(intercept, g_i_Mstar, mass)
+    print("b=%.4g" % popt_int)
+    expected = intercept(g_i_Mstar, popt_int[0])
+    chisq, pval = chisquare(mass, expected)
+    print("chisq=%.4g  pval=%.4g" % (chisq, pval))
+    R_squared = 1 - np.sum((mass - expected)**2)/np.sum((mass - np.mean(g_i_Mstar))**2)
+    print("R^2=%.4g" % R_squared)
+    funcs.plot(g_i_Mstar, 'mass from colour', mass - popt_int[0],
+               'corrected mass from catalog ')
+    
+    print("\nUsing parabola with free parameters")
+    popt_parab, pcov_parab = curve_fit(parabola, g_i_Mstar, mass)
+    print("A=%.4g  t=%.4g  b=%.4g" % tuple(popt_parab))
+    expected = parabola(g_i_Mstar, popt_parab[0], popt_parab[1], popt_parab[2])
+    chisq, pval = chisquare(mass, expected)
+    print("chisq=%.4g  pval=%.4g" % (chisq, pval))
+    R_squared = 1 - np.sum((mass - expected)**2)/np.sum((mass - np.mean(g_i_Mstar))**2)
+    print("R^2=%.4g" % R_squared)
+    funcs.plot(g_i_Mstar, 'mass from colour',
+               np.sqrt( (mass - popt_parab[2])/popt_parab[0] ) + popt_parab[1],
+               'corrected mass from catalog')
+    '''
+    
+#    cat_surf_dens, cat_ageden, cat_counts = comparison()
+#    funcs.multi2(np.log10(cat_surf_dens), cat_ageden, 'GAMA',
+#                 np.log10(CARS['SurfaceDensity']),
+#                 CARS['AGEPar'], 'CARS', r'log10(Surface Density (Mpc$^{-2}$))',
+#                 r'AGE Density (Mpc$^{-1}$)')
+    
+    return
+
+#...................................................................helper_fxns
+def intercept(xx, b) :
+    return xx + b
+
+def line(xx, m, b) :
+    return m*xx + b
+
+def parabola(xx, amp, translation, offset) :
+    return amp*(xx - translation)**2 + offset
+
+#...................................................................print_table
+def print_table(table_to_print) :
+    
+    table = Table([host_list, Angle(catalog['RA'],u.deg),
+                   Angle(catalog['DEC'],u.deg),
+            catalog['Z'], catalog['Z']*const.c.to('km/s'), D_A[new_mask],
+            d2d[new_mask], d3d
+                   ],
+            names=('CARS Host','RA','Dec','z','Velocity','D_A','Proj. Sep.',
+                   'Phys. Sep.')
+                  )
     table['z'].format = '10.6f'
     table['Velocity'].format = '8.0f'
     table['D_A'].format = '8.2f'
-    table['Separation'].format = '10.3f'
-    table.sort('Separation') # sort the table by the separation
+    table['Proj. Sep.'].format = '.3f'
+    table['Phys. Sep.'].format = '.3f'
     
-    if printtable == True :
-        table.pprint(max_lines=-1) # print full table, use print(table) for reg
-#    print("\nNote: '*' in the first line denotes the object of interest.")
+    if (cat_name == 'SDSS') :
+        table['Type'] = catalog['TARGETTYPE']
+        table['log(g-i M*)'] = g_i_Mstar
+        table['log(M*)'] = catalog['MEDIAN_2']*u.solMass
+        table['Type'].format = '.7s'        
+    if (cat_name == 'GAMA') :
+        table['log(g-i M*)'] = g_i_Mstar
+        table['log(M*)'] = catalog['logmstar']
+        table['log(M*)'].unit = u.solMass
     
-    if return_vals == True :
-        return len(catalog)-1
+    table.sort('Proj. Sep.') # sort the table by projected separation
+    
+    table.pprint(max_lines=-1, max_width=-1) # print full table
+    print(table)
+    
+    return
+
+#...............................................................surface_density
+def surface_density(catalog) :
+    
+    # see Sarah Brough's 2013 paper for the definition of the GAMA surface density
+    
+    # GAMA Surface Density Environmental Measure
+    # requires delta(velocity) = 1000 km/s
+    
+    catalog.sort('d2d')
+    if len(catalog) >= 6 :
+        DistanceTo4nn = catalog['d2d'][3]*u.Mpc # Python is 0-indexed
+        DistanceTo5nn = catalog['d2d'][4]*u.Mpc
+        DistanceTo6nn = catalog['d2d'][5]*u.Mpc
+        SurfaceDensity4nn = 4 / (np.pi * DistanceTo4nn**2)
+        SurfaceDensity5nn = 5 / (np.pi * DistanceTo5nn**2)
+        SurfaceDensity6nn = 6 / (np.pi * DistanceTo6nn**2)
+        SurfaceDensityErr = max(abs(SurfaceDensity5nn - SurfaceDensity4nn),
+                                abs(SurfaceDensity6nn - SurfaceDensity5nn))
+        return SurfaceDensity5nn, SurfaceDensityErr
     else :
-        return
+        return 0, -999
 
-#..................................................................density_plot
-def density_plot(catalog) :
+#..................................................................sample_table
+def table_of_sample() :
     
-    if catalog == 'both' :
-        redshifts = []
-        SDSS_companions = []
-        SDSS_volumes = []
-        GAMA_companions = []
-        GAMA_volumes = []
-        for i in range(0, 12) :
-            redshift, number, volume = main('SDSS', i, return_vals=True)
-            redshifts.append(redshift)
-            SDSS_companions.append(number)
-            SDSS_volumes.append(volume.value)
-            if i in [4,5,7] :
-                redshift, number, volume = main('GAMA', i, return_vals=True)
-                GAMA_companions.append(number)
-                GAMA_volumes.append(volume.value)
-            else :
-                GAMA_companions.append(np.nan)
-                GAMA_volumes.append(np.nan)
-        multi(redshifts, 'Redshift',
-              np.array(SDSS_companions)/np.array(SDSS_volumes),
-              np.array(GAMA_companions)/np.array(GAMA_volumes),
-              'Density of Companions (Mpc$^{-3}$)')
+    param_list = [IDs, ras, decs, zs, zs*const.c.to('km/s'), dists, radii]
+    headings = ('Object Name','RA','Dec','z','Velocity','D_A', '2 Mpc Radius')
     
-    redshifts = []
-    number_of_companions = []
-    volumes = []
+    print('\nSample Properties\n')
     
-    if catalog == 'SDSS' :
-        for i in range(0, 12) :
-            redshift, number, volume = main('SDSS', i, return_vals=True)
-            redshifts.append(redshift)
-            number_of_companions.append(number)
-            volumes.append(volume.value)
-        plot(redshifts, 'Redshift',
-             np.array(number_of_companions)/np.array(volumes),
-             'Density of Companions (Mpc$^{-3}$)')
+    print('Flat \u039BCDM cosmology: H\u2080 = 70 km s\u207B\u00B9 ' +
+          'Mpc\u207B\u00B9, \u03A9\u2098 = 0.3\n')
     
-    if catalog == 'GAMA' :
-        for i in [4,5,7] :
-            redshift, number, volume = main('GAMA', i, return_vals=True)
-            redshifts.append(redshift)
-            number_of_companions.append(number)
-            volumes.append(volume.value)
-        plot(redshifts, 'Redshift',
-             np.array(number_of_companions)/np.array(volumes),
-             'Density of Companions (Mpc$^{-3}$)')
+    table = Table(param_list, names=headings)
+    table['Object Name'].format = '14s'
+    table['RA'].format = '12.8f'
+    table['Dec'].format = '12.8f'
+    table['z'].format = '10.6f'
+    table['Velocity'].format = '8.0f'
+    table['D_A'].format = '8.2f'
+    table['2 Mpc Radius'].format = '12.3f'
+    table.sort('RA')
+    table.pprint(max_lines=-1, max_width=-1)
+    
+    print('')
     
     return
 
-#.........................................................................multi
-def multi(xvals, xlab, yvals1, yvals2, ylab, xmin=None, xmax=None, ymin=None,
-          ymax=None, location='upper left') :
+#....................................................................comparison
+def comparison() :
     
-    global currentFig        
-    fig = plt.figure(currentFig)  # the current figure
-    currentFig += 1
-    plt.clf() # clear the figure before each run
+    catalog = Table.read('catalogs/GAMA_SpecClassGordon_EnvMeas.fits')
     
-    ax = fig.add_subplot(111)
+    mask = (
+            (catalog['EmLineType'] == 'Seyfert') | (catalog['EmLineType'] == 'BLAGN')
+            )
+    catalog = catalog[mask]
     
-    ax.plot(xvals, yvals1, 'ko', label = "%s" % 'SDSS', zorder=2)
-#    ax.axhline(np.nanmean(yvals1), color='k', linestyle='-', label='mean')
-    ax.axhline(np.nanmedian(yvals1), color='k', linestyle='--', label='median',
-               zorder=1)
+    surf_dens = catalog['SurfaceDensity']
+    counts = catalog['CountInCyl']
+    ageden_par = catalog['AGEDenPar']
     
-    ax.plot(xvals, yvals2, 'ro', label = "%s" % 'GAMA', zorder=2)
-#    ax.axhline(np.nanmean(yvals2), color='r', linestyle='-', label='mean')
-    ax.axhline(np.nanmedian(yvals2), color='r', linestyle='--', label='median',
-               zorder=1)
-    
-    ax.set_xlim(xmin, xmax)
-    ax.set_ylim(ymin, ymax)
-    
-    ax.set_xlabel("%s" % xlab, fontsize = 15 )
-    ax.set_ylabel("%s" % ylab, fontsize = 15 )
-    
-    plt.legend(loc = location)
-    
-    plt.tight_layout()
-    plt.show()
-    
-    return
-
-#..........................................................................plot
-def plot(xvals, xlab, yvals, ylab, xmin=None, xmax=None, ymin=None,
-         ymax=None) : #, logx=False, logy=False, linear=False) :
-    
-    global currentFig
-    fig = plt.figure(currentFig)  # the current figure
-    currentFig += 1
-    plt.clf() # clear the figure before each run
-    
-    ax = fig.add_subplot(111) # set axes, figure location
-    
-#    if (logx == True) and (logy == False) and (linear == False) :
-#        ax.semilogx(xvals, yvals, 'ko')
-#    elif (logx == False) and (logy == True) and (linear == False) :
-#        ax.semilogy(xvals, yvals, 'ko')
-#    elif (logx == False) and (logy == False) and (linear == True) :
-    ax.plot(xvals, yvals, 'ko')
-#    elif (logx == True) and (logy == True) and (linear == False) :
-#        ax.loglog(xvals, yvals, 'ko')
-#    else :
-#        ax.loglog(xvals, yvals, 'ko')
-            
-    ax.set_xlabel("%s" % xlab, fontsize = 15 )
-    ax.set_ylabel("%s" % ylab, fontsize = 15 )
-    
-    ax.set_xlim(xmin, xmax)
-    ax.set_ylim(ymin, ymax)
-    
-    plt.tight_layout()
-    plt.show()
-    
-    return
+    return surf_dens, counts, ageden_par
 #..............................................................end of functions
 
-#main('SDSS', 0, printtable=True, sample_table=True)
+#table_of_sample()
 
-#for i in range(1, 12) :
-#    main('SDSS', i, printtable=True)
+#cat, CARS_data = main('SDSS', SDSS_path, 0)
 
-#for i in [4,5,7] :
-#    main('GAMA', i, printtable=True)
+#cat, CARS_data = main('GAMA', GAMA_path, 8)
+#cat.sort('d2d')
+#print(cat['d3d'])
+
+full_search('SDSS')

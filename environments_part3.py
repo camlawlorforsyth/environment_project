@@ -23,6 +23,8 @@ import numpy.ma as ma
 # constants
 currentFig = 1
 pogson = np.power(100, 0.2)
+FUV_ZP = 18.81707 # zero-point in AB magnitudes, from
+NUV_ZP = 20.08238 # http://www.galex.caltech.edu/researcher/files/mcat_columns_long.txt
 
 #.......................................................................convert
 def convert(mag) :
@@ -50,23 +52,94 @@ def histo(param, label, num_bins) :
 
 #..............................................................................
 
-dat = ascii.read('photometry_v1.csv') # requires columns to have unique names
+dat = ascii.read('photometry_v2.csv') # requires columns to have unique names
 #histo(2*dat['petroRad_r'], r'$2r_p$', 100) # show petroRad_r distribution
+data_length = len(dat)
 
 # GALEX
-FUV = convert( dat['fuv_mag']-dat['e_bv'] )
-FUV_err = np.log(10)/pogson*FUV*dat['fuv_magerr']
+#FUV = convert( dat['fuv_mag']-dat['e_bv'] )
+#FUV_err = np.log(10)/pogson*FUV*dat['fuv_magerr']
+#FUV.fill_value = -99
+#FUV = FUV.filled()
+#FUV_err.fill_value = -99
+#FUV_err = FUV_err.filled()
+
+#NUV = convert( dat['nuv_mag']-dat['e_bv'] )
+#NUV_err = np.log(10)/pogson*NUV*dat['nuv_magerr']
+#NUV.fill_value = -99
+#NUV = NUV.filled()
+#NUV_err.fill_value = -99
+#NUV_err = NUV_err.filled()
+
+FUV, NUV = [], []
+FUV_err, NUV_err = [], []
+for i in range(data_length) :
+    if 2*(dat['petroRad_r'][i]) < 3 :
+        val1 = convert(dat['FUV_MAG_APER_1'][i] + FUV_ZP - dat['e_bv'][i])
+        FUV.append(val1)
+        FUV_err.append(np.log(10)/pogson*val1*dat['FUV_MAGERR_APER_1'][i])
+        val2 = convert(dat['NUV_MAG_APER_1'][i] + NUV_ZP - dat['e_bv'][i])
+        NUV.append(val2)
+        NUV_err.append(np.log(10)/pogson*val2*dat['NUV_MAGERR_APER_1'][i])
+    elif 2*(dat['petroRad_r'][i]) < 4.5 :
+        val1 = convert(dat['FUV_MAG_APER_2'][i] + FUV_ZP - dat['e_bv'][i])
+        FUV.append(val1)
+        FUV_err.append(np.log(10)/pogson*val1*dat['FUV_MAGERR_APER_2'][i])
+        val2 = convert(dat['NUV_MAG_APER_2'][i] + FUV_ZP - dat['e_bv'][i])
+        NUV.append(val2)
+        NUV_err.append(np.log(10)/pogson*val2*dat['NUV_MAGERR_APER_2'][i])
+    elif 2*(dat['petroRad_r'][i]) < 7.5 :
+        val1 = convert(dat['FUV_MAG_APER_3'][i] + FUV_ZP - dat['e_bv'][i])
+        FUV.append(val1)
+        FUV_err.append(np.log(10)/pogson*val1*dat['FUV_MAGERR_APER_3'][i])
+        val2 = convert(dat['NUV_MAG_APER_3'][i] + FUV_ZP - dat['e_bv'][i])
+        NUV.append(val2)
+        NUV_err.append(np.log(10)/pogson*val2*dat['NUV_MAGERR_APER_3'][i])
+    elif 2*(dat['petroRad_r'][i]) < 12 :
+        val1 = convert(dat['FUV_MAG_APER_4'][i] + FUV_ZP - dat['e_bv'][i])
+        FUV.append(val1)
+        FUV_err.append(np.log(10)/pogson*val1*dat['FUV_MAGERR_APER_4'][i])
+        val2 = convert(dat['NUV_MAG_APER_4'][i] + FUV_ZP - dat['e_bv'][i])
+        NUV.append(val2)
+        NUV_err.append(np.log(10)/pogson*val2*dat['NUV_MAGERR_APER_4'][i])
+    elif 2*(dat['petroRad_r'][i]) < 18 :
+        val1 = convert(dat['FUV_MAG_APER_5'][i] + FUV_ZP - dat['e_bv'][i])
+        FUV.append(val1)
+        FUV_err.append(np.log(10)/pogson*val1*dat['FUV_MAGERR_APER_5'][i])
+        val2 = convert(dat['NUV_MAG_APER_5'][i] + FUV_ZP - dat['e_bv'][i])
+        NUV.append(val2)
+        NUV_err.append(np.log(10)/pogson*val2*dat['NUV_MAGERR_APER_5'][i])
+    elif 2*(dat['petroRad_r'][i]) < 25.5 :
+        val1 = convert(dat['FUV_MAG_APER_6'][i] + FUV_ZP - dat['e_bv'][i])
+        FUV.append(val1)
+        FUV_err.append(np.log(10)/pogson*val1*dat['FUV_MAGERR_APER_6'][i])
+        val2 = convert(dat['NUV_MAG_APER_6'][i] + FUV_ZP - dat['e_bv'][i])
+        NUV.append(val2)
+        NUV_err.append(np.log(10)/pogson*val2*dat['NUV_MAGERR_APER_6'][i])
+    elif 2*(dat['petroRad_r'][i]) < 34.5 :
+        val1 = convert(dat['FUV_MAG_APER_7'][i] + FUV_ZP - dat['e_bv'][i])
+        FUV.append(val1)
+        FUV_err.append(np.log(10)/pogson*val1*dat['FUV_MAGERR_APER_7'][i])
+        val2 = convert(dat['NUV_MAG_APER_7'][i]-dat['e_bv'][i])
+        NUV.append(val2)
+        NUV_err.append(np.log(10)/pogson*val2*dat['NUV_MAGERR_APER_7'][i])
+    else :
+        FUV.append(ma.masked)
+        FUV_err.append(ma.masked)
+        NUV.append(ma.masked)
+        NUV_err.append(ma.masked)
+FUV = ma.array(FUV)
+FUV_err= ma.array(FUV_err)
 FUV.fill_value = -99
 FUV = FUV.filled()
 FUV_err.fill_value = -99
 FUV_err = FUV_err.filled()
-
-NUV = convert( dat['nuv_mag']-dat['e_bv'] )
-NUV_err = np.log(10)/pogson*NUV*dat['nuv_magerr']
+NUV = ma.array(NUV)
+NUV_err= ma.array(NUV_err)
 NUV.fill_value = -99
 NUV = NUV.filled()
 NUV_err.fill_value = -99
-NUV_err = NUV_err.filled()
+NUV_err = NUV_err.filled()        
 
 # SDSS
 u = convert( dat['petroMag_u']-dat['extinction_u']-0.04 )
@@ -107,7 +180,7 @@ z_err = z_err.filled()
 # 2MASS
 J, H, K = [], [], []
 J_err, H_err, K_err = [], [], []
-for i in range(len(dat)) :
+for i in range(data_length) :
     if 2*(dat['petroRad_r'][i]) < 5 :
         val1 = convert(dat['j_m_5'][i]+0.898)
         J.append(val1)
@@ -217,7 +290,7 @@ K_err = K_err.filled()
 # WISE
 W1, W2, W3, W4 = [], [], [], []
 W1_err, W2_err, W3_err, W4_err = [], [], [], []
-for i in range(len(dat)) :
+for i in range(data_length) :
     if 2*(dat['petroRad_r'][i]) < 5.5 :
         val1 = convert(dat['w1mag_1'][i]+2.699)
         W1.append(val1)
@@ -406,21 +479,21 @@ W4_err.fill_value = -99
 W4_err = W4_err.filled()
 
 # wavelengths and redshifts
-ids = np.arange(0, len(dat))
-FUV_wl = np.full(len(dat), 1538.6)
-NUV_wl = np.full(len(dat), 2315.7)
-u_wl = np.full(len(dat), 3551)
-g_wl = np.full(len(dat), 4686)
-r_wl = np.full(len(dat), 6166)
-i_wl = np.full(len(dat), 7480)
-z_wl = np.full(len(dat), 8932)
-J_wl = np.full(len(dat), 12350)
-H_wl = np.full(len(dat), 16620)
-K_wl = np.full(len(dat), 21590)
-W1_wl = np.full(len(dat), 34000)
-W2_wl = np.full(len(dat), 46000)
-W3_wl = np.full(len(dat), 120000)
-W4_wl = np.full(len(dat), 220000)
+ids = np.arange(0, data_length)
+FUV_wl = np.full(data_length, 1538.6)
+NUV_wl = np.full(data_length, 2315.7)
+u_wl = np.full(data_length, 3551)
+g_wl = np.full(data_length, 4686)
+r_wl = np.full(data_length, 6166)
+i_wl = np.full(data_length, 7480)
+z_wl = np.full(data_length, 8932)
+J_wl = np.full(data_length, 12350)
+H_wl = np.full(data_length, 16620)
+K_wl = np.full(data_length, 21590)
+W1_wl = np.full(data_length, 34000)
+W2_wl = np.full(data_length, 46000)
+W3_wl = np.full(data_length, 120000)
+W4_wl = np.full(data_length, 220000)
 
 # create the table to be used in SED fitting
 newdata = Table( {
@@ -443,7 +516,7 @@ newdata = Table( {
         } )
 
 
-ascii.write(newdata, 'catalog.txt', overwrite=True)
+ascii.write(newdata, 'catalog_circ_aps.txt', overwrite=True)
 
 
 #tbl = ascii.read('catalog.txt')
