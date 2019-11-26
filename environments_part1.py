@@ -29,29 +29,29 @@ import functions as funcs
 # the following are all in SDSS as per Bernd
 galaxies = { # coordinates from SDSS DR7 catalog, z from SDSS DR7, otherwise NED
             'HE 0040-1105':{'RA':'10.65358672','dec':'-10.82278912','z':0.0419,
-                            'g':16.015482, 'i':15.224949},
+                            'g':15.873565, 'i':15.084779},
             'HE 0114-0015':{'RA':'19.26494998','dec':'7.61312E-3','z':0.0456,
-                            'g':15.879524, 'i':14.895632}, # RBS 175
+                            'g':15.659997, 'i':14.723861}, # RBS 175
             'HE 0119-0118':{'RA':'20.49921832','dec':'-1.04010828','z':0.0542,
-                            'g':14.478693, 'i':13.959898}, # Mrk 1503
+                            'g':14.495553, 'i':13.845582}, # Mrk 1503
             'HE 0203-0031':{'RA':'31.56661419','dec':'-0.29144322','z':0.0426,
-                            'g':np.nan, 'i':np.nan}, # Mrk 1018
+                            'g':14.032228, 'i':12.812394}, # Mrk 1018
             'HE 0212-0059':{'RA':'33.63982968','dec':'-0.76672567','z':0.0261,
-                            'g':np.nan, 'i':np.nan}, # Mrk 590
+                            'g':13.756615, 'i':12.667005}, # Mrk 590
             'HE 0227-0913':{'RA':'37.52302021','dec':'-8.99813544','z':0.01645,
-                            'g':13.585828, 'i':12.932489}, # Mrk 1044, in GAMA? no DR7/8 spectra
+                            'g':14.035069, 'i':13.183728}, # Mrk 1044, in GAMA? no DR7/8 spectra
             'HE 0232-0900':{'RA':'38.6576586','dec':'-8.78777681','z':0.04314,
-                            'g':13.159993, 'i':12.592682}, # Mrk 1048, in GAMA?, no DR7/8 spectra
+                            'g':13.537529, 'i':12.712051}, # Mrk 1048, in GAMA?, no DR7/8 spectra
             'HE 0345+0056':{'RA':'56.91745592','dec':'1.08722631','z':0.03100,
-                            'g':13.731509, 'i':13.4499}, # no DR7/8 spectra
+                            'g':15.105369, 'i':14.4509535}, # no DR7/8 spectra
             'HE 0853+0102':{'RA':'133.97612964','dec':'0.85305195','z':0.0524,
-                            'g':16.407547, 'i':15.479069,'GAMA_CATAID':278841},
+                            'g':16.010803, 'i':15.319082,'GAMA_CATAID':278841},
             'HE 0934+0119':{'RA':'144.25436927','dec':'1.09547822','z':0.0505,
-                            'g':15.497892, 'i':15.050711}, # Mrk 707
+                            'g':15.794184, 'i':15.187816}, # Mrk 707
             'HE 2222-0026':{'RA':'336.14705331','dec':'-0.18441524','z':0.0581,
-                            'g':17.348343, 'i':16.35691},
+                            'g':17.061754, 'i':16.162113},
             'HE 2302-0857':{'RA':'346.18116153','dec':'-8.68572479','z':0.0469,
-                            'g':14.915611, 'i':13.669703}, # Mrk 926
+                            'g':14.508565, 'i':13.438229}, # Mrk 926
             
 #            'HE 0853-0126':{'RA':'134.07430518','dec':'-1.63535577','z':0.05981}, # no DR7 spectra
 #            'HE 0949-0122':{'RA':'148.07959493','dec':'-1.61209535','z':0.01993}, # Mrk 1239, no DR7 spectra
@@ -84,6 +84,14 @@ CARS_base.meta['comments'] = ['Flat \u039BCDM cosmology: H\u2080 = 70 km ' +
 #CARS_base.write('catalogs/CARS_base.fits', overwrite=True)
 #CARS_base.write('CARS_base.tex', format='ascii.latex', overwrite=True)
 
+CARS_GAMA_base = Table(rows=CARS_base[8],
+                       names=('CARS_Host', 'RA', 'DEC', 'Z', 'D_A', 'D_L',
+                              '2_Mpc_Radius', 'g', 'i', 'M_i', 'log_mass'))
+CARS_GAMA_base.meta['comments'] = ['Flat \u039BCDM cosmology: H\u2080 = 70 km ' +
+                                   's\u207B\u00B9 Mpc\u207B\u00B9, \u03A9\u2098 = 0.3']
+#CARS_GAMA_base.write('catalogs/CARS_GAMA_base.fits', overwrite=True)
+#CARS_GAMA_base.write('CARS_GAMA_base.tex', format='ascii.latex', overwrite=True)
+
 # using color-based mass estimate
 #mass_limit = 9.942327 # 17 km/s away from CARS target z
 #mass_limit = 9.253037 # 65 km/s away from CARS target z
@@ -109,9 +117,11 @@ def main(cat_name, mass_check=False) :
     if (cat_name == 'SDSS') :
         indexes = range(len(galaxies))
         path = SDSS_path
+        base = CARS_base
     if (cat_name == 'GAMA') :
         indexes = [8]
         path = GAMA_path
+        base = CARS_GAMA_base
     
     list_of_sub_cats = []
     tables = []
@@ -151,24 +161,25 @@ def main(cat_name, mass_check=False) :
     
     # table that contains the determined parameters for the CARS galaxies
     CARS = vstack(tables)
-#    CARS['Companions'].description = 'number of companions in 2Mpc, +/-1500km/s cylinder'
-#    CARS['Most_Massive'].description='mass of most massive companion'
-#    CARS['Closest'].description='distance to closest companion'
-#    CARS['Closest_Mass'].description='mass of closest companion'
-#    CARS['SurfaceDensity'].description='surface density based on the distance to the 5th nearest neighbour'
-#    CARS['SurfaceDensityErr'].description='surface density uncertainty'
-#    CARS['CountInCyl'].description='number of (other) galaxies within cylinder of radius 1 co-moving Mpc'
-#    CARS['CountInCylErr'].description='Poisson error on number of galaxies in cylinder'
-#    CARS['Overdensity'].description='ratio of CountInCyl over the average number of galaxies within the considered volume'
-#    CARS['Excess'].description='difference between CountInCyl and average number of galaxies within the considered volume'
-#    CARS['AGEPar'].description='adaptive Gaussian environment parameter'
-#    CARS['AGEParErr'].description='Poisson error on the number of galaxies used to calculate AGEPar'
-#    CARS['AGEScale'].description='adaptive scaling factor used for the adaptive Gaussian ellipsoid'
-#    CARS.write('catalogs/CARS_environments_masslimited.fits', overwrite=True)
+    CARS['Companions'].description = 'number of companions in 2Mpc, +/-1500km/s cylinder'
+    CARS['Most_Massive'].description='mass of most massive companion'
+    CARS['Dist_to_Massive'].description='distance to most massive companion'
+    CARS['Closest_Mass'].description='mass of closest companion'
+    CARS['Dist_to_Closest'].description='distance to closest companion'
+    CARS['SurfaceDensity'].description='surface density based on the distance to the 5th nearest neighbour'
+    CARS['SurfaceDensityErr'].description='surface density uncertainty'
+    CARS['CountInCyl'].description='number of (other) galaxies within cylinder of radius 1 co-moving Mpc'
+    CARS['CountInCylErr'].description='Poisson error on number of galaxies in cylinder'
+    CARS['Overdensity'].description='ratio of CountInCyl over the average number of galaxies within the considered volume'
+    CARS['Excess'].description='difference between CountInCyl and average number of galaxies within the considered volume'
+    CARS['AGEPar'].description='adaptive Gaussian environment parameter'
+    CARS['AGEParErr'].description='Poisson error on the number of galaxies used to calculate AGEPar'
+    CARS['AGEScale'].description='adaptive scaling factor used for the adaptive Gaussian ellipsoid'
+    CARS.write('catalogs/CARS_environments_masslimited_new.fits', overwrite=True)
     
     # table that contains the basic information and the environment parameters
-#    combined = hstack([CARS_base, CARS])
-#    combined.write('catalogs/CARS_complete_masslimited.fits', overwrite=True)
+    combined = hstack([base, CARS])
+    combined.write('catalogs/CARS_complete_masslimited_new.fits', overwrite=True)
     
 #    funcs.plot(CARS['AGEPar'], 'AGEPar', CARS['AGEParErr'], 'AGEParErr')
     # use linear scaling to illustrate relationship
@@ -414,13 +425,15 @@ def counts_in_cylinder(redshift, catalog) :
     D_As = cosmo.angular_diameter_distance([lo, hi])
     volume = (np.pi)*(1*u.Mpc)*(1*u.Mpc)*abs(D_As[1] - D_As[0])
     nbar_ref = 65/(972.1576816002101*u.Mpc**3) # total counts in cylinders over
-        # total 1Mpc**2*1000km/s volume for each target
+        # total (1Mpc**2)*(z-1000km/s)*(z+1000km/s) volume for each target
 #    nbar_ref = 6.916794832380327e-05*u.Mpc**(-3) # from MPA/JHU and D_A of
         # highest redshift object as radius of sphere
 #    nbar_ref = 0.00911*u.Mpc**(-3) # from GAMA catalog
-    OverDensity = CountInCyl/(nbar_ref * volume)
+    avg_count = nbar_ref*volume
+    OverDensity = CountInCyl/avg_count
+    Excess = CountInCyl - avg_count
     
-    return CountInCyl, CountInCylErr, OverDensity
+    return CountInCyl, CountInCylErr, OverDensity, Excess
 
 #...................................................................helper_fxns
 def intercept(xx, b) :
@@ -443,9 +456,10 @@ def gama_params(cat_name, path, alpha, delta, zz, D_A, ID) :
     default_catalog = default_catalog[last_mask]
     default_catalog.sort('g_i_Mstar')
     massive = default_catalog['g_i_Mstar'][-1]
+    massive_dist = (default_catalog['d3d'].to(u.kpc))[-1]
     default_catalog.sort('d3d')
-    closest = (default_catalog['d3d'].to(u.kpc)[0])
-    closest_mass = default_catalog['g_i_Mstar'][-1]
+    closest_mass = default_catalog['g_i_Mstar'][0]
+    closest = (default_catalog['d3d'].to(u.kpc))[0]
     
     age_catalog = catalog_search(path, cat_name, ID, center, zz, 4931.58, 7)
     age_par, age_par_err, age_scale = adaptive_gaussian(center, D_A, age_catalog)
@@ -454,8 +468,7 @@ def gama_params(cat_name, path, alpha, delta, zz, D_A, ID) :
     surface_dens, surface_dens_err = surface_density(surface_catalog)
     
     cylinder_catalog = catalog_search(path, cat_name, ID, center, zz, 1000, 1)
-    counts, counts_err, overdensity = counts_in_cylinder(zz, cylinder_catalog)
-    excess = counts - counts/overdensity
+    counts, counts_err, overdensity, excess = counts_in_cylinder(zz, cylinder_catalog)
     
 #    funcs.plot(companion_catalog['g_i_Mstar']/u.solMass,
 #               r'$\log(M_*/M_\odot)$ = 1.15 + 0.70($g-i$) - 0.4$M_i$',
@@ -473,8 +486,9 @@ def gama_params(cat_name, path, alpha, delta, zz, D_A, ID) :
     envs = Table()
     envs['Companions'] = Column([len(default_catalog)])
     envs['Most_Massive'] = Column([massive], unit=u.solMass)
-    envs['Closest'] = Column([closest.value], unit=u.kpc)
+    envs['Dist_to_Massive'] = Column([massive_dist.value], unit=u.kpc)
     envs['Closest_Mass'] = Column([closest_mass], unit=u.solMass)
+    envs['Dist_to_Closest'] = Column([closest.value], unit=u.kpc)
     envs['SurfaceDensity'] = Column([surface_dens.value], unit=u.Mpc**(-2))
     envs['SurfaceDensityErr'] = Column([surface_dens_err.value], unit=u.Mpc**(-2))
     envs['CountInCyl'] = Column([counts])
