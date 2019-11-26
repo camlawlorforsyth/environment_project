@@ -59,7 +59,7 @@ def density_plot(catalog) :
     return
 
 #.........................................................................histo
-def histo(param, label, num_bins=None) :
+def histo(param, label, title=None, vert_line=None, num_bins=None) :
     
     global currentFig
     fig = plt.figure(currentFig)
@@ -67,9 +67,43 @@ def histo(param, label, num_bins=None) :
     plt.clf()
     
     ax = fig.add_subplot(111)
-    ax.hist(param, bins=num_bins)
+    ax.hist(param, range=(7, 11.5)) #, bins=num_bins)
     plt.xlabel("%s" % label, fontsize = 15)
     
+    if vert_line :
+        ymin, ymax = ax.get_ylim()
+        ax.vlines(vert_line, ymin, ymax,
+                  color='r', linestyle='--', label=r'CARS Host')
+        plt.legend()
+    
+    plt.title('%s' % title, fontsize = 15)
+    plt.tight_layout()
+    plt.show()
+    
+    return
+
+#..........................................................................plot
+def histo2d(xvals, xlab, yvals, ylab, hist2d=False, nbins=200) :
+    
+    from matplotlib.colors import LogNorm
+    
+    global currentFig
+    fig = plt.figure(currentFig)
+    currentFig += 1
+    plt.clf()
+    
+    ax = fig.add_subplot(111)
+    
+    plt.hist2d(xvals, yvals, bins=nbins, norm=LogNorm())
+    cbar = plt.colorbar()
+    
+    ax.set_xlabel("%s" % xlab, fontsize = 15 )
+    ax.set_ylabel("%s" % ylab, fontsize = 15 )
+    
+#    ax.set_xlim(xmin, xmax)
+#    ax.set_ylim(ymin, ymax)
+    
+    plt.legend()
     plt.tight_layout()
     plt.show()
     
