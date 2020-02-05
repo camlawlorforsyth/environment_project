@@ -110,5 +110,5 @@ venv.bak/
 *.fits.gz
 
 # generated and saved Numpy arrays
-.npy
-.npz
+*.npy
+*.npz
