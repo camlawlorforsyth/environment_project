@@ -6,6 +6,60 @@ import matplotlib.pyplot as plt
 
 currentFig = 1
 
+#.....................................................................contour3d
+def contour3d(xx, yy, zz, xlabel, ylabel, zlabel) :
+    
+    from mpl_toolkits.mplot3d import Axes3D
+    
+    global currentFig
+    
+    fig = plt.figure(currentFig)
+    currentFig += 1
+    plt.clf()
+    
+    ax = fig.add_subplot(111, projection='3d')
+    
+#    ax.contourf(xx, yy, zz)
+    ax.plot_surface(xx, yy, zz)
+    
+    ax.elev = 30
+    ax.azim = 225
+    
+    plt.xlabel(xlabel, fontsize = 15 )
+    plt.ylabel(ylabel, fontsize = 15 )
+    ax.set_zlabel(zlabel, fontsize = 15)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return
+
+#......................................................................plotting
+def plot3D(xvals, yvals, zvals, xlabel, ylabel, zlabel) :
+    
+    from mpl_toolkits.mplot3d import Axes3D
+    
+    global currentFig
+    
+    fig = plt.figure(currentFig)
+    currentFig += 1
+    plt.clf()
+    
+    ax = fig.add_subplot(111, projection='3d')
+    
+    ax.plot(xvals, yvals, zvals)
+    
+    ax.set_xticks([-1, -0.5, 0, 0.5, 1])
+    ax.set_yticks([-1, -0.5, 0, 0.5, 1])
+    
+    plt.xlabel(xlabel, fontsize = 15 )
+    plt.ylabel(ylabel, fontsize = 15 )
+    ax.set_zlabel(zlabel, fontsize = 15)
+    
+    plt.show()
+    
+    return
+
 #..................................................................density_plot
 def density_plot(catalog) :
     
@@ -58,6 +112,16 @@ def density_plot(catalog) :
     
     return
 
+#...................................................................helper_fxns
+def intercept(xx, b) :
+    return xx + b
+
+def line(xx, m, b) :
+    return m*xx + b
+
+def parabola(xx, amp, translation, offset) :
+    return amp*(xx - translation)**2 + offset
+
 #.........................................................................histo
 def histo(param, label, title=None, vert_line=None, num_bins=None) :
     
@@ -83,7 +147,8 @@ def histo(param, label, title=None, vert_line=None, num_bins=None) :
     return
 
 #..........................................................................plot
-def histo2d(xvals, xlab, yvals, ylab, hist2d=False, nbins=200) :
+def histo2d(xvals, xlab, yvals, ylab, nbins=200, xmin=None, xmax=None,
+            ymin=None, ymax=None,) :
     
     from matplotlib.colors import LogNorm
     
@@ -100,8 +165,8 @@ def histo2d(xvals, xlab, yvals, ylab, hist2d=False, nbins=200) :
     ax.set_xlabel("%s" % xlab, fontsize = 15 )
     ax.set_ylabel("%s" % ylab, fontsize = 15 )
     
-#    ax.set_xlim(xmin, xmax)
-#    ax.set_ylim(ymin, ymax)
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
     
     plt.legend()
     plt.tight_layout()
@@ -176,7 +241,7 @@ def multi2(xvals1, yvals1, label1, xvals2, yvals2, label2, xlab, ylab) :
 
 #..........................................................................plot
 def plot(xvals, xlab, yvals, ylab, cat_name='SDSS', xmin=None, xmax=None,
-         ymin=None, ymax=None, hist2d=False, nbins=200) :
+         ymin=None, ymax=None, hist2d=False, nbins=200, fit=False, log=False) :
     
     from matplotlib.colors import LogNorm
     
@@ -188,18 +253,21 @@ def plot(xvals, xlab, yvals, ylab, cat_name='SDSS', xmin=None, xmax=None,
     ax = fig.add_subplot(111) # set axes, figure location
     
     if (hist2d == True) :
-        plt.hist2d(xvals, yvals, bins=nbins, norm=LogNorm())
+        plt.hist2d(xvals, yvals, bins=nbins)#, norm=LogNorm())
         cbar = plt.colorbar()
         cbar.set_label('N(%s)' % cat_name, fontsize = 15)
+    elif (log == True) :
+        ax.loglog(xvals, yvals, 'ko', label='data')
     else :
-        ax.plot(xvals, yvals, 'ko')
+        ax.plot(xvals, yvals, 'ko', label='data')
     
-    xs = np.linspace(7, 11.3, 1000)
-#    xs = np.linspace(6, 13, 1000)
-    ax.plot(xs, xs+0, 'r--', label='equality')
-#    ax.plot(xs, 0.89981547*xs + 1.5640069, 'b--', label='linear fit')
-#    ax.plot(xs, xs + 0.65219703, 'r--', label='linear offset')
-#    ax.plot(xs, 0.13952656*(xs - 5.80306785)**2 + 8.16238619, 'r--', label='parabolic fit')
+    if fit == True :
+        xs = np.linspace(7, 11.3, 1000)
+    #    xs = np.linspace(6, 13, 1000)
+        ax.plot(xs, xs+0, 'r--', label='equality')
+    #    ax.plot(xs, 0.89981547*xs + 1.5640069, 'b--', label='linear fit')
+    #    ax.plot(xs, xs + 0.65219703, 'r--', label='linear offset')
+    #    ax.plot(xs, 0.13952656*(xs - 5.80306785)**2 + 8.16238619, 'r--', label='parabolic fit')
     
     ax.set_xlabel("%s" % xlab, fontsize = 15 )
     ax.set_ylabel("%s" % ylab, fontsize = 15 )
@@ -212,4 +280,29 @@ def plot(xvals, xlab, yvals, ylab, cat_name='SDSS', xmin=None, xmax=None,
     plt.show()
     
     return
+
+#.....................................................................mollweide
+def full_sky(ra1, dec1, label1, ra2, dec2, label2, ra3, dec3, label3) :
+    
+    global currentFig
+    fig = plt.figure(currentFig, figsize=(16,8))  # the current figure
+    currentFig += 1
+    plt.clf() # clear the figure before each run
+    
+    ax = fig.add_subplot(111, projection="aitoff") # aitoff or mollweide
+    
+    ax.plot(ra1, dec1, 'ko', label = label1)
+    ax.plot(ra2, dec2, 'bo', label = label2)
+    ax.plot(ra3, dec3, 'ro', label = label3)
+    
+    ax.set_xticklabels(['14h','16h','18h','20h','22h','0h','2h','4h','6h',
+                        '8h','10h'])
+    ax.grid(True)
+    
+    plt.legend(fontsize=15)
+    plt.tight_layout()
+    plt.show()
+    
+    return
+
 #..............................................................end of functions
