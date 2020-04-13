@@ -129,7 +129,8 @@ def main(cat_name, mass_check=False) :
         sub_catalog, table = gama_params(cat_name, path, RAs[index],
                                          Decs[index], redshifts[index],
                                          Dists[index], IDs[index],
-                                         np.power(10, masses[index])*u.solMass)
+                                         np.power(10, masses[index])*u.solMass,
+                                         self_in_search=False)
         list_of_sub_cats.append(sub_catalog)
 #        bins = int(np.ceil(np.sqrt( len(sub_catalog) )))
 #        funcs.histo(sub_catalog['g_i_Mstar'], r'$\log_{10}(\rm M_{*}/M_{\odot})$',
@@ -274,21 +275,24 @@ def adaptive_gaussian(CARS_coords, CARS_dist, catalog) :
 #..................................................................basic_params
 def basic_params(catalog) :
     
-    mass_catalog = catalog
-    mass_catalog.sort('g_i_Mstar')
-    most_massive_mass = mass_catalog['g_i_Mstar'][-1]
-    most_massive_dist = (mass_catalog['d3d'].to(u.kpc))[-1]
-    
-    closeness_catalog = catalog
-    closeness_catalog.sort('d3d')
-    closest_mass = closeness_catalog['g_i_Mstar'][0]
-    closest_dist = (closeness_catalog['d3d'].to(u.kpc))[0]    
-    
-    return most_massive_mass, most_massive_dist, closest_mass, closest_dist
+    if len(catalog) > 0 :
+        mass_catalog = catalog
+        mass_catalog.sort('g_i_Mstar')
+        most_massive_mass = mass_catalog['g_i_Mstar'][-1]
+        most_massive_dist = (mass_catalog['d3d'].to(u.kpc))[-1]
+        
+        closeness_catalog = catalog
+        closeness_catalog.sort('d3d')
+        closest_mass = closeness_catalog['g_i_Mstar'][0]
+        closest_dist = (closeness_catalog['d3d'].to(u.kpc))[0]    
+        
+        return most_massive_mass, most_massive_dist, closest_mass, closest_dist
+    else :
+        return 0, 0*u.kpc, 0, 0*u.kpc
 
 #................................................................catalog_search
 def catalog_search(catalog_path, cat_name, CARS_host, CARS_sky_coords,
-                   redshift, delta_v, radius) :
+                   redshift, delta_v, radius, self_in_search) :
     
     lower_z = redshift - delta_v*(u.km/u.s)/const.c.to('km/s')
     upper_z = redshift + delta_v*(u.km/u.s)/const.c.to('km/s')
@@ -348,6 +352,11 @@ def catalog_search(catalog_path, cat_name, CARS_host, CARS_sky_coords,
     catalog['g_i_Mstar'] = g_i_Mstar
     catalog['CARS_host'] = host_list
     
+    if self_in_search == True :
+        if len(catalog) > 0 :
+            catalog.sort('d2d')
+            catalog.remove_row(0)
+    
 #    if (cat_name == 'SDSS') :
 #        catalog['log_mass'] = catalog['MEDIAN_2']
 #    if (cat_name == 'GAMA') :
@@ -387,6 +396,42 @@ def center_of_mass_calc(companions_RA, companions_DEC, companions_redshifts,
 #    print(np.sum(companion_3d_seps > sep_3d))
     
     return center_of_mass
+
+#............................................................center_of_mass_map
+def center_of_mass_map(CARS_mass, cat_name, center, ID, path, zz) :
+    
+    # compute the 2D distance from the CARS host galaxy to the center of mass
+    # as a function of the radius of the aperture and the velocity difference
+    
+    min_val = 0
+    max_val = 10
+    XX = 250*np.arange(min_val, max_val, 1)
+    YY = 0.25*np.arange(min_val, max_val, 1)
+    XX, YY = np.meshgrid(XX, YY)
+    ZZ = []
+    companions = []
+    
+    for i in range(min_val, max_val) :
+        row = []
+        companions_row = []
+        for j in range(min_val, max_val) :
+            subcat = catalog_search(path, cat_name, ID, center, zz, 250*i, 0.25*j)
+            num_companions = len(subcat)
+            companions_row.append(num_companions)
+            sub_CoM = center_of_mass_calc(subcat['RA'], subcat['DEC'],
+                                          subcat['Z'], subcat['g_i_Mstar'],
+                                          center, CARS_mass)
+            distance = center.separation(sub_CoM).to(u.arcmin).value
+            row.append(distance)
+        companions.append(companions_row)
+        ZZ.append(row)
+    companions = np.array(companions)
+    ZZ = np.array(ZZ)
+    
+    outfile = cat_name + '_' + ID + '_' + str(len(XX)) + '_' + str(len(YY))
+    np.savez(outfile, x=XX, y=YY, z=ZZ, a=companions) # save the arrays to a file
+    
+    return
 
 #....................................................................comparison
 def comparison() :
@@ -548,11 +593,12 @@ def counts_in_cylinder(redshift, catalog) :
 
 #...................................................................gama_params
 def gama_params(cat_name, path, alpha, delta, zz, D_A, ID, CARS_mass,
-                com_calc=False) :
+                com_map=False, self_in_search=False) :
     
     center = SkyCoord(ra=alpha, dec=delta, distance=D_A) # galaxy of interest
     
-    default_catalog = catalog_search(path, cat_name, ID, center, zz, 1500, 2)
+    default_catalog = catalog_search(path, cat_name, ID, center, zz, 1500, 2,
+                                     self_in_search)
     last_mask = (default_catalog['g_i_Mstar'] >= mass_limit)
     default_catalog = default_catalog[last_mask]
     
@@ -562,45 +608,20 @@ def gama_params(cat_name, path, alpha, delta, zz, D_A, ID, CARS_mass,
     CoM = center_of_mass_calc(default_catalog['RA'], default_catalog['DEC'],
                               default_catalog['Z'], default_catalog['g_i_Mstar'],
                               center, CARS_mass)
+    if com_map == True :
+        center_of_mass_map(CARS_mass, cat_name, center, ID, path, zz)
     
-    age_catalog = catalog_search(path, cat_name, ID, center, zz, 4931.58, 7)
+    age_catalog = catalog_search(path, cat_name, ID, center, zz, 2995, 10,
+                                 self_in_search)
     age_par, age_par_err, age_scale = adaptive_gaussian(center, D_A, age_catalog)
     
-    surface_catalog = catalog_search(path, cat_name, ID, center, zz, 1000, 7)
+    surface_catalog = catalog_search(path, cat_name, ID, center, zz, 1000, 7,
+                                     self_in_search)
     surface_dens, surface_dens_err = surface_density(surface_catalog)
     
-    cylinder_catalog = catalog_search(path, cat_name, ID, center, zz, 1000, 1)
+    cylinder_catalog = catalog_search(path, cat_name, ID, center, zz, 1000, 1,
+                                      self_in_search)
     counts, counts_err, overdensity, excess = counts_in_cylinder(zz, cylinder_catalog)    
-    
-    # compute the 2D distance from the CARS host galaxy to the center of mass
-    # as a function of the radius of the aperture and the velocity difference
-    if com_calc == True :
-        min_val = 0
-        max_val = 10
-        XX = 250*np.arange(min_val, max_val, 1)
-        YY = 0.25*np.arange(min_val, max_val, 1)
-        XX, YY = np.meshgrid(XX, YY)
-        ZZ = []
-        companions = []
-        for i in range(min_val, max_val) :
-            row = []
-            companions_row = []
-            for j in range(min_val, max_val) :
-                subcat = catalog_search(path, cat_name, ID, center, zz,
-                                        250*i, 0.25*j)
-                num_companions = len(subcat)
-                companions_row.append(num_companions)
-                sub_CoM = center_of_mass_calc(subcat['RA'], subcat['DEC'],
-                                              subcat['Z'], subcat['g_i_Mstar'],
-                                              center, CARS_mass)
-                distance = center.separation(sub_CoM).to(u.arcmin).value
-                row.append(distance)
-            companions.append(companions_row)
-            ZZ.append(row)
-        companions = np.array(companions)
-        ZZ = np.array(ZZ)
-        outfile = cat_name + '_' + ID + '_' + str(len(XX)) + '_' + str(len(YY))
-        np.savez(outfile, x=XX, y=YY, z=ZZ, a=companions) # save the arrays to a file
     
 #    funcs.plot(companion_catalog['g_i_Mstar']/u.solMass,
 #               r'$\log(M_*/M_\odot)$ = 1.15 + 0.70($g-i$) - 0.4$M_i$',
@@ -643,6 +664,113 @@ def image_scale() :
     pixel_scale = radius*arcsec_scale/(image_side_length/2)
     print(pixel_scale)
     print( (2*u.Mpc/Dists)*(180*60*u.arcmin/np.pi) )
+    
+    return
+
+#......................................................random_galaxy_candidates
+def random_galaxy_candidates() :
+    
+    path = 'catalogs/edited_cats/gal_info_dr7_v5_2_vCam_CARS-compliments.fits'
+    CARS_compliments = Table.read(path)
+    
+    D_L = cosmo.luminosity_distance(CARS_compliments['Z']).to(u.pc)/u.pc
+    M_i = CARS_compliments['KCOR_MAG'][:,2] - 5*np.log10(D_L) + 5 # absolute i mag.
+    colour_masses = (1.15 + 0.7*(CARS_compliments['KCOR_MAG'][:,0] -
+                                 CARS_compliments['KCOR_MAG'][:,2]) - 0.4*M_i)
+    CARS_compliments['masses'] = colour_masses
+    
+    # mask = (catalog['TARGETTYPE'] == 'QSO                ')
+    mask = (CARS_compliments['masses'] >= mass_limit)
+    CARS_compliments = CARS_compliments[mask]
+    CARS_compliments.write(path, overwrite=True)
+    
+    return
+
+#.......................................................random_galaxy_selection
+def random_galaxy_comparison() :
+    
+    dir_path = 'catalogs/edited_cats/'
+    out_dir_path = 'catalogs/CARS_SDSS/'
+    
+    # rng = np.random.default_rng(0) # '0' refers to the seed
+    # randoms = rng.uniform(0, 1, 10)
+    
+    path = dir_path + 'gal_info_dr7_v5_2_vCam_CARS-compliments_mass.fits'
+    catalog = Table.read(path)
+    length = len(catalog)
+    
+    # index_mask = (np.array(randoms*length)).astype(int)
+    start, stop, step = 0, length, 1 # calculate the env. params for all 2411 QSOs
+    out_end = '_' + str(start) + '-' + str(stop-1)
+    index_mask = np.arange(start, stop, step)
+    cat = catalog[index_mask]
+    
+    RAs = Angle(cat['RA'], u.deg)
+    decs = Angle(cat['DEC'], u.deg)
+    D_As = cosmo.angular_diameter_distance(cat['Z'])
+    D_Ls = cosmo.luminosity_distance(cat['Z'])
+    
+    julianIDs = []
+    for i in range(len(cat)) :
+        RA_str = RAs[i].to_string(unit=u.hour, sep='', precision=0, pad=True)
+        dec_str = decs[i].to_string(unit=u.deg, sep='', precision=0,
+                                    alwayssign=True, pad=True)
+        ID = 'J' + RA_str + dec_str
+        julianIDs.append(ID)
+    
+    base = Table([julianIDs, RAs, decs, cat['Z'], D_As, D_Ls,
+                  (2*u.Mpc/D_As)*(180*60*u.arcmin/np.pi),
+                  cat['KCOR_MAG'][:,0]*u.mag, cat['KCOR_MAG'][:,2]*u.mag,
+                  cat['KCOR_MAG'][:,2] - 5*np.log10(D_Ls.to('pc')/u.pc) + 5,
+                  cat['colour_mass']*u.solMass],
+                 names=('Name', 'RA', 'DEC', 'Z', 'D_A', 'D_L',
+                        '2_Mpc_Radius', 'g', 'i', 'M_i', 'log_mass'))
+    base.meta['comments'] = ['Flat \u039BCDM cosmology: H\u2080 = 70 km ' +
+                              's\u207B\u00B9 Mpc\u207B\u00B9, \u03A9\u2098 = 0.3']
+    base_outpath = (out_dir_path + 'SDSS_compliments_base_masslimited' +
+                    out_end + '.fits')
+    base.write(base_outpath, overwrite=True)
+    
+    tables = []
+    for index in range(len(cat)) :
+        sub_cat, table = gama_params('SDSS', SDSS_path, RAs[index],
+                                     decs[index], cat['Z'][index],
+                                     D_As[index], julianIDs[index],
+                                     np.power(10, cat['colour_mass'][index])*u.solMass,
+                                     self_in_search=True)
+        tables.append(table)
+        print(str(index) + ' finished.')
+    
+    compliments = vstack(tables)
+    outpath = (out_dir_path + 'SDSS_compliments_environments_masslimited' +
+               out_end + '.fits')
+    compliments.write(outpath, overwrite=True)
+    
+    complete = hstack([base, compliments])
+    complete_outpath = (out_dir_path + 'SDSS_compliments_complete_masslimited' +
+                        out_end + '.fits')
+    complete.write(complete_outpath, overwrite=True)
+    
+    return
+
+#.....................................................random_galaxy_join_tables
+def random_galaxy_join_tables() :
+    
+    dir_path = 'catalogs/CARS_SDSS/'
+    
+    envs_list = [
+                'SDSS_compliments_environments_masslimited_0_999.fits',
+                'SDSS_compliments_environments_masslimited_1000_1499.fits',
+                'SDSS_compliments_environments_masslimited_1500_1999.fits',
+                'SDSS_compliments_environments_masslimited_2000_2410.fits'
+                ]
+    
+    envs_tables = []
+    for file in envs_list :
+        envs_tables.append(Table.read(dir_path + file))
+    
+    envs_master = vstack(envs_tables)
+    envs_master.write(dir_path + 'SDSS_compliments_environments_masslimited_all.fits')
     
     return
 
