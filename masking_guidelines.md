@@ -113,12 +113,15 @@ The resulting table will have 119301 rows and 363 columns. We will now mask the 
 3) Survey class (column 'SURVEY_CLASS')
    -We only want objects with SURVEY_CLASS >= 3.
    --This removes 30 rows, leaving us with 8539 good rows.
+4) Fringing in AATSpecAllv27 (column 'BAD_FLAG')
+   -We only want objects with BAD_FLAG==0.
+   --This removes 66 rows, leaving us with 8473 good rows.
 
-Save the resulting table as 'GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_masked.fits'. This file should take up ~12.8 MB.
+Save the resulting table as 'GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_masked.fits'. This file should take up ~12.7 MB.
 
 ### Subsequent file size reduction (optimization) ###
 
-We will now mask out columns we do not need before creating a final useable table that is smaller in size and thus faster to lead in Python.
+We will now mask out columns we do not need before creating a final useable table that is smaller in size and thus faster to load in Python.
 
 In TOPCAT, use the Display column metadata option to view the column metadata. In this interface, we can also deselect columns that are shown. For our final table, we require only the following columns:
 -CATAID_1
@@ -128,24 +131,41 @@ In TOPCAT, use the Display column metadata option to view the column metadata. I
 -NQ_1
 -SURVEY_1
 -SURVEY_CODE_1
+-FSCALE
+-HB_CONT
+-HB_CONT_ERR
+-HB_GRAD
+-HB_GRAD_ERR
+-POS_HB
+-POS_HB_ERR
 -SIG_HB
 -SIG_HB_ERR
 -HB_FLUX_1
 -HB_FLUX_ERR_1
 -HB_EW_1
 -HB_EW_ERR
+-POS_OIIIR
+-POS_OIIIR_ERR
 -SIG_OIIIR
 -SIG_OIIIR_ERR
 -OIIIR_FLUX_1
 -OIIIR_FLUX_ERR_1
 -OIIIR_EW_1
 -OIIIR_EW_ERR
+-HA_CONT
+-HA_CONT_ERR
+-HA_GRAD
+-HA_GRAD_ERR
+-POS_HA
+-POS_HA_ERR
 -SIG_HA
 -SIG_HA_ERR
 -HA_FLUX_1
 -HA_FLUX_ERR_1
 -HA_EW_1
 -HA_EW_ERR
+-POS_NIIR
+-POS_NIIR_ERR
 -SIG_NIIR
 -SIG_NIIR_ERR
 -NIIR_FLUX_1
@@ -180,4 +200,4 @@ In TOPCAT, use the Display column metadata option to view the column metadata. I
 -EmLineType
 -EmLineMethod
 
-The resulting final table will thus have 8539 rows with 58 columns. Save the resulting table as 'GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_vCam.fits'. This file should take up ~2.04 MB.
+The resulting final table will thus have 8473 rows with 75 columns. Save the resulting table as 'GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_vCam.fits'. This file should take up ~2.58 MB.
