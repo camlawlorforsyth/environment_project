@@ -5,7 +5,7 @@
 
 ### Preliminary Masking ###
 
-We being with the 'gal_info_dr7_v5_2.fit.gz' file and the 'gal_line_dr7_v5_2.fit.gz' file, both available from the MPA/JHU collaboration here: https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/raw_data.html
+We begin with the 'gal_info_dr7_v5_2.fit.gz' file and the 'gal_line_dr7_v5_2.fit.gz' file, both available from the MPA/JHU collaboration here: https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/raw_data.html
 
 'gal_info_dr7_v5_2.fit.gz' has 927552 rows and 25 columns, while 'gal_line_dr7_v5_2.fit.gz' has 927552 rows and 239 columns.
 
@@ -92,6 +92,38 @@ In TOPCAT, use the Display column metadata option to view the column metadata. I
 -SPECTOFIBER
 
 The resulting final table will thus have 224005 rows with 52 columns. Save the resulting table as 'SDSS_gal_info_gal_line_vCam.fits'. This file should take up ~48.3 MB.
+
+### Secondary Masking ###
+
+#### Cross-match table preparation ####
+
+We fist must prepare the catalogue file that we will cross-match with our 'SDSS_gal_info_gal_line_vCam.fits' file. We begin with the 'Oh+_2015_newType1AGNcatalog.fits' file, and the 'OSSY_SDSS_parameters.fits' file, both available from the OSSY database here: http://gem.yonsei.ac.kr/~ksoh/wordpress/
+
+'Oh+_2015_newType1AGNcatalog.fits' has 5553 rows and 14 columns, while 'OSSY_SDSS_parameters.fits' has 664187 rows and 7 columns.
+
+Next we use TOPCAT to join the two tables by employing a pair match. The algorithm we will be using is 'Exact Value'. For the Matched Value column in 'Oh+_2015_newType1AGNcatalog.fits' we write 'SDSS_OBJID' and for the Matched Value column in 'OSSY_SDSS_parameters.fits' we write 'SDSS_ID', which will cross-match the two tables based on the unique SDSS object identifier.
+
+The resulting table will have 5553 rows and 21 columns. We will now hide various columns that we do not care about in our analysis. In TOPCAT, use the Display column metadata option to view the column metadata. In this interface, we can also deselect columns that are shown. For our final table, we require only the following columns:
+-FWHM
+-FWHM_ERR
+-EW_BHA
+-PLATEID
+-MJD
+-FIBERID
+
+The resulting final table will thus have 5553 rows with 6 columns. Save the resulting table as 'Oh+_2015_newType1AGNcatalog_PlateMJDFiber.fits'. This file should take up ~205 KB.
+
+#### Cross-match table execution ####
+
+We now finally begin with the 'SDSS_gal_info_gal_line_vCam.fits' file and the 'Oh+_2015_newType1AGNcatalog_PlateMJDFiber.fits' file, both as previously saved above.
+
+'SDSS_gal_info_gal_line_vCam.fits' has 224005 rows with 52 columns, while 'Oh+_2015_newType1AGNcatalog_PlateMJDFiber.fits' has 5553 rows with 6 columns.
+
+Next we use TOPCAT to join the two tables by employing a pair match. The algorithm we will be using is 'Exact Value'. For the Matched Value column in 'SDSS_gal_info_gal_line_vCam.fits' we write 'concat(PLATEID_1, "_", MJD, "_", FIBERID_1)' and for 'Oh+_2015_newType1AGNcatalog_PlateMJDFiber.fits' we write 'concat(PLATE, "_", MJD, "_", FIBERID)'. We ensure that the Join Type is 'All from 1' so that we still have our 224005 galaxies in SDSS.
+
+The resulting table will have 224005 rows and 58 columns. We do not require the last 3 columns (namely 'PLATE', 'MJD_2', and 'FIBERID') so we can hide those columns. Thus we will have the same final columns as in 'SDSS_gal_info_gal_line_vCam.fits', plus the additional columns 'FWHM', 'FWHM_ERR', and 'EW_BHA'.
+
+The resulting final table will thus have 224005 rows with 55 columns. Save the resulting table as 'SDSS_gal_info_gal_line_Oh+broad_vCam.fits'. This file should take up ~53.4 MB.
 
 ## GAMA ##
 
