@@ -3,14 +3,13 @@
 import numpy as np
 
 import astropy.constants as const
-from astropy.coordinates import Angle
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import Angle, SkyCoord
 from astropy.cosmology import FlatLambdaCDM
 from astropy.table import Table
 import astropy.units as u
 
 # constants
-cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
+cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3)
 
 def catalog_search(catalog_path, cat_name, CARS_host, CARS_sky_coords,
                    redshift, delta_v, radius, self_in_search) :
@@ -19,7 +18,7 @@ def catalog_search(catalog_path, cat_name, CARS_host, CARS_sky_coords,
     upper_z = redshift + delta_v*(u.km/u.s)/const.c.to('km/s')
     
     D_A = cosmo.angular_diameter_distance(redshift)
-    radius = Angle( ((radius*u.Mpc)/D_A).value, u.radian )  # find the angular radius
+    radius = Angle( ((radius*u.Mpc)/D_A).value, u.radian ) # find the angular radius
     radius = radius.to('arcmin')
     
     catalog = Table.read(catalog_path)

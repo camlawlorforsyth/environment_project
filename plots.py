@@ -1,8 +1,13 @@
 
 # imports
-import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib import cm
 from matplotlib.colors import LogNorm
+import matplotlib.pyplot as plt
+import numpy as np
+
+from astropy.coordinates import Angle
+from astropy.table import Table
+import astropy.units as u
 
 # constants
 currentFig = 1
@@ -95,18 +100,35 @@ def diagram_BPT(x1, y1, x2, y2, x3, y3, x4, y4, standard=True,
     plt.clf()
     ax = fig.add_subplot(111)
     
+    # for the SDSS sample check
     ax.hist2d(x1, y1, bins=341, cmap='Blues', norm=LogNorm())
     ax.hist2d(x2, y2, bins=156, cmap='Purples', norm=LogNorm())
     ax.hist2d(x3, y3, bins=200, cmap='Reds', norm=LogNorm())
     ax.hist2d(x4, y4, bins=117, cmap='Greens', norm=LogNorm())
     
-    extra_x = [0.52699786, 0.6472921, 0.51526904, 0.10082114, 0.4783239,
-               0.64564115, 0.47279504, 0.48915058, 0.5316156, 0.52157855,
-               0.072221704, 0.6222592, 0.061153412]
-    extra_y = [0.20510054, 0.15230991, 0.3134719, -1.4588171, 0.8099388,
-               0.41682592, 0.12564416, 0.5535542, 0.8346556, 0.4626364,
-               -0.5899385, 0.4983, -0.36166635]
-    ax.plot(extra_x, extra_y, 'ko')
+    # for the GAMA sample check
+    # ax.hist2d(x1, y1, bins=100, cmap='Blues', norm=LogNorm())
+    # ax.hist2d(x2, y2, bins=30, cmap='Purples', norm=LogNorm())
+    # ax.hist2d(x3, y3, bins=10, cmap='Reds', norm=LogNorm())
+    # ax.hist2d(x4, y4, bins=10, cmap='Greens', norm=LogNorm())
+    
+    unclass_x = [0.52699786, 0.6472921, 0.51526904, 0.10082114,
+               0.4783239, 0.64564115, 0.47279504, 0.48915058,
+               0.5316156, 0.52157855, 0.072221704, 0.6222592, 0.061153412]
+    unclass_y = [0.20510054, 0.15230991, 0.3134719, -1.4588171,
+               0.8099388, 0.41682592, 0.12564416, 0.5535542,
+               0.8346556, 0.4626364, -0.5899385, 0.4983, -0.36166635]
+    ax.plot(unclass_x, unclass_y, 'kx', label='BPT Classification Fails (13 galaxies)')
+    
+    CARS_x_7p5 = [-0.2558046120106365, -0.3039520129538409, -0.2417594381357093,
+                  0.06476555533411806, 0.275461262291009, -0.3938455204465459,
+                  -0.05406315470653154, -1.0767286502681763, -0.21683621439121184,
+                  -0.2583153650781086, -0.3611262953855419, -0.041477366726339726]
+    CARS_y_7p5 = [1.0442984352563223, -0.4632845953092678, -0.17709178145221774,
+                  0.7852122081665016, 0.701362126702604, -0.3101074263261445,
+                  0.9213412646212272, 0.07531550781816444, 0.43745460649821044,
+                  0.6040263849321078, 0.02695921366978017, 0.8956928513689375]
+    ax.plot(CARS_x_7p5, CARS_y_7p5, 'ko', label='Fluxes from .eline MUSE Tables in 3" Aperture')
     
     if (standard==True) :
         xmin, xmax, ymin, ymax = -2.2, 0.7, -1.5, 1.4
@@ -137,7 +159,7 @@ def diagram_BPT(x1, y1, x2, y2, x3, y3, x4, y4, standard=True,
         ax.text(-1.4, -0.4, 'SFG', fontsize=15)
         ax.text(-0.225, -1, 'Comp', fontsize=15)
         
-        ax.vlines(0.47, ymin, ymax, color='b', linestyle='-.')
+        # ax.vlines(0.47, ymin, ymax, color='b', linestyle='-.')
         
     ax.set_xlabel(xlabel, fontsize=15)
     ax.set_ylabel(ylabel, fontsize=15)
@@ -161,11 +183,19 @@ def diagram_WHAN(x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, standard=True,
     plt.clf()
     ax = fig.add_subplot(111)  
     
+    # for the SDSS sample check
     ax.hist2d(x1, y1, bins=80, cmap='Oranges', norm=LogNorm())
     ax.hist2d(x2, y2, bins=86, cmap='Blues', norm=LogNorm())
     ax.hist2d(x3, y3, bins=30, cmap='Purples', norm=LogNorm())
     ax.hist2d(x4, y4, bins=40, cmap='Reds', norm=LogNorm())
     ax.hist2d(x5, y5, bins=113, cmap='Greens', norm=LogNorm())
+    
+    # for the GAMA sample check
+    # ax.hist2d(x1, y1, bins=50, cmap='Oranges', norm=LogNorm())
+    # ax.hist2d(x2, y2, bins=100, cmap='Blues', norm=LogNorm())
+    # ax.hist2d(x3, y3, bins=30, cmap='Purples', norm=LogNorm())
+    # ax.hist2d(x4, y4, bins=20, cmap='Reds', norm=LogNorm())
+    # ax.hist2d(x5, y5, bins=20, cmap='Greens', norm=LogNorm())
     
     if (standard==True) :
         xmin, xmax, ymin, ymax = -2.2, 1, -0.7, 3.3
@@ -196,6 +226,34 @@ def diagram_WHAN(x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, standard=True,
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     ax.legend(loc = 'lower left')
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return
+
+def emission_line_map(vals, wcs, label) :
+    
+    global currentFig
+    fig = plt.figure(currentFig)
+    currentFig += 1
+    plt.clf()
+    ax = plt.subplot(111)#, projection = wcs, slices=('x', 'y', 1, 1))
+    
+    # ax.coords[0].set_axislabel('Right Ascension')
+    # ax.coords[1].set_axislabel('Declination')
+    
+    cmap = cm.plasma # or use jet
+    cmap.set_bad('white', 1)
+    
+    # ax.set_xlim(51, 106)
+    # ax.set_ylim(37, 126)
+    
+    frame = plt.imshow(vals, origin = 'lower', cmap = cmap,
+                       norm = LogNorm(), interpolation = 'None')
+    cbar = plt.colorbar()
+    cbar.ax.set_title(r"$10^{-16}$ erg s$^{-1}$ cm$^{-2}$")
+    cbar.set_label(label, fontsize = 15)
     
     plt.tight_layout()
     plt.show()

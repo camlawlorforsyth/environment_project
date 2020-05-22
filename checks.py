@@ -1,8 +1,18 @@
 
 # imports
-from astropy.table import Table
 import numpy as np
+
+from astropy.coordinates import Angle
+from astropy.cosmology import FlatLambdaCDM
+from astropy.table import Table
+import astropy.units as u
+
+import environmental_parameters as env_params
 import plots as plt
+
+# constants
+cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3)
+GAMA_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_vCam.fits'
 
 def comparison() :
     
@@ -54,9 +64,9 @@ def consistency_check(cat_name) :
     list_of_sub_cats = []
     rows = []
     for index in range(length) :
-        sub_catalog, row = gama_params(cat_name, GAMA_path, ras[index],
-                                       decs[index], zs[index], dists[index],
-                                       ids[index])
+        sub_catalog, row = env_params.gama_params(cat_name, GAMA_path, ras[index],
+                                                  decs[index], zs[index], dists[index],
+                                                  ids[index])
         list_of_sub_cats.append(sub_catalog)
         rows.append(row)
     
@@ -95,25 +105,46 @@ def magnitude_check() :
     
     return
 
-def specClass_check_BPT() :
+def specClass_check_BPT(sample) :
     
-    in_path = 'catalogs/joined_cats/SDSS_gal_info_gal_line_SpecClassCam_vCam.fits'
-    catalog = Table.read(in_path)
-    SFG = (catalog['EmLineType'] == 'SFG') & (catalog['BPT'] == True)
-    Comp = (catalog['EmLineType'] == 'Comp') & (catalog['BPT'] == True)
-    Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['BPT'] == True)
-    LINER = (catalog['EmLineType'] == 'LINER') & (catalog['BPT'] == True)
-    
-    # totBPT = np.sum(catalog['BPT'])
-    # print(totBPT)
-    # totSFG, totComp, totSey, totLIN = np.sum(SFG), np.sum(Comp), np.sum(Sey), np.sum(LINER)
-    # print(totSFG, totComp, totSey, totLIN)
-    # print(totBPT - (totSFG + totComp + totSey + totLIN) )
-    # not_ELG = (catalog['EmLineType'] == 'not_ELG') & (catalog['BPT'] == True)
-    # print(np.sum(not_ELG))
-    
-    log_OIII_HB = np.log10( catalog['OIII_5007_FLUX'] / catalog['H_BETA_FLUX'] )
-    log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
+    if sample == 'SDSS' :
+        in_path = 'catalogs/joined_cats/SDSS_gal_info_gal_line_SpecClassCam_vCam.fits'
+        catalog = Table.read(in_path)
+        
+        log_OIII_HB = np.log10( catalog['OIII_5007_FLUX'] / catalog['H_BETA_FLUX'] )
+        log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
+        
+        # totBPT = np.sum(catalog['BPT'])
+        # print(totBPT)
+        # totSFG, totComp, totSey, totLIN = np.sum(SFG), np.sum(Comp), np.sum(Sey), np.sum(LINER)
+        # print(totSFG, totComp, totSey, totLIN)
+        # print(totBPT - (totSFG + totComp + totSey + totLIN) )
+        # not_ELG = (catalog['EmLineType'] == 'not_ELG') & (catalog['BPT'] == True)
+        # print(np.sum(not_ELG))
+        
+        # old method
+        # SFG = (catalog['EmLineType'] == 'SFG') & (catalog['BPT'] == True)
+        # Comp = (catalog['EmLineType'] == 'Comp') & (catalog['BPT'] == True)
+        # Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['BPT'] == True)
+        # LINER = (catalog['EmLineType'] == 'LINER') & (catalog['BPT'] == True)
+        
+        # new method
+        SFG = (catalog['EmLineType'] == 'SFG') & (catalog['EmLineMethod'] == 'BPT')
+        Comp = (catalog['EmLineType'] == 'Comp') & (catalog['EmLineMethod'] == 'BPT')
+        Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['EmLineMethod'] == 'BPT')
+        LINER = (catalog['EmLineType'] == 'LINER') & (catalog['EmLineMethod'] == 'BPT')
+        
+    if sample == 'GAMA' :
+        in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_vCam.fits'
+        catalog = Table.read(in_path)
+        
+        log_OIII_HB = np.log10( catalog['OIIIR_FLUX_1'] / catalog['HB_FLUX_1'] )
+        log_NII_HA = np.log10( catalog['NIIR_FLUX_1'] / catalog['HA_FLUX_1'] )
+        
+        SFG = (catalog['EmLineType'] == 'SFG    ') & (catalog['EmLineMethod'] == 'BPT    ')
+        Comp = (catalog['EmLineType'] == 'Comp   ') & (catalog['EmLineMethod'] == 'BPT    ')
+        Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['EmLineMethod'] == 'BPT    ')
+        LINER = (catalog['EmLineType'] == 'LINER  ') & (catalog['EmLineMethod'] == 'BPT    ')
     
     plt.diagram_BPT(log_NII_HA[SFG], log_OIII_HB[SFG],
                     log_NII_HA[Comp], log_OIII_HB[Comp],
@@ -122,26 +153,49 @@ def specClass_check_BPT() :
     
     return
 
-def specClass_check_WHAN() :
+def specClass_check_WHAN(sample) :
     
-    in_path = 'catalogs/joined_cats/SDSS_gal_info_gal_line_SpecClassCam_vCam.fits'
-    catalog = Table.read(in_path)
-    Pass = (catalog['EmLineType'] == 'Passive') & (catalog['WHAN'] == True)
-    SFG = (catalog['EmLineType'] == 'SFG') & (catalog['WHAN'] == True)
-    Comp = (catalog['EmLineType'] == 'Comp') & (catalog['WHAN'] == True)
-    Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['WHAN'] == True)
-    LINER = (catalog['EmLineType'] == 'LINER') & (catalog['WHAN'] == True)
+    if sample == 'SDSS' :
+        in_path = 'catalogs/joined_cats/SDSS_gal_info_gal_line_SpecClassCam_vCam.fits'
+        catalog = Table.read(in_path)
+        
+        HA_width = np.log10(np.absolute(catalog['H_ALPHA_EQW']))
+        log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
+        
+        # totWHAN = np.sum(catalog['WHAN'])
+        # print(totWHAN)
+        # totPass, totSFG, totComp, totSey, totLIN = np.sum(Pass), np.sum(SFG), np.sum(Comp), np.sum(Sey), np.sum(LINER)
+        # print(totPass, totSFG, totComp, totSey, totLIN)
+        # print(totWHAN - (totPass + totSFG + totComp + totSey + totLIN) )
+        # not_ELG = (catalog['EmLineType'] == 'not_ELG') & (catalog['WHAN'] == True)
+        # print(np.sum(not_ELG))
+        
+        # old method
+        # Pass = (catalog['EmLineType'] == 'Passive') & (catalog['WHAN'] == True)
+        # SFG = (catalog['EmLineType'] == 'SFG') & (catalog['WHAN'] == True)
+        # Comp = (catalog['EmLineType'] == 'Comp') & (catalog['WHAN'] == True)
+        # Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['WHAN'] == True)
+        # LINER = (catalog['EmLineType'] == 'LINER') & (catalog['WHAN'] == True)
+        
+        # new method
+        Pass = (catalog['EmLineType'] == 'Passive') & (catalog['EmLineMethod'] == 'WHAN')
+        SFG = (catalog['EmLineType'] == 'SFG') & (catalog['EmLineMethod'] == 'WHAN')
+        Comp = (catalog['EmLineType'] == 'Comp') & (catalog['EmLineMethod'] == 'WHAN')
+        Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['EmLineMethod'] == 'WHAN')
+        LINER = (catalog['EmLineType'] == 'LINER') & (catalog['EmLineMethod'] == 'WHAN')
     
-    # totWHAN = np.sum(catalog['WHAN'])
-    # print(totWHAN)
-    # totPass, totSFG, totComp, totSey, totLIN = np.sum(Pass), np.sum(SFG), np.sum(Comp), np.sum(Sey), np.sum(LINER)
-    # print(totPass, totSFG, totComp, totSey, totLIN)
-    # print(totWHAN - (totPass + totSFG + totComp + totSey + totLIN) )
-    # not_ELG = (catalog['EmLineType'] == 'not_ELG') & (catalog['WHAN'] == True)
-    # print(np.sum(not_ELG))
-    
-    HA_width = np.log10(np.absolute(catalog['H_ALPHA_EQW']))
-    log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
+    if sample == 'GAMA' :
+        in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_vCam.fits'
+        catalog = Table.read(in_path)
+        
+        HA_width = np.log10(np.absolute(catalog['HA_EW_1']))
+        log_NII_HA = np.log10( catalog['NIIR_FLUX_1'] / catalog['HA_FLUX_1'] )
+        
+        Pass = (catalog['EmLineType'] == 'Passive') & (catalog['EmLineMethod'] == 'WHAN   ')
+        SFG = (catalog['EmLineType'] == 'SFG    ') & (catalog['EmLineMethod'] == 'WHAN   ')
+        Comp = (catalog['EmLineType'] == 'Comp   ') & (catalog['EmLineMethod'] == 'WHAN   ')
+        Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['EmLineMethod'] == 'WHAN   ')
+        LINER = (catalog['EmLineType'] == 'LINER  ') & (catalog['EmLineMethod'] == 'WHAN   ')
     
     plt.diagram_WHAN(log_NII_HA[Pass], HA_width[Pass],
                      log_NII_HA[SFG], HA_width[SFG],
@@ -152,3 +206,8 @@ def specClass_check_WHAN() :
     return
 
 #consistency_check('GAMA_alt') # this doesn't work
+
+# specClass_check_BPT('SDSS')
+# specClass_check_WHAN('SDSS')
+# specClass_check_BPT('GAMA') # double check these with Yjan, they look wonky
+# specClass_check_WHAN('GAMA')

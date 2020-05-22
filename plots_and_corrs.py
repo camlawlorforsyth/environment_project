@@ -56,5 +56,3 @@ def plot(x_param, x_label, y_param, y_label, linear=False) :
 #plot(H2_mass, 'H2_mass', HI_mass, 'HI_mass')
 #plot(zz, 'zz', H2_mass, 'H2_mass')
 #plot(zz, 'zz', HI_mass, 'HI_mass')
-
-

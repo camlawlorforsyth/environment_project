@@ -1,4 +1,19 @@
 
+# imports
+import numpy as np
+
+from astropy.coordinates import Angle
+from astropy.cosmology import FlatLambdaCDM
+from astropy.table import hstack, Table, vstack
+import astropy.units as u
+
+import environmental_parameters as env_params
+
+# constants
+cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3)
+mass_limit = 8.452021
+SDSS_path = 'catalogs/joined_cats/SDSS_gal_info_gal_line_vCam.fits'
+
 def random_galaxy_candidates(GAMA_or_SDSS, outfilename, targettype) :
     
     out_dir_path = 'catalogs/candidate_cats/'
@@ -121,11 +136,11 @@ def random_galaxy_comparison(GAMA_or_SDSS, infile, outfilename, random=True,
     
     tables = []
     for index in range(len(cat)) :
-        sub_cat, table = gama_params('SDSS', SDSS_path, RAs[index],
-                                     decs[index], cat['Z'][index],
-                                     D_As[index], julianIDs[index],
-                                     np.power(10, cat['colour_mass'][index])*u.solMass,
-                                     self_in_search=True)
+        sub_cat, table = env_params.gama_params('SDSS', SDSS_path, RAs[index],
+                                                decs[index], cat['Z'][index],
+                                                D_As[index], julianIDs[index],
+                                                np.power(10, cat['colour_mass'][index])*u.solMass,
+                                                self_in_search=True)
         tables.append(table)
         print(str(index) + ' finished.')
     

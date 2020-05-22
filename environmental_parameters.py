@@ -11,8 +11,8 @@ import astropy.units as u
 import search as srch
 
 # constants
-cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
-mass_limit = 8.452021 # [dex(M_*)]
+cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3)
+mass_limit = 8.452021
 
 def adaptive_gaussian(CARS_coords, CARS_dist, catalog) :
     

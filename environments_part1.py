@@ -18,16 +18,16 @@ from astropy.coordinates import Angle
 # from astropy.coordinates import SkyCoord
 from astropy.cosmology import FlatLambdaCDM
 # from astropy.io import ascii
-from astropy.table import Table, vstack, hstack#, Column
+from astropy.table import hstack, Table, vstack
 import astropy.units as u
 import warnings
 warnings.filterwarnings("ignore") # ignore warnings about division by 0 when
 # taking z/z_err >= 3, and ignore integration warning for the cosmology
 
-import plots as plt
-import functions as funcs
 import checks as chk
 import environmental_parameters as env_params
+import functions as funcs
+import plots as plt
 import search as srch
 
 # the following are all in SDSS as per Bernd
@@ -97,7 +97,7 @@ CARS_GAMA_base.meta['comments'] = ['Flat \u039BCDM cosmology: H\u2080 = 70 km ' 
 #CARS_GAMA_base.write('catalogs/CARS_GAMA/CARS_GAMA_base.tex', format='ascii.latex', overwrite=True)
 
 # mass-limit using color-based mass estimate
-mass_limit = 8.452021 # 104 km/s away from HE 2222-0026
+mass_limit = 8.452021 # [dex(M_*)] ie. log(M_*) = 8.452021, 104 km/s away from HE 2222-0026
 if (mass_limit > 0) :
     limited = '_masslimited'
 else :
@@ -275,6 +275,8 @@ def spectral_classification() :
     
     EmLineType = []
     EmLineMethod = []
+    bad_x = []
+    bad_y = []
     for i in range(len(catalog)) :
         if catalog['BL'][i] :
             EmLineType.append('BLAGN')
@@ -289,7 +291,8 @@ def spectral_classification() :
             elif BPT_LIN[i] :
                 EmLineType.append('LINER')
             else :
-                print(log_NII_HA[i], log_OIII_HB[i])
+                bad_x.append(log_NII_HA[i])
+                bad_y.append(log_OIII_HB[i])
                 EmLineType.append('not_ELG')
             EmLineMethod.append('BPT')
         elif catalog['WHAN'][i] :
@@ -313,8 +316,11 @@ def spectral_classification() :
     catalog['EmLineType'] = EmLineType
     catalog['EmLineMethod'] = EmLineMethod
     
-    catalog.write('catalogs/joined_cats/SDSS_gal_info_gal_line_SpecClassCam_vCam.fits',
-                   overwrite=True)
+    print(bad_x)
+    print(bad_y)
+    
+    # catalog.write('catalogs/joined_cats/SDSS_gal_info_gal_line_SpecClassCam_vCam.fits',
+                   # overwrite=True)
     
     return
 
@@ -415,4 +421,5 @@ def whole_cat_params(cat_name) :
 # main('SDSS')
 # main('GAMA')
 
+# spectral_classification()
 # whole_cat_params('SDSS')

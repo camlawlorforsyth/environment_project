@@ -1,4 +1,9 @@
 
+# imports
+from astropy.table import Table
+
+import plots as plt
+
 def correlations() :
     
     catalog = Table.read('catalogs/CARS_SDSS/CARS_SDSS_complete_masslimited.fits')
