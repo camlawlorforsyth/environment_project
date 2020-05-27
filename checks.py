@@ -138,8 +138,10 @@ def specClass_check_BPT(sample) :
         in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_vCam.fits'
         catalog = Table.read(in_path)
         
-        log_OIII_HB = np.log10( catalog['OIIIR_FLUX_1'] / catalog['HB_FLUX_1'] )
-        log_NII_HA = np.log10( catalog['NIIR_FLUX_1'] / catalog['HA_FLUX_1'] )
+        HB_flux_corr = (1 + 2.5/catalog['HB_EW_1'])*catalog['HB_FLUX_1']
+        log_OIII_HB = np.log10( catalog['OIIIR_FLUX_1'] / HB_flux_corr )
+        HA_flux_corr = (1 + 2.5/catalog['HA_EW_1'])*catalog['HA_FLUX_1']
+        log_NII_HA = np.log10( catalog['NIIR_FLUX_1'] / HA_flux_corr )
         
         SFG = (catalog['EmLineType'] == 'SFG    ') & (catalog['EmLineMethod'] == 'BPT    ')
         Comp = (catalog['EmLineType'] == 'Comp   ') & (catalog['EmLineMethod'] == 'BPT    ')
@@ -159,7 +161,7 @@ def specClass_check_WHAN(sample) :
         in_path = 'catalogs/joined_cats/SDSS_gal_info_gal_line_SpecClassCam_vCam.fits'
         catalog = Table.read(in_path)
         
-        HA_width = np.log10(np.absolute(catalog['H_ALPHA_EQW']))
+        HA_width = np.log10( catalog['H_ALPHA_FLUX'] / catalog['H_ALPHA_CONT'] )
         log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
         
         # totWHAN = np.sum(catalog['WHAN'])
@@ -189,7 +191,8 @@ def specClass_check_WHAN(sample) :
         catalog = Table.read(in_path)
         
         HA_width = np.log10(np.absolute(catalog['HA_EW_1']))
-        log_NII_HA = np.log10( catalog['NIIR_FLUX_1'] / catalog['HA_FLUX_1'] )
+        HA_flux_corr = (1 + 2.5/catalog['HA_EW_1'])*catalog['HA_FLUX_1']
+        log_NII_HA = np.log10( catalog['NIIR_FLUX_1'] / HA_flux_corr )
         
         Pass = (catalog['EmLineType'] == 'Passive') & (catalog['EmLineMethod'] == 'WHAN   ')
         SFG = (catalog['EmLineType'] == 'SFG    ') & (catalog['EmLineMethod'] == 'WHAN   ')

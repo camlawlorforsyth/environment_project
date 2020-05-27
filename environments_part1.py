@@ -263,7 +263,7 @@ def spectral_classification() :
     BPT_LIN = ( (log_OIII_HB > 0.61/(log_NII_HA - 0.47) + 1.19) &
                 (log_OIII_HB < 1.05*log_NII_HA + 0.45) )
     
-    HA_EW = np.log10(np.absolute(catalog['H_ALPHA_EQW']))
+    HA_EW = np.log10( catalog['H_ALPHA_FLUX'] / catalog['H_ALPHA_CONT'] )
     WHAN_passives = ( (HA_EW < -log_NII_HA + np.log10(0.5)) |
                       (HA_EW < np.log10(0.5)) )
     WHAN_SFG = (HA_EW > -log_NII_HA + np.log10(0.5)) & (log_NII_HA < -0.4)
