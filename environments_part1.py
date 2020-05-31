@@ -13,11 +13,8 @@
 # imports
 import numpy as np
 
-# import astropy.constants as const
 from astropy.coordinates import Angle
-# from astropy.coordinates import SkyCoord
 from astropy.cosmology import FlatLambdaCDM
-# from astropy.io import ascii
 from astropy.table import hstack, Table, vstack
 import astropy.units as u
 import warnings
@@ -30,103 +27,45 @@ import functions as funcs
 import plots as plt
 import search as srch
 
-# the following are all in SDSS as per Bernd
-galaxies = { # coordinates from SDSS DR7 catalog, z from SDSS DR7, otherwise NED
-            'HE 0040-1105':{'RA':'10.65358672','dec':'-10.82278912','z':0.0419,
-                            'g':15.873565, 'i':15.084779},
-            'HE 0114-0015':{'RA':'19.26494998','dec':'7.61312E-3','z':0.0456,
-                            'g':15.659997, 'i':14.723861}, # RBS 175
-            'HE 0119-0118':{'RA':'20.49921832','dec':'-1.04010828','z':0.0542,
-                            'g':14.495553, 'i':13.845582}, # Mrk 1503
-            'HE 0203-0031':{'RA':'31.56661419','dec':'-0.29144322','z':0.0426,
-                            'g':14.032228, 'i':12.812394}, # Mrk 1018
-            'HE 0212-0059':{'RA':'33.63982968','dec':'-0.76672567','z':0.0261,
-                            'g':13.756615, 'i':12.667005}, # Mrk 590
-            'HE 0227-0913':{'RA':'37.52302021','dec':'-8.99813544','z':0.01645,
-                            'g':14.035069, 'i':13.183728}, # Mrk 1044, in GAMA? no DR7/8 spectra
-            'HE 0232-0900':{'RA':'38.6576586','dec':'-8.78777681','z':0.04314,
-                            'g':13.537529, 'i':12.712051}, # Mrk 1048, in GAMA?, no DR7/8 spectra
-            'HE 0345+0056':{'RA':'56.91745592','dec':'1.08722631','z':0.03100,
-                            'g':15.105369, 'i':14.4509535}, # no DR7/8 spectra
-            'HE 0853+0102':{'RA':'133.97612964','dec':'0.85305195','z':0.0524,
-                            'g':16.010803, 'i':15.319082,'GAMA_CATAID':278841},
-            'HE 0934+0119':{'RA':'144.25436927','dec':'1.09547822','z':0.0505,
-                            'g':15.794184, 'i':15.187816}, # Mrk 707
-            'HE 2222-0026':{'RA':'336.14705331','dec':'-0.18441524','z':0.0581,
-                            'g':17.061754, 'i':16.162113},
-            'HE 2302-0857':{'RA':'346.18116153','dec':'-8.68572479','z':0.0469,
-                            'g':14.508565, 'i':13.438229}, # Mrk 926
-            
-#            'HE 0853-0126':{'RA':'134.07430518','dec':'-1.63535577','z':0.05981}, # no DR7 spectra
-#            'HE 0949-0122':{'RA':'148.07959493','dec':'-1.61209535','z':0.01993}, # Mrk 1239, no DR7 spectra
-#            'HE 2128-0221':{'RA':'322.69512987','dec':'-2.14690352','z':0.05248} # no DR7 spectra
-           }
-
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
 currentFig = 1 # first figure will be numbered as 'Figure 1'
-
-IDs = list( galaxies.keys() ) # the object name/identifier
-RAs = Angle([ galaxy['RA'] for galaxy in galaxies.values() ], u.deg)
-Decs = Angle([ galaxy['dec'] for galaxy in galaxies.values() ], u.deg)
-redshifts = np.array([ galaxy['z'] for galaxy in galaxies.values() ])
-Dists = cosmo.angular_diameter_distance(redshifts) # compute D_A
-g_colors = np.array([ galaxy['g'] for galaxy in galaxies.values() ])
-i_colors = np.array([ galaxy['i'] for galaxy in galaxies.values() ])
-lum_dists = cosmo.luminosity_distance(redshifts).to(u.pc)/u.pc
-abs_i_colors = i_colors - 5*np.log10(lum_dists) + 5
-masses = 1.15 + 0.7*(g_colors - i_colors) - 0.4*abs_i_colors
-
-CARS_base = Table([IDs, RAs, Decs, redshifts, Dists, (lum_dists*u.pc).to(u.Mpc),
-                   Angle( ((2*u.Mpc)/Dists).value, u.radian ).to('arcmin'),
-                   g_colors*u.mag, i_colors*u.mag, abs_i_colors*u.mag,
-                   masses*u.solMass],
-                  names=('CARS_Host', 'RA', 'DEC', 'Z', 'D_A', 'D_L',
-                         '2_Mpc_Radius', 'g', 'i', 'M_i', 'log_mass'))
-CARS_base.meta['comments'] = ['Flat \u039BCDM cosmology: H\u2080 = 70 km ' +
-                              's\u207B\u00B9 Mpc\u207B\u00B9, \u03A9\u2098 = 0.3']
-#CARS_base.write('catalogs/CARS_SDSS/CARS_SDSS_base.fits', overwrite=True)
-#CARS_base.write('catalogs/CARS_SDSS/CARS_SDSS_base.tex', format='ascii.latex', overwrite=True)
-
-CARS_GAMA_base = Table(rows=CARS_base[8],
-                       names=('CARS_Host', 'RA', 'DEC', 'Z', 'D_A', 'D_L',
-                              '2_Mpc_Radius', 'g', 'i', 'M_i', 'log_mass'))
-CARS_GAMA_base.meta['comments'] = ['Flat \u039BCDM cosmology: H\u2080 = 70 km ' +
-                                   's\u207B\u00B9 Mpc\u207B\u00B9, \u03A9\u2098 = 0.3']
-#CARS_GAMA_base.write('catalogs/CARS_GAMA/CARS_GAMA_base.fits', overwrite=True)
-#CARS_GAMA_base.write('catalogs/CARS_GAMA/CARS_GAMA_base.tex', format='ascii.latex', overwrite=True)
+mass_limit = 8.452021 # [dex(M_*)] ie. log(M_*) = 8.452021, 104 km/s away from HE 2222-0026
+SDSS_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_vCam.fits'
+GAMA_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassCam_vCam.fits'
 
 # mass-limit using color-based mass estimate
-mass_limit = 8.452021 # [dex(M_*)] ie. log(M_*) = 8.452021, 104 km/s away from HE 2222-0026
 if (mass_limit > 0) :
     limited = '_masslimited'
 else :
     limited = ''
 
-SDSS_path = 'catalogs/joined_cats/SDSS_gal_info_gal_line_vCam.fits'
-#SDSS_path = 'catalogs/joined_cats/SDSS_gal_info_Mstar_SFR.fits' # v2 removes -9999 value
-# GAMA_path = 'catalogs/joined_cats/GAMA_GFS_StelMass.fits'
-#GAMA_alt = 'catalogs/joined_cats/GAMA_GFS_StelMass_EnvMeas.fits'
-#GAMA_path = 'catalogs/raw_cats/GAMA_GaussFitSimple.fits'
-#GAMA_alt = 'catalogs/raw_cats/GAMA_EnvironmentMeasures.fits'
-GAMA_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_vCam.fits'
+# open the CARS catalog and populate values
+galaxies = Table.read('catalogs/raw_cats/CARS_thesis_sample.fits')
+IDs = galaxies['Name']
+RAs = Angle(galaxies['RA'], u.deg)
+Decs = Angle(galaxies['DEC'], u.deg)
+redshifts = galaxies['Z']
+g_colors = galaxies['g_mag']
+i_colors = galaxies['i_mag']
 
-# further information regarding GAMA environmental parameters
-# www.gama-survey.org/dr3/data/cat/EnvironmentMeasures/v05/EnvironmentMeasures.notes
+Dists = cosmo.angular_diameter_distance(redshifts) # compute D_A
+lum_dists = cosmo.luminosity_distance(redshifts).to(u.pc)
+M_i = i_colors - 5*np.log10(lum_dists.value) + 5
+masses = 1.15 + 0.7*(g_colors - i_colors) - 0.4*M_i
 
-#..........................................................................main
 def main(cat_name, mass_check=False) :
     
     # complete the search and determine values for all CARS host galaxies
     
+    base = save_base_table(cat_name)
+    
     if (cat_name == 'SDSS') :
         indexes = range(len(galaxies))
         path = SDSS_path
-        base = CARS_base
     if (cat_name == 'GAMA') :
         indexes = [8]
         path = GAMA_path
-        base = CARS_GAMA_base
     
     list_of_sub_cats = []
     tables = []
@@ -245,14 +184,60 @@ def main(cat_name, mass_check=False) :
     
     return
 
-def spectral_classification() :
+def save_base_table(sample) :
     
-    in_path = 'catalogs/joined_cats/SDSS_gal_info_gal_line_SpecClassPrelim_vCam.fits'
+    columns = [IDs, RAs, Decs, redshifts, Dists, lum_dists.to(u.Mpc),
+               Angle( ((2*u.Mpc)/Dists).value, u.radian ).to('arcmin'),
+               g_colors*u.mag, i_colors*u.mag, M_i*u.mag, masses*u.solMass]
     
-    catalog = Table.read(in_path)
+    column_headings = ('CARS_Host', 'RA', 'DEC', 'Z', 'D_A', 'D_L', 
+                       '2_Mpc_Radius', 'g', 'i', 'M_i', 'log_mass')
     
-    log_OIII_HB = np.log10( catalog['OIII_5007_FLUX'] / catalog['H_BETA_FLUX'] )
-    log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
+    comment = ['Flat \u039BCDM cosmology: H\u2080 = 70 km ' +
+               's\u207B\u00B9 Mpc\u207B\u00B9, \u03A9\u2098 = 0.3']
+    
+    if sample == 'SDSS' :
+        CARS_base = Table(columns, names=column_headings)
+        CARS_base.meta['comments'] = comment
+        # CARS_base.write('catalogs/CARS_SDSS/CARS_SDSS_base.fits',
+                        # overwrite=True)
+        # CARS_base.write('catalogs/CARS_SDSS/CARS_SDSS_base.tex',
+                        # format='ascii.latex', overwrite=True)
+        base_table = CARS_base
+    
+    if sample == 'GAMA' :
+        CARS_GAMA_base = Table.read('catalogs/CARS_SDSS/CARS_SDSS_base.fits')
+        CARS_GAMA_base = Table(CARS_GAMA_base[8], names=column_headings)
+        # CARS_GAMA_base.write('catalogs/CARS_GAMA/CARS_GAMA_base.fits',
+                              # overwrite=True)
+        # CARS_GAMA_base.write('catalogs/CARS_GAMA/CARS_GAMA_base.tex',
+                             # format='ascii.latex', overwrite=True)
+        base_table = CARS_GAMA_base
+    
+    return base_table
+
+def spectral_classification(sample) :
+    
+    if sample == 'SDSS' :
+        in_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassPrelim_vCam.fits'
+        out_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_vCam.fits'
+        catalog = Table.read(in_path)
+        
+        log_OIII_HB = np.log10( catalog['OIII_5007_FLUX'] / catalog['H_BETA_FLUX'] )
+        log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
+        HA_EW = np.log10( catalog['H_ALPHA_FLUX'] / catalog['H_ALPHA_CONT'] )
+    
+    if sample == 'GAMA' :
+        in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassPrelim_vCam.fits'
+        out_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassCam_vCam.fits'
+        catalog = Table.read(in_path)
+        
+        HB_flux_corr = (1 + 2.5/catalog['HB_EW_1'])*catalog['HB_FLUX_1']
+        log_OIII_HB = np.log10( catalog['OIIIR_FLUX_1'] / HB_flux_corr )
+        HA_flux_corr = (1 + 2.5/catalog['HA_EW_1'])*catalog['HA_FLUX_1']
+        log_NII_HA = np.log10( catalog['NIIR_FLUX_1'] / HA_flux_corr )
+        HA_EW = np.log10(catalog['HA_EW_1'])
+    
     BPT_SFG = ( (log_OIII_HB < 0.61/(log_NII_HA - 0.05) + 1.3) &
                 (log_NII_HA < 0.05) )
     BPT_Comp = ( (log_OIII_HB > 0.61/(log_NII_HA - 0.05) + 1.3) &
@@ -263,7 +248,6 @@ def spectral_classification() :
     BPT_LIN = ( (log_OIII_HB > 0.61/(log_NII_HA - 0.47) + 1.19) &
                 (log_OIII_HB < 1.05*log_NII_HA + 0.45) )
     
-    HA_EW = np.log10( catalog['H_ALPHA_FLUX'] / catalog['H_ALPHA_CONT'] )
     WHAN_passives = ( (HA_EW < -log_NII_HA + np.log10(0.5)) |
                       (HA_EW < np.log10(0.5)) )
     WHAN_SFG = (HA_EW > -log_NII_HA + np.log10(0.5)) & (log_NII_HA < -0.4)
@@ -319,12 +303,10 @@ def spectral_classification() :
     print(bad_x)
     print(bad_y)
     
-    # catalog.write('catalogs/joined_cats/SDSS_gal_info_gal_line_SpecClassCam_vCam.fits',
-                   # overwrite=True)
+    catalog.write(out_path, overwrite=True)
     
     return
 
-#..............................................................whole_cat_params
 def whole_cat_params(cat_name) :
     
     if (cat_name == 'SDSS') :
@@ -416,10 +398,8 @@ def whole_cat_params(cat_name) :
                   SFR_other_label)
     
     return
-#..............................................................end of functions
 
 # main('SDSS')
 # main('GAMA')
 
-# spectral_classification()
 # whole_cat_params('SDSS')

@@ -12,7 +12,7 @@ import environmental_parameters as env_params
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3)
 mass_limit = 8.452021
-SDSS_path = 'catalogs/joined_cats/SDSS_gal_info_gal_line_vCam.fits'
+SDSS_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_vCam.fits'
 
 def random_galaxy_candidates(GAMA_or_SDSS, outfilename, targettype) :
     
@@ -20,10 +20,10 @@ def random_galaxy_candidates(GAMA_or_SDSS, outfilename, targettype) :
     
     if GAMA_or_SDSS == 'GAMA' :
         dir_path = 'catalogs/joined_cats/'
-        in_path = dir_path + 'GAMA_GaussFitSimple_StellarMasses_SpecClassGordon_vCam.fits'
+        in_path = dir_path + 'GAMA_GaussFitSimple_StellarMasses_SpecClassCam_vCam.fits'
     if GAMA_or_SDSS == 'SDSS' :
         dir_path = 'catalogs/joined_cats/'
-        in_path = dir_path + 'SDSS_gal_info_gal_line_vCam.fits'
+        in_path = dir_path + 'SDSS_gal-info_gal-line_SpecClassCam_vCam.fits'
     
     base_cat = Table.read(in_path)
     
@@ -65,7 +65,6 @@ def random_galaxy_candidates(GAMA_or_SDSS, outfilename, targettype) :
     compliments.write(out_path, overwrite=False)
     
     return
-
 
 def random_galaxy_comparison(GAMA_or_SDSS, infile, outfilename, random=True,
                              num_random=10) :

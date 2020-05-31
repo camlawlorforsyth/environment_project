@@ -108,17 +108,17 @@ def diagram_BPT(x1, y1, x2, y2, x3, y3, x4, y4, standard=True,
     
     # for the GAMA sample check
     # ax.hist2d(x1, y1, bins=100, cmap='Blues', norm=LogNorm())
-    # ax.hist2d(x2, y2, bins=30, cmap='Purples', norm=LogNorm())
-    # ax.hist2d(x3, y3, bins=10, cmap='Reds', norm=LogNorm())
-    # ax.hist2d(x4, y4, bins=10, cmap='Greens', norm=LogNorm())
+    # ax.hist2d(x2, y2, bins=12, cmap='Purples', norm=LogNorm())
+    # ax.hist2d(x3, y3, bins=5, cmap='Reds', norm=LogNorm())
+    # ax.hist2d(x4, y4, bins=2, cmap='Greens', norm=LogNorm())
     
-    unclass_x = [0.52699786, 0.6472921, 0.51526904, 0.10082114,
-               0.4783239, 0.64564115, 0.47279504, 0.48915058,
-               0.5316156, 0.52157855, 0.072221704, 0.6222592, 0.061153412]
-    unclass_y = [0.20510054, 0.15230991, 0.3134719, -1.4588171,
-               0.8099388, 0.41682592, 0.12564416, 0.5535542,
-               0.8346556, 0.4626364, -0.5899385, 0.4983, -0.36166635]
-    ax.plot(unclass_x, unclass_y, 'kx', label='BPT Classification Fails (13 galaxies)')
+    # unclass_x = [0.64564115, 0.48915058, 0.4783239, 0.10082114, 0.51526904,
+    #              0.6472921, 0.072221704, 0.061153412, 0.52157855, 0.47279504,
+    #              0.6222592, 0.52699786, 0.5316156]
+    # unclass_y = [0.41682592, 0.5535542, 0.8099388, -1.4588171, 0.3134719,
+    #              0.15230991, -0.5899385, -0.36166635, 0.4626364, 0.12564416,
+    #              0.4983, 0.20510054, 0.8346556]
+    # ax.plot(unclass_x, unclass_y, 'kx', label='BPT Classification Fails (13 galaxies)')
     
     CARS_x_7p5 = [-0.2558046120106365, -0.3039520129538409, -0.2417594381357093,
                   0.06476555533411806, 0.275461262291009, -0.3938455204465459,
@@ -191,10 +191,10 @@ def diagram_WHAN(x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, standard=True,
     ax.hist2d(x5, y5, bins=113, cmap='Greens', norm=LogNorm())
     
     # for the GAMA sample check
-    # ax.hist2d(x1, y1, bins=50, cmap='Oranges', norm=LogNorm())
-    # ax.hist2d(x2, y2, bins=100, cmap='Blues', norm=LogNorm())
-    # ax.hist2d(x3, y3, bins=30, cmap='Purples', norm=LogNorm())
-    # ax.hist2d(x4, y4, bins=20, cmap='Reds', norm=LogNorm())
+    # ax.hist2d(x1, y1, bins=20, cmap='Oranges', norm=LogNorm())
+    # ax.hist2d(x2, y2, bins=80, cmap='Blues', norm=LogNorm())
+    # ax.hist2d(x3, y3, bins=12, cmap='Purples', norm=LogNorm())
+    # ax.hist2d(x4, y4, bins=12, cmap='Reds', norm=LogNorm())
     # ax.hist2d(x5, y5, bins=20, cmap='Greens', norm=LogNorm())
     
     if (standard==True) :
@@ -216,6 +216,7 @@ def diagram_WHAN(x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, standard=True,
         ax.plot(xs, ys, 'k:')
         
         ax.text(-1, 2.75, 'SFG', fontsize=15)
+        ax.text(-0.4, 1.75, 'Composite', rotation='vertical', fontsize=15)
         ax.text(0, 2.5, 'Seyfert', fontsize=15)
         ax.text(0.55, 0.5, 'LINER', fontsize=15)
         ax.text(-0.2, -0.6, 'Passive', fontsize=15)
@@ -309,8 +310,8 @@ def histo(param, label, title=None, vert_line=None, num_bins=None) :
     plt.clf()
     
     ax = fig.add_subplot(111)
-    ax.hist(param, range=(7, 11.5)) #, bins=num_bins)
-    ax.set_xlabel("%s" % label, fontsize = 15)
+    ax.hist(param) #, range=(7, 11.5)) #, bins=num_bins)
+    ax.set_xlabel('%s' % label, fontsize = 15)
     
     if vert_line :
         ymin, ymax = ax.get_ylim()
@@ -318,7 +319,8 @@ def histo(param, label, title=None, vert_line=None, num_bins=None) :
                   color='r', linestyle='--', label=r'CARS Host')
         plt.legend()
     
-    plt.title('%s' % title, fontsize = 15)
+    ax.set_title('%s' % title, fontsize = 15)
+    
     plt.tight_layout()
     plt.show()
     
@@ -528,6 +530,39 @@ def plot3D(xvals, yvals, zvals, xlabel, ylabel, zlabel) :
     ax.set_zlabel(zlabel, fontsize = 15)
     
     plt.show()
+    
+    return
+
+def plot_decoupled_fit(file, x_array, raw_data, fit, residual, HA_NII_core, BLR1) :
+    
+    global currentFig
+    fig = plt.figure(currentFig, figsize=(8.5, 6.5))
+    currentFig += 1
+    plt.clf()
+    ax = fig.add_subplot(111)
+    
+    ax.plot(x_array, raw_data, drawstyle='steps-mid', linewidth=3, color='grey')
+    ax.plot(x_array, fit, 'r-', label='Model')
+    resid = (x_array>=6500) & (x_array <= 6650)
+    ax.plot(x_array[resid], residual[resid], 'm-.', label='Residual')
+    ax.plot(x_array, HA_NII_core, 'b-', label=r'H$\rm \alpha$+[N II] core')
+    # ax.plot(x_array, HA_NII_wing, 'g-', label=r'H$\rm \alpha$+[N II] wing')
+    ax.plot(x_array, BLR1, 'k--', label=r'H$\rm \alpha$ BLR1')
+    # ax.plot(x_array, BLR2, 'k-.', label=r'H$\rm \alpha$ BLR2')
+    # ax.plot(x_array, BLR3, 'k:', label=r'H$\rm \alpha$ BLR3')
+    
+    ax.set_title(r'%s' % (file) ) # H$\rm \alpha$ +[N II] Spectrum
+    ax.set_xlabel(r'Wavelength ($\rm \AA$)', fontsize = 15)
+    ax.set_ylabel(r'Flux Density ($10^{-17}$ erg s$^{-1}$ cm$^{-2}$ $\rm \AA^{-1}$)',
+               fontsize = 15)
+    
+    ax.set_xlim(6400, 6700)
+    
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+    # plt.savefig(file, overwrite=True)
+    # plt.close(fig)
     
     return
 

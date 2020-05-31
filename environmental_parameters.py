@@ -156,6 +156,9 @@ def counts_in_cylinder(redshift, catalog) :
 def gama_params(cat_name, path, alpha, delta, zz, D_A, ID, CARS_mass,
                 com_map=False, self_in_search=False) :
     
+    # further information regarding GAMA environmental parameters
+    # www.gama-survey.org/dr3/data/cat/EnvironmentMeasures/v05/EnvironmentMeasures.notes
+    
     center = SkyCoord(ra=alpha, dec=delta, distance=D_A) # galaxy of interest
     
     default_catalog = srch.catalog_search(path, cat_name, ID, center, zz, 1500, 2,
