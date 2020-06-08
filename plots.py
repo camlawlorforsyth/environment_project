@@ -1,9 +1,10 @@
 
 # imports
+import numpy as np
+
 from matplotlib import cm
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
-import numpy as np
 
 from astropy.coordinates import Angle
 from astropy.table import Table
@@ -11,6 +12,81 @@ import astropy.units as u
 
 # constants
 currentFig = 1
+
+def all_histograms(param, xlabel, mass_limit=None, xmin=None, xmax=None, ymin=None, ymax=None) :
+    
+    main_dir = 'catalogs/CARS_SDSS/'
+    SDSS_CARS = Table.read(main_dir + 'CARS_SDSS_complete_masslimited.fits')
+    
+    directory = 'catalogs/CARS_GAMA/'
+    BLAGN = Table.read(directory + 'GAMA_comparison_BLAGN_logMass10_complete_0-39.fits')
+    Seyferts = Table.read(directory + 'GAMA_comparison_Seyferts_logMass10_complete_0-39.fits')
+    LINERs = Table.read(directory + 'GAMA_comparison_LINERs_logMass10_complete_0-109.fits')
+    Composites = Table.read(directory + 'GAMA_comparison_Comps_logMass10_complete_0-126.fits')
+    SFGs = Table.read(directory + 'GAMA_comparison_SFGs_logMass10_complete_0-354.fits')
+    Passives = Table.read(directory + 'GAMA_comparison_Passives_logMass10_complete_0-52.fits')
+    not_ELGs = Table.read(directory + 'GAMA_comparison_not-ELGs_logMass10_complete_0-645.fits')
+    
+    if mass_limit==10 :
+        # BLAGN = BLAGN[BLAGN['logMass'] >= 10]
+        # Seyferts = Seyferts[Seyferts['logMass'] >= 10]
+        # LINERs = LINERs[LINERs['logMass'] >= 10]
+        # Composites = Composites[Composites['logMass'] >= 10]
+        # SFGs = SFGs[SFGs['logMass'] >= 10]
+        # Passives = Passives[Passives['logMass'] >= 10]
+        # not_ELGs = not_ELGs[not_ELGs['logMass'] >= 10]
+        mass_string = 'logMass10_'
+    else :
+        mass_string = ''
+    
+    CARS_weight = np.ones(len(SDSS_CARS))/len(SDSS_CARS)
+    BLAGN_weight = np.ones(len(BLAGN))/len(BLAGN)
+    Sey_weight = np.ones(len(Seyferts))/len(Seyferts)
+    LINER_weight = np.ones(len(LINERs))/len(LINERs)
+    Comp_weight = np.ones(len(Composites))/len(Composites)
+    SFG_weight = np.ones(len(SFGs))/len(SFGs)
+    Pass_weight = np.ones(len(Passives))/len(Passives)
+    ELG_weight = np.ones(len(not_ELGs))/len(not_ELGs)
+    
+    CARS_label = 'CARS in SDSS (%s)' % len(SDSS_CARS)
+    BLAGN_label = 'GAMA BLAGN (%s)' % len(BLAGN)
+    Sey_label = 'GAMA Seyferts (%s)' % len(Seyferts)
+    LINER_label = 'GAMA LINERs (%s)' % len(LINERs)
+    Comp_label = 'GAMA Composites (%s)' % len(Composites)
+    SFG_label = 'GAMA SFGs (%s)' % len(SFGs)
+    Pass_label = 'GAMA Passives (%s)' % len(Passives)
+    ELG_label = 'GAMA not ELGs (%s)' % len(not_ELGs)
+    
+    multi_histo([SDSS_CARS[param], BLAGN[param]], [CARS_label, BLAGN_label],
+                xlabel, ['k','c'], [CARS_weight, BLAGN_weight],
+                outfile='histograms/histo_' + mass_string + param + '_BLAGN.png',
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    multi_histo([SDSS_CARS[param], Seyferts[param]], [CARS_label, Sey_label],
+                xlabel, ['k','r'], [CARS_weight, Sey_weight],
+                outfile='histograms/histo_' + mass_string + param + '_Seyferts.png',
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    multi_histo([SDSS_CARS[param], LINERs[param]], [CARS_label, LINER_label],
+                xlabel, ['k','g'], [CARS_weight, LINER_weight],
+                outfile='histograms/histo_' + mass_string + param + '_LINERs.png',
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    multi_histo([SDSS_CARS[param], Composites[param]], [CARS_label, Comp_label],
+                xlabel, ['k','m'], [CARS_weight, Comp_weight],
+                outfile='histograms/histo_' + mass_string + param + '_Comps.png',
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    multi_histo([SDSS_CARS[param], SFGs[param]], [CARS_label, SFG_label],
+                xlabel, ['k','b'], [CARS_weight, SFG_weight],
+                outfile='histograms/histo_' + mass_string + param + '_SFGs.png',
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    multi_histo([SDSS_CARS[param], Passives[param]], [CARS_label, Pass_label],
+                xlabel, ['k','orange'], [CARS_weight, Pass_weight],
+                outfile='histograms/histo_' + mass_string + param + '_Passives.png',
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    multi_histo([SDSS_CARS[param], not_ELGs[param]], [CARS_label, ELG_label],
+                xlabel, ['k','grey'], [CARS_weight, ELG_weight],
+                outfile='histograms/histo_' + mass_string + param + '_not-ELGs.png',
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    
+    return
 
 def contour3d(xx, yy, zz, xlabel, ylabel, zlabel) :
     
@@ -101,16 +177,16 @@ def diagram_BPT(x1, y1, x2, y2, x3, y3, x4, y4, standard=True,
     ax = fig.add_subplot(111)
     
     # for the SDSS sample check
-    ax.hist2d(x1, y1, bins=341, cmap='Blues', norm=LogNorm())
-    ax.hist2d(x2, y2, bins=156, cmap='Purples', norm=LogNorm())
-    ax.hist2d(x3, y3, bins=200, cmap='Reds', norm=LogNorm())
-    ax.hist2d(x4, y4, bins=117, cmap='Greens', norm=LogNorm())
+    ax.hist2d(x1, y1, bins=200, cmap='Reds', norm=LogNorm())
+    ax.hist2d(x2, y2, bins=117, cmap='Greens', norm=LogNorm())
+    ax.hist2d(x3, y3, bins=156, cmap='Purples', norm=LogNorm())
+    ax.hist2d(x4, y4, bins=231, cmap='Blues', norm=LogNorm())
     
     # for the GAMA sample check
-    # ax.hist2d(x1, y1, bins=100, cmap='Blues', norm=LogNorm())
-    # ax.hist2d(x2, y2, bins=12, cmap='Purples', norm=LogNorm())
-    # ax.hist2d(x3, y3, bins=5, cmap='Reds', norm=LogNorm())
-    # ax.hist2d(x4, y4, bins=2, cmap='Greens', norm=LogNorm())
+    # ax.hist2d(x1, y1, bins=5, cmap='Reds', norm=LogNorm())
+    # ax.hist2d(x2, y2, bins=2, cmap='Greens', norm=LogNorm())
+    # ax.hist2d(x3, y3, bins=16, cmap='Purples', norm=LogNorm())
+    # ax.hist2d(x4, y4, bins=100, cmap='Blues', norm=LogNorm())
     
     # unclass_x = [0.64564115, 0.48915058, 0.4783239, 0.10082114, 0.51526904,
     #              0.6472921, 0.072221704, 0.061153412, 0.52157855, 0.47279504,
@@ -128,7 +204,7 @@ def diagram_BPT(x1, y1, x2, y2, x3, y3, x4, y4, standard=True,
                   0.7852122081665016, 0.701362126702604, -0.3101074263261445,
                   0.9213412646212272, 0.07531550781816444, 0.43745460649821044,
                   0.6040263849321078, 0.02695921366978017, 0.8956928513689375]
-    ax.plot(CARS_x_7p5, CARS_y_7p5, 'ko', label='Fluxes from .eline MUSE Tables in 3" Aperture')
+    # ax.plot(CARS_x_7p5, CARS_y_7p5, 'ko', label='Fluxes from .eline MUSE Tables in 3" Aperture')
     
     if (standard==True) :
         xmin, xmax, ymin, ymax = -2.2, 0.7, -1.5, 1.4
@@ -184,18 +260,18 @@ def diagram_WHAN(x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, standard=True,
     ax = fig.add_subplot(111)  
     
     # for the SDSS sample check
-    ax.hist2d(x1, y1, bins=80, cmap='Oranges', norm=LogNorm())
-    ax.hist2d(x2, y2, bins=86, cmap='Blues', norm=LogNorm())
+    ax.hist2d(x1, y1, bins=40, cmap='Reds', norm=LogNorm())
+    ax.hist2d(x2, y2, bins=113, cmap='Greens', norm=LogNorm())
     ax.hist2d(x3, y3, bins=30, cmap='Purples', norm=LogNorm())
-    ax.hist2d(x4, y4, bins=40, cmap='Reds', norm=LogNorm())
-    ax.hist2d(x5, y5, bins=113, cmap='Greens', norm=LogNorm())
+    ax.hist2d(x4, y4, bins=86, cmap='Blues', norm=LogNorm())
+    ax.hist2d(x5, y5, bins=80, cmap='Oranges', norm=LogNorm())
     
     # for the GAMA sample check
-    # ax.hist2d(x1, y1, bins=20, cmap='Oranges', norm=LogNorm())
-    # ax.hist2d(x2, y2, bins=80, cmap='Blues', norm=LogNorm())
+    # ax.hist2d(x1, y1, bins=12, cmap='Reds', norm=LogNorm())
+    # ax.hist2d(x2, y2, bins=20, cmap='Greens', norm=LogNorm())
     # ax.hist2d(x3, y3, bins=12, cmap='Purples', norm=LogNorm())
-    # ax.hist2d(x4, y4, bins=12, cmap='Reds', norm=LogNorm())
-    # ax.hist2d(x5, y5, bins=20, cmap='Greens', norm=LogNorm())
+    # ax.hist2d(x4, y4, bins=50, cmap='Blues', norm=LogNorm())
+    # ax.hist2d(x5, y5, bins=13, cmap='Oranges', norm=LogNorm())
     
     if (standard==True) :
         xmin, xmax, ymin, ymax = -2.2, 1, -0.7, 3.3
@@ -353,7 +429,8 @@ def histo2d(xvals, xlab, yvals, ylab, nbins=200, xmin=None, xmax=None,
     
     return
 
-def multi_histo(param_list, labels, xlab, log=False, xmin=None, xmax=None) :
+def multi_histo(param_list, labels, xlab, colors, weights, outfile=None,
+                log=False, xmin=None, xmax=None, ymin=None, ymax=None) :
     
     global currentFig
     fig = plt.figure(currentFig)
@@ -362,8 +439,9 @@ def multi_histo(param_list, labels, xlab, log=False, xmin=None, xmax=None) :
     
     ax = fig.add_subplot(111)    
     
-    colors = ['k', 'b', 'r', 'g', 'm', 'c', 'y', 'k', 'b']
-    styles = ['-', '--', '-.', ':', '-', '--', '-.', ':', '-']
+    # colors = ['k', 'b', 'r', 'g', 'm', 'c', 'y', 'k', 'b']
+    # styles = ['-', '--', '-.', ':', '-', '--', '-.', ':', '-']
+    styles = ['--', '-']
     
     if log==True :
         new_list = []
@@ -373,9 +451,29 @@ def multi_histo(param_list, labels, xlab, log=False, xmin=None, xmax=None) :
         ax.hist(new_list, histtype='bar', density=True, label=labels,
                 linestyle='--') # stacked=False
         xlabel = 'log(' + xlab + ')'
+    # else :
+    #     ax.hist(param_list, histtype='step', density=True, label=labels,
+    #             linestyle='--')
+    #     xlabel = xlab
     else :
-        ax.hist(param_list, histtype='step', density=True, label=labels,
-                linestyle='--')
+        # option 1
+        # ax.hist(param_list, label=labels, weights=weights,
+        #         histtype='step', linestyle='-', linewidth=2, color=colors)
+        
+        # option 2
+        ax.hist(param_list[0], label=labels[0], weights=weights[0],
+                histtype='step', linestyle='-', color=colors[0])
+        ax.hist(param_list[1], label=labels[1], weights=weights[1],
+                histtype='step', linestyle='-', color=colors[1], linewidth=2)
+        
+        # for i in range(len(param_list)) : # add each dataset to the plot
+        #     ax.hist(param_list[i], label = labels[i], density=True,
+        #             histtype='step', linestyle=styles[i], color=colors[i],
+        #             stacked=True)
+        
+        # ax.hist(param_list, label=labels, density=True, histtype='step',
+        #         linestyle='--', color=colors)
+        
         xlabel = xlab
     
     """
@@ -395,12 +493,16 @@ def multi_histo(param_list, labels, xlab, log=False, xmin=None, xmax=None) :
         xlabel = xlab
     """
     
-    ax.set_xlabel("%s" % xlabel, fontsize = 15 )
+    ax.set_xlabel('%s' % xlabel, fontsize=15)
+    ax.set_ylabel('Fractional Frequency', fontsize=15)
     ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
     
     plt.legend()
     plt.tight_layout()
     plt.show()
+    # plt.savefig(outfile, overwrite=True)
+    # plt.close(fig)
     
     return
 
@@ -502,7 +604,7 @@ def plot(xvals, xlab, yvals, ylab, cat_name='SDSS', xmin=None, xmax=None,
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     
-    plt.legend()
+    # plt.legend()
     plt.tight_layout()
     plt.show()
     
@@ -513,7 +615,6 @@ def plot3D(xvals, yvals, zvals, xlabel, ylabel, zlabel) :
     from mpl_toolkits.mplot3d import Axes3D
     
     global currentFig
-    
     fig = plt.figure(currentFig)
     currentFig += 1
     plt.clf()
@@ -529,6 +630,39 @@ def plot3D(xvals, yvals, zvals, xlabel, ylabel, zlabel) :
     plt.ylabel(ylabel, fontsize = 15 )
     ax.set_zlabel(zlabel, fontsize = 15)
     
+    plt.show()
+    
+    return
+
+def plot_cylinder() :
+    
+    from matplotlib import patches
+    
+    global currentFig
+    fig = plt.figure(currentFig)
+    currentFig += 1
+    plt.clf()
+    
+    ax = fig.add_subplot(111)
+    
+    ell1 = patches.Ellipse((0.3,0.3), width=0.25, height=0.1, angle=-45, linestyle='-',
+                          edgecolor='k', facecolor='None', zorder=2)
+    ax.add_patch(ell1)
+    
+    ell2 = patches.Ellipse((0.7,0.7), width=0.25, height=0.1, angle=-45, linestyle='-',
+                          edgecolor='k', facecolor='None', zorder=2)
+    ax.add_patch(ell2)
+    
+    xs = np.linspace(0,0.959,1000)
+    ax.plot(xs, xs, 'k--')
+    # ax.arrow(0, 0, 0.95, 0.95, linestyle='--', color='k')
+    ax.annotate('', xy=(0.96,0.96), xytext=(0.959,0.959), arrowprops={'arrowstyle': '->'})
+    
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    
+    # plt.legend()
+    plt.tight_layout()
     plt.show()
     
     return
@@ -692,3 +826,11 @@ def view_all_3d_plots() :
                     # 'GAMA - Seyfert',
                     # 'GAMA - SFG'
                    # ])
+
+# all_histograms('Companions', 'Number of Companions', mass_limit=10, xmin=-5, xmax=210, ymin=0, ymax=0.6)
+# all_histograms('Most_Massive_Distance', 'Distance to Most Massive Companion (kpc)', mass_limit=10, xmin=-500, xmax=22500, ymin=0, ymax=0.6)
+
+# all_histograms('AGEPar', r'AGE Parameter (Mpc$^{-1}$)', mass_limit=10, xmin=-1, xmax=32, ymin=0, ymax=0.6)
+# all_histograms('Closest_Distance', xmin=-500, xmax=22500, ymin=0, ymax=0.001)
+# all_histograms('SurfaceDensity', xmin=-0.01, xmax=1.3, ymin=0, ymax=120) # doesn't work
+# all_histograms('Overdensity', xmin=0, xmax=11, ymin=0, ymax=1.8)

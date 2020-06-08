@@ -1,20 +1,25 @@
 
+# imports
 import numpy as np
+
 from astropy.io import ascii
+from astropy.table import Table
 #import astropy.units as u
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import scipy.stats as sp
 
-dat = ascii.read('cars_catalog.csv')
+import plots as plt
 
-name, alt_name, RA, Dec = dat['name'], dat['alt_name'], dat['RA'], dat['Dec']
-zz, large_radii = dat['z'], dat['2Mpc_radius']
-H2_mass = np.power(10, dat['log_M(H2)'])
-HI_mass = np.power(10, dat['log_M(HI)'])
+# dat = ascii.read('cars_catalog.csv')
+# name, alt_name, RA, Dec = dat['name'], dat['alt_name'], dat['RA'], dat['Dec']
+# zz, large_radii = dat['z'], dat['2Mpc_radius']
+# H2_mass = np.power(10, dat['log_M(H2)'])
+# HI_mass = np.power(10, dat['log_M(HI)'])
 
 # would like masses of CARS galaxies themselves, and star formation rates
 
-currentFig = 1
+# constants
+# currentFig = 1
 
 LABELS = {
           'RA':'Right Ascension (deg)',

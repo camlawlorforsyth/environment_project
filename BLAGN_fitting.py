@@ -23,9 +23,9 @@ speed_of_light = const.c.to('km/s').value
 
 def main(method='new') :
     
-    files = os.listdir(directory)
+    # files = os.listdir(directory)
     files = ['spSpec-54484-2656-469.fit', 'spSpec-53816-2219-071.fit',
-              'spSpec-54526-2884-160.fit']
+             'spSpec-54526-2884-160.fit']
     
     BL_FWHM, plates, mjds, fiberids = [], [], [], []
     for file in files :
@@ -53,6 +53,9 @@ def main(method='new') :
         x0_guesses = np.array([20, 20, 0, 100, # 0.1, 0.1, 0, 100,
                                10, 0, 1000, # 0.1, 0, 1000, # 0.1, 0, 1000,
                                -0.01, -0.01])
+        
+        # plt.plot(wave, r'Wavelength ($\rm \AA$)', cs_spec,
+        #          r'Flux Density ($10^{-17}$ erg s$^{-1}$ cm$^{-2}$ $\rm \AA^{-1}$)')
         
         if HA_SN >= 3 :
             if method == 'old' :

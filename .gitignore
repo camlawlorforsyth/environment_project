@@ -112,3 +112,6 @@ venv.bak/
 # generated and saved Numpy arrays
 *.npy
 *.npz
+
+# generated and saved PNG files
+*.png

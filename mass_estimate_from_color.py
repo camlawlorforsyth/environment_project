@@ -1,15 +1,17 @@
 
+# imports
 import numpy as np
 from astropy.cosmology import FlatLambdaCDM
 from astropy.table import Table
 import astropy.units as u
 
 import functions as funcs
+import plots as plt
 
+# constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3)
 currentFig = 1
 
-#...................................................................full_sample
 def mass_comparison(cat_name) :
     
     if (cat_name == 'SDSS') :
@@ -41,12 +43,11 @@ def mass_comparison(cat_name) :
         g_i_Mstar = 1.15 + 0.7*test['gminusi'] - 0.4*test['absmag_i']
         # based on relation from Taylor+ 2011, MNRAS, 418, 1587
         
-        funcs.plot(g_i_Mstar, r'$\log(M_*/M_\odot)$ = 1.15 + 0.70($g-i$) - 0.4$M_i$',
+        plt.plot(g_i_Mstar, r'$\log(M_*/M_\odot)$ = 1.15 + 0.70($g-i$) - 0.4$M_i$',
              test['logmstar'], r'$M_*$ from GAMA [$\log(M_\odot)]$',
              cat_name, hist2d=True, nbins=50, xmin=6, xmax=13, ymin=6, ymax=13)
     
     return
-#..............................................................end of functions
 
-mass_comparison('SDSS')
-mass_comparison('GAMA')
+# mass_comparison('SDSS')
+# mass_comparison('GAMA')

@@ -20,28 +20,22 @@ def adaptive_gaussian(CARS_coords, CARS_dist, catalog) :
     
     sigma = 2*u.Mpc
     
-    distances = cosmo.angular_diameter_distance(catalog['Z'])
-    r_zs = abs(distances - CARS_dist)
+    r_zs = np.absolute(catalog['D_A'] - CARS_dist).to(u.Mpc)
     scale = cosmo.kpc_proper_per_arcmin(catalog['Z'])
     r_as = (scale*catalog['d2d']).to(u.Mpc)
     
-    nn = sum(catalog['d3d'].to(u.Mpc) < sigma)
+    nn = np.sum(catalog['d3d'].to(u.Mpc) < sigma)
     if nn > 10 :
         nn = 10
     AGEScale = 1 + 0.2*nn
     
-    ellipse = (r_as/(3*sigma))**2 + (r_zs/(AGEScale*3*sigma))**2
+    ellipse = ( r_as/(3*sigma) )**2 + ( r_zs/(AGEScale*3*sigma) )**2
     mask = (ellipse <= 1)
     catalog = catalog[mask]
-    AGEErr = np.sqrt(len(catalog))
     
-    distances = cosmo.angular_diameter_distance(catalog['Z'])
-    new_r_zs = abs(distances - CARS_dist)
-    scale = cosmo.kpc_proper_per_arcmin(catalog['Z'])
-    new_r_as = (scale*catalog['d2d']).to(u.Mpc)
-    
-    indv = np.exp( -0.5*( (new_r_as/sigma)**2 + (new_r_zs/(AGEScale*sigma))**2 ) )
+    indv = np.exp( -0.5*( (r_as/sigma)**2 + (r_zs/(AGEScale*sigma))**2 ) )
     AGEDenPar = 1/np.sqrt(2*np.pi)/sigma * np.sum(indv)
+    AGEErr = np.sqrt(len(catalog))
     
     return AGEDenPar, AGEErr, AGEScale
 
@@ -49,28 +43,33 @@ def basic_params(catalog) :
     
     if len(catalog) > 0 :
         mass_catalog = catalog
-        mass_catalog.sort('g_i_Mstar')
-        most_massive_mass = mass_catalog['g_i_Mstar'][-1]
+        mass_catalog.sort('logMass')
+        most_massive_mass = mass_catalog['logMass'][-1]
         most_massive_dist = (mass_catalog['d3d'].to(u.kpc))[-1]
         
         closeness_catalog = catalog
         closeness_catalog.sort('d3d')
-        closest_mass = closeness_catalog['g_i_Mstar'][0]
-        closest_dist = (closeness_catalog['d3d'].to(u.kpc))[0]    
-        
-        return most_massive_mass, most_massive_dist, closest_mass, closest_dist
+        closest_mass = closeness_catalog['logMass'][0]
+        closest_dist = (closeness_catalog['d3d'].to(u.kpc))[0]
     else :
-        return 0, 0*u.kpc, 0, 0*u.kpc
+        most_massive_mass = np.nan
+        most_massive_dist = np.nan*u.kpc
+        closest_mass = np.nan
+        closest_dist = np.nan*u.kpc
+    
+    return most_massive_mass, most_massive_dist, closest_mass, closest_dist
 
-def center_of_mass_calc(companions_RA, companions_DEC, companions_redshifts,
+def center_of_mass_calc(companions_RA, companions_DEC, companions_D_As,
                         companions_log_masses, CARS_position, CARS_mass) :
     
     positions = SkyCoord(ra = companions_RA, dec = companions_DEC,
-                         distance=cosmo.angular_diameter_distance(companions_redshifts),
+                         distance = companions_D_As,
                          unit=(u.deg, u.deg, u.Mpc) )
     
-    masses = np.power(10, companions_log_masses)    
+    CARS_mass = np.power(10, CARS_mass)*u.solMass
+    masses = np.power(10, companions_log_masses)
     total_mass = np.sum(masses)*u.solMass + CARS_mass
+    
     x_cm = (np.sum(positions.cartesian.x*masses) +
             CARS_position.cartesian.x*CARS_mass)/total_mass
     y_cm = (np.sum(positions.cartesian.y*masses) +
@@ -83,21 +82,14 @@ def center_of_mass_calc(companions_RA, companions_DEC, companions_redshifts,
     sep = CARS_position.separation(center_of_mass).to(u.arcmin)
     sep_3d = CARS_position.separation_3d(center_of_mass).to(u.kpc)
     
-#    companion_2d_seps = center_of_mass.separation(positions).to(u.arcmin)
-#    companion_3d_seps = center_of_mass.separation_3d(positions).to(u.kpc)
-    
-#    print(np.sort(companion_2d_seps))
-#    print(np.sort(companion_3d_seps))
-    
-#    print(np.sum(companion_3d_seps < sep_3d))
-#    print(np.sum(companion_3d_seps > sep_3d))
-    
-    return center_of_mass
+    return sep
 
-def center_of_mass_map(CARS_mass, cat_name, center, ID, path, zz) :
+def center_of_mass_map(path, cat_name, ID, center, zz, D_A, CARS_mass) :
     
     # compute the 2D distance from the CARS host galaxy to the center of mass
     # as a function of the radius of the aperture and the velocity difference
+    
+    catalog = srch.search_prep(path, cat_name, ID, center)
     
     min_val = 0
     max_val = 10
@@ -111,20 +103,20 @@ def center_of_mass_map(CARS_mass, cat_name, center, ID, path, zz) :
         row = []
         companions_row = []
         for j in range(min_val, max_val) :
-            subcat = srch.catalog_search(path, cat_name, ID, center, zz, 250*i, 0.25*j)
+            subcat = srch.catalog_search(catalog, zz, D_A, 250*i, 0.25*j)
             num_companions = len(subcat)
             companions_row.append(num_companions)
-            sub_CoM = center_of_mass_calc(subcat['RA'], subcat['DEC'],
-                                          subcat['Z'], subcat['g_i_Mstar'],
+            sub_sep = center_of_mass_calc(subcat['RA_1'], subcat['DEC_1'],
+                                          subcat['D_A'], subcat['logMass'],
                                           center, CARS_mass)
-            distance = center.separation(sub_CoM).to(u.arcmin).value
-            row.append(distance)
+            row.append(sub_sep.value)
         companions.append(companions_row)
         ZZ.append(row)
     companions = np.array(companions)
     ZZ = np.array(ZZ)
     
-    outfile = cat_name + '_' + ID + '_' + str(len(XX)) + '_' + str(len(YY))
+    outfile = ('center_of_mass_arrays/' + cat_name + '_' + ID.replace(' ', '') +
+               '_' + str(len(XX)) + '_' + str(len(YY)) )
     np.savez(outfile, x=XX, y=YY, z=ZZ, a=companions) # save the arrays to a file
     
     return
@@ -147,9 +139,10 @@ def counts_in_cylinder(redshift, catalog) :
 #    nbar_ref = 6.916794832380327e-05*(u.Mpc**(-3)) # from MPA/JHU and D_A of
         # highest redshift object as radius of sphere
 #    nbar_ref = 0.00911*(u.Mpc**(-3)) # from GAMA catalog
-    avg_count = nbar_ref*volume
-    OverDensity = (CountInCyl + 1)/avg_count # add the CARS host into the calc.
-    Excess = (CountInCyl + 1) - avg_count
+    expected = nbar_ref*volume # expected number of galaxies given average
+        # density and specific volume
+    OverDensity = (CountInCyl + 1)/expected # add the CARS host into the calc.
+    Excess = (CountInCyl + 1) - expected # add the CARS host into the calc.
     
     return CountInCyl, CountInCylErr, OverDensity, Excess
 
@@ -161,33 +154,32 @@ def gama_params(cat_name, path, alpha, delta, zz, D_A, ID, CARS_mass,
     
     center = SkyCoord(ra=alpha, dec=delta, distance=D_A) # galaxy of interest
     
-    default_catalog = srch.catalog_search(path, cat_name, ID, center, zz, 1500, 2,
-                                     self_in_search)
-    last_mask = (default_catalog['g_i_Mstar'] >= mass_limit)
-    default_catalog = default_catalog[last_mask]
+    catalog = srch.search_prep(path, ID, center, self_in_search)
+    
+    default_catalog = srch.catalog_search(catalog, zz, D_A, 1500, 2)
     
     (most_massive_mass, most_massive_dist,
      closest_mass, closest_dist) = basic_params(default_catalog)
     
-    CoM = center_of_mass_calc(default_catalog['RA'], default_catalog['DEC'],
-                              default_catalog['Z'], default_catalog['g_i_Mstar'],
+    sigma = sigma_2d(default_catalog, 2)
+    rho = rho_3d(default_catalog, zz, 1500, 2)
+    
+    sep = center_of_mass_calc(default_catalog['RA_1'], default_catalog['DEC_1'],
+                              default_catalog['D_A'], default_catalog['logMass'],
                               center, CARS_mass)
     if com_map == True :
-        center_of_mass_map(CARS_mass, cat_name, center, ID, path, zz)
+        center_of_mass_map(path, cat_name, ID, center, zz, D_A, CARS_mass)
     
-    age_catalog = srch.catalog_search(path, cat_name, ID, center, zz, 2995, 10,
-                                 self_in_search)
+    age_catalog = srch.catalog_search(catalog, zz, D_A, 2995, 10)
     age_par, age_par_err, age_scale = adaptive_gaussian(center, D_A, age_catalog)
     
-    surface_catalog = srch.catalog_search(path, cat_name, ID, center, zz, 1000, 7,
-                                     self_in_search)
+    surface_catalog = srch.catalog_search(catalog, zz, D_A, 1000, 7)
     surface_dens, surface_dens_err = surface_density(surface_catalog)
     
-    cylinder_catalog = srch.catalog_search(path, cat_name, ID, center, zz, 1000, 1,
-                                      self_in_search)
-    counts, counts_err, overdensity, excess = counts_in_cylinder(zz, cylinder_catalog)    
+    cylinder_catalog = srch.catalog_search(catalog, zz, D_A, 1000, 1)
+    counts, counts_err, overdensity, excess = counts_in_cylinder(zz, cylinder_catalog)
     
-#    plt.plot(companion_catalog['g_i_Mstar']/u.solMass,
+#    plt.plot(companion_catalog['logMass']/u.solMass,
 #               r'$\log(M_*/M_\odot)$ = 1.15 + 0.70($g-i$) - 0.4$M_i$',
 #               companion_catalog['MEDIAN_2'],
 #               r'$M_*$ from catalog [$\log(M_\odot)$]', cat_name)
@@ -206,6 +198,9 @@ def gama_params(cat_name, path, alpha, delta, zz, D_A, ID, CARS_mass,
     envs['Most_Massive_Distance'] = Column([most_massive_dist.value], unit=u.kpc)
     envs['Closest_Mass'] = Column([closest_mass], unit=u.solMass)
     envs['Closest_Distance'] = Column([closest_dist.value], unit=u.kpc)
+    envs['sigma_2D'] = Column([sigma.value], unit=u.Mpc**(-2))
+    envs['rho_3D'] = Column([rho.value], unit=u.Mpc**(-3))
+    envs['d_CoM'] = Column([sep.value], unit=u.arcmin)
     envs['SurfaceDensity'] = Column([surface_dens.value], unit=u.Mpc**(-2))
     envs['SurfaceDensityErr'] = Column([surface_dens_err.value], unit=u.Mpc**(-2))
     envs['CountInCyl'] = Column([counts])
@@ -217,6 +212,25 @@ def gama_params(cat_name, path, alpha, delta, zz, D_A, ID, CARS_mass,
     envs['AGEScale'] = Column([age_scale])
     
     return default_catalog, envs
+
+def sigma_2d(catalog, radius) :
+    
+    radius = radius*u.Mpc
+    sigma = len(catalog) / (np.pi * radius**2)
+    
+    return sigma
+
+def rho_3d(catalog, redshift, delta_v, radius) :
+    
+    radius = radius*u.Mpc
+    lo = redshift - delta_v*(u.km/u.s)/const.c.to('km/s')
+    hi = redshift + delta_v*(u.km/u.s)/const.c.to('km/s')
+    D_As = cosmo.angular_diameter_distance([lo, hi])
+    volume = (np.pi * radius**2)*abs(D_As[1] - D_As[0])
+    
+    rho = len(catalog) / volume
+    
+    return rho
 
 def surface_density(catalog) :
     
@@ -235,6 +249,15 @@ def surface_density(catalog) :
         SurfaceDensity6nn = 6 / (np.pi * DistanceTo6nn**2)
         SurfaceDensityErr = max(abs(SurfaceDensity5nn - SurfaceDensity4nn),
                                 abs(SurfaceDensity6nn - SurfaceDensity5nn))
-        return SurfaceDensity5nn, SurfaceDensityErr
+        SD = SurfaceDensity5nn
+        SD_err = SurfaceDensityErr
+    elif len(catalog) >= 5 :
+        DistanceTo5nn = catalog['d2d'][4]*u.Mpc
+        SurfaceDensity5nn = 5 / (np.pi * DistanceTo5nn**2)
+        SD = SurfaceDensity5nn
+        SD_err = -999/(u.Mpc**2)
     else :
-        return 0/(u.Mpc**2), -999/(u.Mpc**2)
+        SD = np.nan/(u.Mpc**2)
+        SD_err = -999/(u.Mpc**2)
+    
+    return SD, SD_err
