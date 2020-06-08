@@ -13,78 +13,120 @@ import astropy.units as u
 # constants
 currentFig = 1
 
-def all_histograms(param, xlabel, mass_limit=None, xmin=None, xmax=None, ymin=None, ymax=None) :
-    
-    main_dir = 'catalogs/CARS_SDSS/'
-    SDSS_CARS = Table.read(main_dir + 'CARS_SDSS_complete_masslimited.fits')
-    
-    directory = 'catalogs/CARS_GAMA/'
-    BLAGN = Table.read(directory + 'GAMA_comparison_BLAGN_logMass10_complete_0-39.fits')
-    Seyferts = Table.read(directory + 'GAMA_comparison_Seyferts_logMass10_complete_0-39.fits')
-    LINERs = Table.read(directory + 'GAMA_comparison_LINERs_logMass10_complete_0-109.fits')
-    Composites = Table.read(directory + 'GAMA_comparison_Comps_logMass10_complete_0-126.fits')
-    SFGs = Table.read(directory + 'GAMA_comparison_SFGs_logMass10_complete_0-354.fits')
-    Passives = Table.read(directory + 'GAMA_comparison_Passives_logMass10_complete_0-52.fits')
-    not_ELGs = Table.read(directory + 'GAMA_comparison_not-ELGs_logMass10_complete_0-645.fits')
+def all_histograms(param, xlabel, mass_limit=10, loc=0, log=False,
+                   xmin=None, xmax=None, ymin=None, ymax=None) :
     
     if mass_limit==10 :
-        # BLAGN = BLAGN[BLAGN['logMass'] >= 10]
-        # Seyferts = Seyferts[Seyferts['logMass'] >= 10]
-        # LINERs = LINERs[LINERs['logMass'] >= 10]
-        # Composites = Composites[Composites['logMass'] >= 10]
-        # SFGs = SFGs[SFGs['logMass'] >= 10]
-        # Passives = Passives[Passives['logMass'] >= 10]
-        # not_ELGs = not_ELGs[not_ELGs['logMass'] >= 10]
         mass_string = 'logMass10_'
     else :
         mass_string = ''
     
-    CARS_weight = np.ones(len(SDSS_CARS))/len(SDSS_CARS)
-    BLAGN_weight = np.ones(len(BLAGN))/len(BLAGN)
-    Sey_weight = np.ones(len(Seyferts))/len(Seyferts)
-    LINER_weight = np.ones(len(LINERs))/len(LINERs)
-    Comp_weight = np.ones(len(Composites))/len(Composites)
-    SFG_weight = np.ones(len(SFGs))/len(SFGs)
-    Pass_weight = np.ones(len(Passives))/len(Passives)
-    ELG_weight = np.ones(len(not_ELGs))/len(not_ELGs)
+    import scipy.stats as sp
+    import warnings
+    warnings.filterwarnings('ignore')
     
-    CARS_label = 'CARS in SDSS (%s)' % len(SDSS_CARS)
-    BLAGN_label = 'GAMA BLAGN (%s)' % len(BLAGN)
-    Sey_label = 'GAMA Seyferts (%s)' % len(Seyferts)
-    LINER_label = 'GAMA LINERs (%s)' % len(LINERs)
-    Comp_label = 'GAMA Composites (%s)' % len(Composites)
-    SFG_label = 'GAMA SFGs (%s)' % len(SFGs)
-    Pass_label = 'GAMA Passives (%s)' % len(Passives)
-    ELG_label = 'GAMA not ELGs (%s)' % len(not_ELGs)
+    # CARS
+    main_dir = 'catalogs/CARS_SDSS/'
+    SDSS_CARS = Table.read(main_dir + 'CARS_SDSS_complete_masslimited.fits')
+    sdss_cars_len = len(SDSS_CARS)
+    CARS_weight = np.ones(sdss_cars_len)/sdss_cars_len
     
-    multi_histo([SDSS_CARS[param], BLAGN[param]], [CARS_label, BLAGN_label],
-                xlabel, ['k','c'], [CARS_weight, BLAGN_weight],
+    # GAMA
+    gama_dir = 'catalogs/CARS_GAMA/'
+    gama_blagn = Table.read(gama_dir + 'GAMA_comparison_BLAGN_logMass10_complete_0-39.fits')
+    gama_sey = Table.read(gama_dir + 'GAMA_comparison_Seyferts_logMass10_complete_0-39.fits')
+    gama_lin = Table.read(gama_dir + 'GAMA_comparison_LINERs_logMass10_complete_0-109.fits')
+    gama_comp = Table.read(gama_dir + 'GAMA_comparison_Comps_logMass10_complete_0-126.fits')
+    gama_sfg = Table.read(gama_dir + 'GAMA_comparison_SFGs_logMass10_complete_0-354.fits')
+    gama_pass = Table.read(gama_dir + 'GAMA_comparison_Passives_logMass10_complete_0-52.fits')
+    gama_elg = Table.read(gama_dir + 'GAMA_comparison_not-ELGs_logMass10_complete_0-645.fits')
+    
+    gama_blagn_len = len(gama_blagn)
+    gama_sey_len = len(gama_sey)
+    gama_lin_len = len(gama_lin)
+    gama_comp_len = len(gama_comp)
+    gama_sfg_len = len(gama_sfg)
+    gama_pass_len = len(gama_pass)
+    gama_elg_len = len(gama_elg)
+    
+    gama_blagn_weight = np.ones(gama_blagn_len)/gama_blagn_len
+    gama_sey_weight = np.ones(gama_sey_len)/gama_sey_len
+    gama_lin_weight = np.ones(gama_lin_len)/gama_lin_len
+    gama_comp_weight = np.ones(gama_comp_len)/gama_comp_len
+    gama_sfg_weight = np.ones(gama_sfg_len)/gama_sfg_len
+    gama_pass_weight = np.ones(gama_pass_len)/gama_pass_len
+    gama_elg_weight = np.ones(gama_elg_len)/gama_elg_len
+    
+    # Compute the Kolmogorov-Smirnov statistic on 2 samples
+    ks_gama_blagn, pval_gama_blagn = sp.ks_2samp(SDSS_CARS[param], gama_blagn[param])
+    ks_gama_sey, pval_gama_sey = sp.ks_2samp(SDSS_CARS[param], gama_sey[param])
+    ks_gama_lin, pval_gama_lin = sp.ks_2samp(SDSS_CARS[param], gama_lin[param])
+    ks_gama_comp, pval_gama_comp = sp.ks_2samp(SDSS_CARS[param], gama_comp[param])
+    ks_gama_sfg, pval_gama_sfg = sp.ks_2samp(SDSS_CARS[param], gama_sfg[param])
+    ks_gama_pass, pval_gama_pass = sp.ks_2samp(SDSS_CARS[param], gama_pass[param])
+    ks_gama_elg, pval_gama_elg = sp.ks_2samp(SDSS_CARS[param], gama_elg[param])
+    
+    # Compute the Anderson-Darling test for k-samples
+    (ad_gama_blagn, critvals_gama_blagn,
+     siglvl_gama_blagn) = sp.anderson_ksamp([SDSS_CARS[param], gama_blagn[param]])
+    (ad_gama_sey, critvals_gama_sey,
+     siglvl_gama_sey) = sp.anderson_ksamp([SDSS_CARS[param], gama_sey[param]])
+    (ad_gama_lin, critvals_gama_lin,
+     siglvl_gama_lin) = sp.anderson_ksamp([SDSS_CARS[param], gama_lin[param]])
+    (ad_gama_comp, critvals_gama_comp,
+     siglvl_gama_comp) = sp.anderson_ksamp([SDSS_CARS[param], gama_comp[param]])
+    (ad_gama_sfg, critvals_gama_sfg,
+     siglvl_gama_sfg) = sp.anderson_ksamp([SDSS_CARS[param], gama_sfg[param]])
+    (ad_gama_pass, critvals_gama_pass,
+     siglvl_gama_pass) = sp.anderson_ksamp([SDSS_CARS[param], gama_pass[param]])
+    (ad_gama_elg, critvals_gama_elg,
+     siglvl_gama_elg) = sp.anderson_ksamp([SDSS_CARS[param], gama_elg[param]])
+    
+    gama_blagn_tuple = (gama_blagn_len, ks_gama_blagn, pval_gama_blagn, ad_gama_blagn, 100*siglvl_gama_blagn)
+    gama_sey_tuple = (gama_sey_len, ks_gama_sey, pval_gama_sey, ad_gama_sey, 100*siglvl_gama_sey)
+    gama_lin_tuple = (gama_lin_len, ks_gama_lin, pval_gama_lin, ad_gama_lin, 100*siglvl_gama_lin)
+    gama_comp_tuple = (gama_comp_len, ks_gama_comp, pval_gama_comp, ad_gama_comp, 100*siglvl_gama_comp)
+    gama_sfg_tuple = (gama_sfg_len, ks_gama_sfg, pval_gama_sfg, ad_gama_sfg, 100*siglvl_gama_sfg)
+    gama_pass_tuple = (gama_pass_len, ks_gama_pass, pval_gama_pass, ad_gama_pass, 100*siglvl_gama_pass)
+    gama_elg_tuple = (gama_elg_len, ks_gama_elg, pval_gama_elg, ad_gama_elg, 100*siglvl_gama_elg)
+    
+    CARS_label = 'CARS in SDSS (%s)' % sdss_cars_len
+    gama_blagn_label = 'GAMA BLAGN (%s)\nK-S=%.3g, p=%.3g\nA-D=%.3g, SL=%.3g%%' % gama_blagn_tuple
+    gama_sey_label = 'GAMA Seyferts (%s)\nK-S=%.3g, p=%.3g\nA-D=%.3g, SL=%.3g%%' % gama_sey_tuple
+    gama_lin_label = 'GAMA LINERs (%s)\nK-S=%.3g, p=%.3g\nA-D=%.3g, SL=%.3g%%' % gama_lin_tuple
+    gama_comp_label = 'GAMA Composites (%s)\nK-S=%.3g, p=%.3g\nA-D=%.3g, SL=%.3g%%' % gama_comp_tuple
+    gama_sfg_label = 'GAMA SFGs (%s)\nK-S=%.3g, p=%.3g\nA-D=%.3g, SL=%.3g%%' % gama_sfg_tuple
+    gama_pass_label = 'GAMA Passives (%s)\nK-S=%.3g, p=%.3g\nA-D=%.3g, SL=%.3g%%' % gama_pass_tuple
+    gama_elg_label = 'GAMA not ELGs (%s)\nK-S=%.3g, p=%.3g\nA-D=%.3g, SL=%.3g%%' % gama_elg_tuple
+    
+    multi_histo([SDSS_CARS[param], gama_blagn[param]], [CARS_label, gama_blagn_label],
+                xlabel, ['k','c'], [CARS_weight, gama_blagn_weight], log=log,
                 outfile='histograms/histo_' + mass_string + param + '_BLAGN.png',
-                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
-    multi_histo([SDSS_CARS[param], Seyferts[param]], [CARS_label, Sey_label],
-                xlabel, ['k','r'], [CARS_weight, Sey_weight],
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
+    multi_histo([SDSS_CARS[param], gama_sey[param]], [CARS_label, gama_sey_label],
+                xlabel, ['k','r'], [CARS_weight, gama_sey_weight], log=log,
                 outfile='histograms/histo_' + mass_string + param + '_Seyferts.png',
-                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
-    multi_histo([SDSS_CARS[param], LINERs[param]], [CARS_label, LINER_label],
-                xlabel, ['k','g'], [CARS_weight, LINER_weight],
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
+    multi_histo([SDSS_CARS[param], gama_lin[param]], [CARS_label, gama_lin_label],
+                xlabel, ['k','g'], [CARS_weight, gama_lin_weight], log=log,
                 outfile='histograms/histo_' + mass_string + param + '_LINERs.png',
-                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
-    multi_histo([SDSS_CARS[param], Composites[param]], [CARS_label, Comp_label],
-                xlabel, ['k','m'], [CARS_weight, Comp_weight],
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
+    multi_histo([SDSS_CARS[param], gama_comp[param]], [CARS_label, gama_comp_label],
+                xlabel, ['k','m'], [CARS_weight, gama_comp_weight], log=log,
                 outfile='histograms/histo_' + mass_string + param + '_Comps.png',
-                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
-    multi_histo([SDSS_CARS[param], SFGs[param]], [CARS_label, SFG_label],
-                xlabel, ['k','b'], [CARS_weight, SFG_weight],
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
+    multi_histo([SDSS_CARS[param], gama_sfg[param]], [CARS_label, gama_sfg_label],
+                xlabel, ['k','b'], [CARS_weight, gama_sfg_weight], log=log,
                 outfile='histograms/histo_' + mass_string + param + '_SFGs.png',
-                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
-    multi_histo([SDSS_CARS[param], Passives[param]], [CARS_label, Pass_label],
-                xlabel, ['k','orange'], [CARS_weight, Pass_weight],
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
+    multi_histo([SDSS_CARS[param], gama_pass[param]], [CARS_label, gama_pass_label],
+                xlabel, ['k','orange'], [CARS_weight, gama_pass_weight], log=log,
                 outfile='histograms/histo_' + mass_string + param + '_Passives.png',
-                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
-    multi_histo([SDSS_CARS[param], not_ELGs[param]], [CARS_label, ELG_label],
-                xlabel, ['k','grey'], [CARS_weight, ELG_weight],
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
+    multi_histo([SDSS_CARS[param], gama_elg[param]], [CARS_label, gama_elg_label],
+                xlabel, ['k','grey'], [CARS_weight, gama_elg_weight], log=log,
                 outfile='histograms/histo_' + mass_string + param + '_not-ELGs.png',
-                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
     
     return
 
@@ -429,8 +471,13 @@ def histo2d(xvals, xlab, yvals, ylab, nbins=200, xmin=None, xmax=None,
     
     return
 
-def multi_histo(param_list, labels, xlab, colors, weights, outfile=None,
-                log=False, xmin=None, xmax=None, ymin=None, ymax=None) :
+def multi_histo(param_list, labels, xlab, colors, weights, location=0,
+                outfile=None, log=False, xmin=None, xmax=None, ymin=None, ymax=None) :
+    
+    first_param = param_list[0]
+    second_param = param_list[1]
+    first_weight = weights[0]
+    second_weight = weights[1]
     
     global currentFig
     fig = plt.figure(currentFig)
@@ -441,64 +488,48 @@ def multi_histo(param_list, labels, xlab, colors, weights, outfile=None,
     
     # colors = ['k', 'b', 'r', 'g', 'm', 'c', 'y', 'k', 'b']
     # styles = ['-', '--', '-.', ':', '-', '--', '-.', ':', '-']
-    styles = ['--', '-']
+    # styles = ['--', '-']
+    
+    if xlab == 'Number of Companions' :
+        xlab = '1 + Number of Companions'
+        first_param = 1 + param_list[0]
+        second_param = 1 + param_list[1]
+    
+    if xlab == 'Projected Distance to the Center of Stellar Mass (arcmin)' :
+        xlab = r'1 + Projected Dist. to the Center of $M_{*}$ (arcmin)'
+        first_param = 1 + param_list[0]
+        second_param = 1 + param_list[1]
+    
+    if xlab == 'Companions in the GAMA Cyl.' :
+        xlab = '1 + Companions in the GAMA Cyl.'
+        first_param = 1 + param_list[0]
+        second_param = 1 + param_list[1]
     
     if log==True :
-        new_list = []
-        for i in range(len(param_list)) :
-            mask = param_list[i] > 0
-            new_list.append( np.log10(param_list[i][mask]) )
-        ax.hist(new_list, histtype='bar', density=True, label=labels,
-                linestyle='--') # stacked=False
-        xlabel = 'log(' + xlab + ')'
-    # else :
-    #     ax.hist(param_list, histtype='step', density=True, label=labels,
-    #             linestyle='--')
-    #     xlabel = xlab
-    else :
-        # option 1
-        # ax.hist(param_list, label=labels, weights=weights,
-        #         histtype='step', linestyle='-', linewidth=2, color=colors)
+        # alternative to mask out values of 0
+        # first_param = first_param[first_param > 0]
+        # first_weight = np.ones(len(first_param))/len(first_param)
+        # second_param = second_param[second_param > 0]
+        # second_weight = np.ones(len(second_param))/len(second_param)
         
-        # option 2
-        ax.hist(param_list[0], label=labels[0], weights=weights[0],
+        ax.hist(np.log10(first_param), label=labels[0], weights=first_weight,
                 histtype='step', linestyle='-', color=colors[0])
-        ax.hist(param_list[1], label=labels[1], weights=weights[1],
+        ax.hist(np.log10(second_param), label=labels[1], weights=second_weight,
                 histtype='step', linestyle='-', color=colors[1], linewidth=2)
-        
-        # for i in range(len(param_list)) : # add each dataset to the plot
-        #     ax.hist(param_list[i], label = labels[i], density=True,
-        #             histtype='step', linestyle=styles[i], color=colors[i],
-        #             stacked=True)
-        
-        # ax.hist(param_list, label=labels, density=True, histtype='step',
-        #         linestyle='--', color=colors)
-        
-        xlabel = xlab
-    
-    """
-    if log==True :
-        for i in range(len(param_list)) :
-            mask = param_list[i] > 0
-            ax.hist(np.log10(param_list[i][mask]), label = labels[i],
-                    density=True,
-                    histtype='step', linestyle=styles[i], color=colors[i],
-                    stacked=True)
-        xlabel = 'log(' + xlab + ')'
+        xlabel = r'$\log_{10}$(' + xlab + ')'
     else :
-        for i in range(len(param_list)) : # add each dataset to the plot
-            ax.hist(param_list[i], label = labels[i], density=True,
-                    histtype='step', linestyle=styles[i], color=colors[i],
-                    stacked=True)
+        ax.hist(first_param, label=labels[0], weights=first_weight,
+                histtype='step', linestyle='-', color=colors[0])
+        ax.hist(second_param, label=labels[1], weights=second_weight,
+                histtype='step', linestyle='-', color=colors[1], linewidth=2)
         xlabel = xlab
-    """
     
     ax.set_xlabel('%s' % xlabel, fontsize=15)
     ax.set_ylabel('Fractional Frequency', fontsize=15)
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     
-    plt.legend()
+    plt.legend(loc=location)
     plt.tight_layout()
     plt.show()
     # plt.savefig(outfile, overwrite=True)
@@ -827,10 +858,45 @@ def view_all_3d_plots() :
                     # 'GAMA - SFG'
                    # ])
 
-# all_histograms('Companions', 'Number of Companions', mass_limit=10, xmin=-5, xmax=210, ymin=0, ymax=0.6)
-# all_histograms('Most_Massive_Distance', 'Distance to Most Massive Companion (kpc)', mass_limit=10, xmin=-500, xmax=22500, ymin=0, ymax=0.6)
+# to include as-is in thesis
+# all_histograms('Z', 'Redshift', loc=2, xmin=0.01, xmax=0.062, ymin=0, ymax=0.44)
+# all_histograms('M_g', r'Absolute $g$ Magnitude', xmin=-23, xmax=-16, ymin=0, ymax=0.38)
+# all_histograms('M_i', r'Absolute $i$ Magnitude', loc=2, xmin=-24.6, xmax=-18.3, ymin=0, ymax=0.42)
+# all_histograms('logMass', r'Target Stellar Mass $(\log_{10}[M_\odot])$', xmin=9.9, xmax=12.4, ymin=0, ymax=0.5)
 
-# all_histograms('AGEPar', r'AGE Parameter (Mpc$^{-1}$)', mass_limit=10, xmin=-1, xmax=32, ymin=0, ymax=0.6)
-# all_histograms('Closest_Distance', xmin=-500, xmax=22500, ymin=0, ymax=0.001)
-# all_histograms('SurfaceDensity', xmin=-0.01, xmax=1.3, ymin=0, ymax=120) # doesn't work
-# all_histograms('Overdensity', xmin=0, xmax=11, ymin=0, ymax=1.8)
+# to review with Chris
+# all_histograms('Companions', 'Number of Companions', xmin=-5, xmax=210, ymin=0, ymax=0.6)
+# all_histograms('Companions', 'Number of Companions', log=True, xmin=-0.1, xmax=2.5, ymin=0, ymax=0.4)
+
+# all_histograms('Most_Massive_Mass', r'Most Massive Companion Mass $(\log_{10}[M_\odot])$',
+               # loc=2, xmin=8.5, xmax=12.4, ymin=0, ymax=0.4)
+
+# all_histograms('Most_Massive_Distance', 'Distance to Most Massive Companion (kpc)',
+#                xmin=-500, xmax=22500, ymin=0, ymax=0.6)
+# all_histograms('Most_Massive_Distance', 'Distance to Most Massive Companion (kpc)',
+#                log=True, xmin=1.9, xmax=4.5, ymin=0, ymax=0.3)
+
+# all_histograms('Closest_Mass', r'Closest Companion Mass $(\log_{10}[M_\odot])$',
+               # xmin=8.4, xmax=11.6, ymin=0, ymax=0.4)
+
+# all_histograms('Closest_Distance', 'Distance to Closest Companion (kpc)',
+#                xmin=-500, xmax=18500, ymin=0, ymax=0.95)
+# all_histograms('Closest_Distance', 'Distance to Closest Companion (kpc)',
+#                log=True, xmin=1.6, xmax=4.4, ymin=0, ymax=0.35)
+
+# all_histograms('d_CoM', 'Projected Distance to the Center of Stellar Mass (arcmin)',
+#                xmin=-2, xmax=62, ymin=0, ymax=0.35)
+# all_histograms('d_CoM', 'Projected Distance to the Center of Stellar Mass (arcmin)',
+               # log=True, loc=2, xmin=-0.05, xmax=1.85, ymin=0, ymax=0.45)
+
+# all_histograms('CountInCyl', 'Companions in the GAMA Cyl.', xmin=-2, xmax=90, ymin=0, ymax=0.68)
+# all_histograms('CountInCyl', 'Companions in the GAMA Cyl.', log=True, xmin=-0.1, xmax=2, ymin=0, ymax=0.45)
+
+# all_histograms('SurfaceDensity', r'Surface Density (Mpc$^{-2}$)',
+                # log=True, xmin=-4.8, xmax=0.4, ymin=0, ymax=0.35)
+
+# all_histograms('Overdensity', 'Overdensity',
+                # log=True, xmin=-0.9, xmax=1.2, ymin=0, ymax=0.43)
+
+# all_histograms('AGEPar', r'AGE Parameter (Mpc$^{-1}$)', xmin=-1, xmax=32, ymin=0, ymax=0.6)
+# all_histograms('AGEPar', r'AGE Parameter (Mpc$^{-1}$)', log=True, loc=2, xmin=-2.75, xmax=1.6, ymin=0, ymax=0.4)
