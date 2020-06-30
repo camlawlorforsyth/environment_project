@@ -37,7 +37,7 @@ def search_prep(catalog_path, host, CARS_sky_coords, self_in_search) :
     # add the additional columns to the catalog
     catalog['d2d'] = d2d
     catalog['d3d'] = d3d
-    catalog['target_host'] = [host] * len(catalog)
+    catalog['target_host'] = [host]*len(catalog)
     
     if self_in_search == True :
         if len(catalog) > 0 :

@@ -2,6 +2,7 @@
 # imports
 import numpy as np
 
+import astropy.constants as const
 from astropy.coordinates import Angle
 from astropy.cosmology import FlatLambdaCDM
 from astropy.table import hstack, Table, vstack
@@ -12,8 +13,10 @@ import environmental_parameters as env_params
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3)
 mass_limit_default = 8.452021
-SDSS_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_logMass_vCam.fits'
-GAMA_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassCam_logMass_vCam.fits'
+fwhm_conv = 2*np.sqrt( 2*np.log(2) )
+speed_of_light = const.c.to('km/s').value
+SDSS_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_logMass_vCam.fits'
+GAMA_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_logMass_vCam.fits'
 
 def random_galaxy_candidates(GAMA_or_SDSS, outfilename, targettype, mass_limit) :
     
@@ -32,6 +35,7 @@ def random_galaxy_candidates(GAMA_or_SDSS, outfilename, targettype, mass_limit) 
     
     # create the resulting masked table of good objects and save it
     comparison_objects = base_cat[mask]
+    print(len(comparison_objects))
     
     # add the index columns to the catalog
     comparison_objects['index'] = np.arange(len(comparison_objects))
@@ -42,7 +46,7 @@ def random_galaxy_candidates(GAMA_or_SDSS, outfilename, targettype, mass_limit) 
         mass_string = '_logMass10'
     
     out_path = 'catalogs/candidate_cats/' + GAMA_or_SDSS + '_' + outfilename + mass_string + '.fits'
-    comparison_objects.write(out_path, overwrite=False)
+    comparison_objects.write(out_path, overwrite=True)
     
     return
 
@@ -84,16 +88,28 @@ def random_galaxy_comparison(GAMA_or_SDSS, infile, outfilename, random=False,
     if GAMA_or_SDSS == 'GAMA' :
         absmag_g = cat['absmag_g']
         absmag_i = cat['absmag_i']
+        catMass = cat['logmstar']
+        sfr = np.power(10, cat['SFR_0_1Gyr_percentile50'])
+        condition = ((cat['SIG_OIIIR']/cat['SIG_OIIIR_ERR'] >= 3) &
+                     (cat['OIIIR_NPEG'] == 0) & (cat['HB_FITFAIL'] == 0))
+        OIII_width = (fwhm_conv*speed_of_light*cat['SIG_OIIIR']/5007)
+        OIII_FWHM = np.where(condition, OIII_width, np.nan)
     if GAMA_or_SDSS == 'SDSS' :
-        absmag_g = cat['KCOR_MAG'][:,0]*u.mag - 5*np.log10(D_Ls.to('pc')/u.pc) + 5
-        absmag_i = cat['KCOR_MAG'][:,2]*u.mag - 5*np.log10(D_Ls.to('pc')/u.pc) + 5
+        absmag_g = (cat['KCOR_MAG'][:,0] - 5*np.log10(D_Ls.to('pc')/u.pc) + 5)*u.mag
+        absmag_i = (cat['KCOR_MAG'][:,2] - 5*np.log10(D_Ls.to('pc')/u.pc) + 5)*u.mag
+        catMass = cat['MEDIAN_logmass']
+        sfr = np.power(10, cat['MEDIAN_sfr'])
+        condition = (cat['OIII_5007_FWHM']/cat['OIII_5007_FWHM_ERR'] >= 3)
+        OIII_FWHM = np.where(condition, cat['OIII_5007_FWHM'], np.nan)
     
     columns = [julianIDs, RAs, decs, cat['Z'], D_As, D_Ls,
                Angle( ((2*u.Mpc)/D_As).value, u.radian ).to('arcmin'),
-               absmag_g, absmag_i, colorMass]
+               absmag_g, absmag_i, colorMass,
+               catMass, sfr, OIII_FWHM]
     
     column_headings = ('Name', 'RA', 'DEC', 'Z', 'D_A', 'D_L',
-                       '2_Mpc_Radius', 'M_g', 'M_i', 'logMass')
+                       '2_Mpc_Radius', 'M_g', 'M_i', 'logMass',
+                       'catlogMass', 'SFR', 'OIII_FWHM')
     
     comment = 'Flat \u039BCDM cosmology: H\u2080 = 70 km s\u207B\u00B9 Mpc\u207B\u00B9, \u03A9\u2098 = 0.3'
     
@@ -145,51 +161,41 @@ def random_galaxy_join_tables(ext) :
     
     return
 
-# subset the different objects types in SDSS
-# random_galaxy_candidates('SDSS', 'comparison_BLAGN', 'BLAGN', mass_limit_default)
-# random_galaxy_candidates('SDSS', 'comparison_Seyferts', 'Seyfert', mass_limit_default)
-# random_galaxy_candidates('SDSS', 'comparison_LINERs', 'LINER', mass_limit_default)
-# random_galaxy_candidates('SDSS', 'comparison_Comps', 'Comp', mass_limit_default)
-# random_galaxy_candidates('SDSS', 'comparison_SFGs', 'SFG', mass_limit_default)
-# random_galaxy_candidates('SDSS', 'comparison_Passives', 'Passive', mass_limit_default)
-# random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', mass_limit_default)
-
-# subset the different objects types in SDSS with logMass >= 10
-# random_galaxy_candidates('SDSS', 'comparison_BLAGN', 'BLAGN', 10)
-# random_galaxy_candidates('SDSS', 'comparison_Seyferts', 'Seyfert', 10)
-# random_galaxy_candidates('SDSS', 'comparison_LINERs', 'LINER', 10)
-# random_galaxy_candidates('SDSS', 'comparison_Comps', 'Comp', 10)
-# random_galaxy_candidates('SDSS', 'comparison_SFGs', 'SFG', 10)
-# random_galaxy_candidates('SDSS', 'comparison_Passives', 'Passive', 10)
-# random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', 10)
-
 # subset the different objects types in GAMA
-# random_galaxy_candidates('GAMA', 'comparison_BLAGN', 'BLAGN', mass_limit_default)
+# random_galaxy_candidates('GAMA', 'comparison_BLAGN', 'BLAGN  ', mass_limit_default)
 # random_galaxy_candidates('GAMA', 'comparison_Seyferts', 'Seyfert', mass_limit_default)
-# random_galaxy_candidates('GAMA', 'comparison_LINERs', 'LINER', mass_limit_default)
-# random_galaxy_candidates('GAMA', 'comparison_Comps', 'Comp', mass_limit_default)
-# random_galaxy_candidates('GAMA', 'comparison_SFGs', 'SFG', mass_limit_default)
+# random_galaxy_candidates('GAMA', 'comparison_LINERs', 'LINER  ', mass_limit_default)
+# random_galaxy_candidates('GAMA', 'comparison_Comps', 'Comp   ', mass_limit_default)
+# random_galaxy_candidates('GAMA', 'comparison_SFGs', 'SFG    ', mass_limit_default)
 # random_galaxy_candidates('GAMA', 'comparison_Passives', 'Passive', mass_limit_default)
 # random_galaxy_candidates('GAMA', 'comparison_not-ELGs', 'not_ELG', mass_limit_default)
 
 # subset the different objects types in GAMA with logMass >= 10
-# random_galaxy_candidates('GAMA', 'comparison_BLAGN', 'BLAGN', 10)
+# random_galaxy_candidates('GAMA', 'comparison_BLAGN', 'BLAGN  ', 10)
 # random_galaxy_candidates('GAMA', 'comparison_Seyferts', 'Seyfert', 10)
-# random_galaxy_candidates('GAMA', 'comparison_LINERs', 'LINER', 10)
-# random_galaxy_candidates('GAMA', 'comparison_Comps', 'Comp', 10)
-# random_galaxy_candidates('GAMA', 'comparison_SFGs', 'SFG', 10)
+# random_galaxy_candidates('GAMA', 'comparison_LINERs', 'LINER  ', 10)
+# random_galaxy_candidates('GAMA', 'comparison_Comps', 'Comp   ', 10)
+# random_galaxy_candidates('GAMA', 'comparison_SFGs', 'SFG    ', 10)
 # random_galaxy_candidates('GAMA', 'comparison_Passives', 'Passive', 10)
 # random_galaxy_candidates('GAMA', 'comparison_not-ELGs', 'not_ELG', 10)
 
-# NEED TO COMPLETE THIS IMMEDIATELY
-# determine env. params for the different objects types in SDSS with logMass >= 10
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_BLAGN_logMass10', 'SDSS_comparison_BLAGN_logMass10')
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_Seyferts_logMass10', 'SDSS_comparison_Seyferts_logMass10')
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_LINERs_logMass10', 'SDSS_comparison_LINERs_logMass10')
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_Comps_logMass10', 'SDSS_comparison_Comps_logMass10')
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_SFGs_logMass10', 'SDSS_comparison_SFGs_logMass10')
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_Passives_logMass10', 'SDSS_comparison_Passives_logMass10')
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_not-ELGs_logMass10', 'SDSS_comparison_not-ELGs_logMass10')
+# subset the different objects types in SDSS
+# random_galaxy_candidates('SDSS', 'comparison_BLAGN', 'BLAGN  ', mass_limit_default)
+# random_galaxy_candidates('SDSS', 'comparison_Seyferts', 'Seyfert', mass_limit_default)
+# random_galaxy_candidates('SDSS', 'comparison_LINERs', 'LINER  ', mass_limit_default)
+# random_galaxy_candidates('SDSS', 'comparison_Comps', 'Comp   ', mass_limit_default)
+# random_galaxy_candidates('SDSS', 'comparison_SFGs', 'SFG    ', mass_limit_default)
+# random_galaxy_candidates('SDSS', 'comparison_Passives', 'Passive', mass_limit_default)
+# random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', mass_limit_default)
+
+# subset the different objects types in SDSS with logMass >= 10
+# random_galaxy_candidates('SDSS', 'comparison_BLAGN', 'BLAGN  ', 10)
+# random_galaxy_candidates('SDSS', 'comparison_Seyferts', 'Seyfert', 10)
+# random_galaxy_candidates('SDSS', 'comparison_LINERs', 'LINER  ', 10)
+# random_galaxy_candidates('SDSS', 'comparison_Comps', 'Comp   ', 10)
+# random_galaxy_candidates('SDSS', 'comparison_SFGs', 'SFG    ', 10)
+# random_galaxy_candidates('SDSS', 'comparison_Passives', 'Passive', 10)
+# random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', 10)
 
 # determine env. params for the different objects types in GAMA with logMass >= 10
 # random_galaxy_comparison('GAMA', 'GAMA_comparison_BLAGN_logMass10', 'GAMA_comparison_BLAGN_logMass10')
@@ -199,3 +205,17 @@ def random_galaxy_join_tables(ext) :
 # random_galaxy_comparison('GAMA', 'GAMA_comparison_SFGs_logMass10', 'GAMA_comparison_SFGs_logMass10')
 # random_galaxy_comparison('GAMA', 'GAMA_comparison_Passives_logMass10', 'GAMA_comparison_Passives_logMass10')
 # random_galaxy_comparison('GAMA', 'GAMA_comparison_not-ELGs_logMass10', 'GAMA_comparison_not-ELGs_logMass10')
+
+# determine env. params for the different objects types in SDSS with logMass >= 10
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_BLAGN_logMass10', 'SDSS_comparison_BLAGN_logMass10')    
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_Seyferts_logMass10', 'SDSS_comparison_Seyferts_logMass10')
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_Passives_logMass10', 'SDSS_comparison_Passives_logMass10')
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_SFGs_logMass10', 'SDSS_comparison_SFGs_logMass10')
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_Comps_logMass10', 'SDSS_comparison_Comps_logMass10')
+
+
+
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_not-ELGs_logMass10', 'SDSS_comparison_not-ELGs_logMass10')
+
+# to complete:
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_LINERs_logMass10', 'SDSS_comparison_LINERs_logMass10')

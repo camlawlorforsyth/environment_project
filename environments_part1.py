@@ -31,8 +31,8 @@ import search as srch
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
 currentFig = 1 # first figure will be numbered as 'Figure 1'
 mass_limit = 8.452021 # [dex(M_*)] ie. log(M_*) = 8.452021, 104 km/s away from HE 2222-0026
-SDSS_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_logMass_vCam.fits'
-GAMA_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassCam_logMass_vCam.fits'
+SDSS_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_logMass_vCam.fits'
+GAMA_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_logMass_vCam.fits'
 
 # mass-limit using color-based mass estimate
 if (mass_limit > 0) :
@@ -190,9 +190,9 @@ def main(cat_name, mass_check=False) :
 def final_catalog_operations(cat_name) :
     
     if cat_name == 'SDSS' :
-        path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_vCam.fits'
+        path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_vCam.fits'
     if cat_name == 'GAMA' :
-        path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassCam_vCam.fits'
+        path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_vCam.fits'
     
     catalog = Table.read(path)
     
@@ -235,9 +235,9 @@ def final_catalog_operations(cat_name) :
     catalog = catalog[mask]
     
     if cat_name == 'SDSS' :
-        outpath = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_logMass_vCam.fits'
+        outpath = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_logMass_vCam.fits'
     if cat_name == 'GAMA' :
-        outpath = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassCam_logMass_vCam.fits'
+        outpath = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_logMass_vCam.fits'
     
     catalog.write(outpath, overwrite=False)
     

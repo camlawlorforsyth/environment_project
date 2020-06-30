@@ -108,11 +108,11 @@ def magnitude_check() :
 def specClass_check_BPT(sample) :
     
     if sample == 'SDSS' :
-        in_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_logMass_vCam.fits'
+        in_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_logMass_vCam.fits'
         catalog = Table.read(in_path)
         
-        log_OIII_HB = np.log10( catalog['OIII_5007_FLUX'] / catalog['H_BETA_FLUX'] )
-        log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
+        log_OIII_HB = np.log10( catalog['OIII_5007_FLUX_1'] / catalog['H_BETA_FLUX'] )
+        log_NII_HA = np.log10( catalog['NII_6584_FLUX_1'] / catalog['H_ALPHA_FLUX'] )
         
         Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['EmLineMethod'] == 'BPT')
         LINER = (catalog['EmLineType'] == 'LINER') & (catalog['EmLineMethod'] == 'BPT')
@@ -120,7 +120,7 @@ def specClass_check_BPT(sample) :
         SFG = (catalog['EmLineType'] == 'SFG') & (catalog['EmLineMethod'] == 'BPT')
     
     if sample == 'GAMA' :
-        in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassCam_logMass_vCam.fits'
+        in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_logMass_vCam.fits'
         catalog = Table.read(in_path)
         
         HB_flux_corr = (1 + 2.5/catalog['HB_EW_1'])*catalog['HB_FLUX_1']
@@ -151,11 +151,11 @@ def specClass_check_BPT(sample) :
 def specClass_check_WHAN(sample) :
     
     if sample == 'SDSS' :
-        in_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_logMass_vCam.fits'
+        in_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_logMass_vCam.fits'
         catalog = Table.read(in_path)
         
         HA_width = np.log10( catalog['H_ALPHA_FLUX'] / catalog['H_ALPHA_CONT'] )
-        log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
+        log_NII_HA = np.log10( catalog['NII_6584_FLUX_1'] / catalog['H_ALPHA_FLUX'] )
         
         Sey = (catalog['EmLineType'] == 'Seyfert') & (catalog['EmLineMethod'] == 'WHAN')
         LINER = (catalog['EmLineType'] == 'LINER') & (catalog['EmLineMethod'] == 'WHAN')
@@ -164,7 +164,7 @@ def specClass_check_WHAN(sample) :
         Pass = (catalog['EmLineType'] == 'Passive') & (catalog['EmLineMethod'] == 'WHAN')
     
     if sample == 'GAMA' :
-        in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassCam_logMass_vCam.fits'
+        in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_logMass_vCam.fits'
         catalog = Table.read(in_path)
         
         HA_width = np.log10(catalog['HA_EW_1'])

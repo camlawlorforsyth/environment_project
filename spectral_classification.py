@@ -7,17 +7,17 @@ from astropy.table import Table
 def spectral_classification(sample) :
     
     if sample == 'SDSS' :
-        in_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassPrelim_vCam.fits'
-        out_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_SpecClassCam_vCam.fits'
+        in_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassPrelim_vCam.fits'
+        out_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_vCam.fits'
         catalog = Table.read(in_path)
         
-        log_OIII_HB = np.log10( catalog['OIII_5007_FLUX'] / catalog['H_BETA_FLUX'] )
-        log_NII_HA = np.log10( catalog['NII_6584_FLUX'] / catalog['H_ALPHA_FLUX'] )
+        log_OIII_HB = np.log10( catalog['OIII_5007_FLUX_1'] / catalog['H_BETA_FLUX'] )
+        log_NII_HA = np.log10( catalog['NII_6584_FLUX_1'] / catalog['H_ALPHA_FLUX'] )
         HA_EW = np.log10( catalog['H_ALPHA_FLUX'] / catalog['H_ALPHA_CONT'] )
     
     if sample == 'GAMA' :
-        in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassPrelim_vCam.fits'
-        out_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_SpecClassCam_vCam.fits'
+        in_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassPrelim_vCam.fits'
+        out_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_vCam.fits'
         catalog = Table.read(in_path)
         
         HB_flux_corr = (1 + 2.5/catalog['HB_EW_1'])*catalog['HB_FLUX_1']
