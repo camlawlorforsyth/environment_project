@@ -10,6 +10,11 @@ from astropy.coordinates import Angle
 from astropy.table import Table
 import astropy.units as u
 
+plt.style.use('ggplot') # or 'default'
+# plt.rcParams['axes.grid'] = True
+plt.rcParams['axes.edgecolor'] = 'k'
+plt.rcParams['axes.linewidth'] = 1.5
+
 # constants
 currentFig = 1
 
@@ -605,7 +610,7 @@ def histo(param, label, title=None, vert_line=None, num_bins=None) :
     return
 
 def histo2d(xvals, xlab, yvals, ylab, nbins=200, xmin=None, xmax=None,
-            ymin=None, ymax=None,) :
+            ymin=None, ymax=None) :
     
     from matplotlib.colors import LogNorm
     
@@ -616,7 +621,7 @@ def histo2d(xvals, xlab, yvals, ylab, nbins=200, xmin=None, xmax=None,
     ax = fig.add_subplot(111)
     
     ax.hist2d(xvals, yvals, bins=nbins, norm=LogNorm())
-    cbar = plt.colorbar()
+    # cbar = plt.colorbar()
     
     ax.set_xlabel('%s' % xlab, fontsize=15)
     ax.set_ylabel('%s' % ylab, fontsize=15)
@@ -624,7 +629,7 @@ def histo2d(xvals, xlab, yvals, ylab, nbins=200, xmin=None, xmax=None,
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     
-    ax.legend()
+    # ax.legend()
     plt.tight_layout()
     plt.show()
     
@@ -947,6 +952,38 @@ def plot_decoupled_fit(file, x_array, raw_data, fit, residual, HA_NII_core, BLR1
     plt.show()
     # plt.savefig(file, overwrite=True)
     # plt.close(fig)
+    
+    return
+
+def plot_with_errors(xvals, xlab, yvals, ylab, upper_errors, lower_errors,
+                     xmin=None, xmax=None, ymin=None, ymax=None) :
+    
+    global currentFig
+    fig = plt.figure(currentFig, figsize=(11.54, 8))
+    currentFig += 1
+    plt.clf()
+    ax = fig.add_subplot(111)
+    
+    ax.plot(xvals, yvals, 'k-', label='Median')
+    ax.plot(xvals, upper_errors, 'k:', label=r'$1\sigma$ Limits')
+    ax.plot(xvals, lower_errors, 'k:')
+    
+    ax.hlines(0, 6, 14, color='grey', linestyle='--')
+    
+    ax.set_xlabel('%s' % xlab, fontsize=22)
+    ax.set_ylabel('%s' % ylab, fontsize=22)
+    
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+    
+    ax.tick_params(axis='both',which='both',labelsize=19)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
+    ax.legend(facecolor='whitesmoke', framealpha=1, fontsize=19, loc = 'upper left')
+    plt.tight_layout()
+    plt.show()
     
     return
 
