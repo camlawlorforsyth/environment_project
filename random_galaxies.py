@@ -209,13 +209,8 @@ def random_galaxy_join_tables(ext) :
 # determine env. params for the different objects types in SDSS with logMass >= 10
 # random_galaxy_comparison('SDSS', 'SDSS_comparison_BLAGN_logMass10', 'SDSS_comparison_BLAGN_logMass10')    
 # random_galaxy_comparison('SDSS', 'SDSS_comparison_Seyferts_logMass10', 'SDSS_comparison_Seyferts_logMass10')
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_Passives_logMass10', 'SDSS_comparison_Passives_logMass10')
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_SFGs_logMass10', 'SDSS_comparison_SFGs_logMass10')
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_Comps_logMass10', 'SDSS_comparison_Comps_logMass10')
-
-
-
-# random_galaxy_comparison('SDSS', 'SDSS_comparison_not-ELGs_logMass10', 'SDSS_comparison_not-ELGs_logMass10')
-
-# to complete:
 # random_galaxy_comparison('SDSS', 'SDSS_comparison_LINERs_logMass10', 'SDSS_comparison_LINERs_logMass10')
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_Comps_logMass10', 'SDSS_comparison_Comps_logMass10')
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_SFGs_logMass10', 'SDSS_comparison_SFGs_logMass10')
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_Passives_logMass10', 'SDSS_comparison_Passives_logMass10')
+# random_galaxy_comparison('SDSS', 'SDSS_comparison_not-ELGs_logMass10', 'SDSS_comparison_not-ELGs_logMass10')
