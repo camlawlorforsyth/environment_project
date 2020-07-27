@@ -98,8 +98,18 @@ def random_galaxy_comparison(GAMA_or_SDSS, infile, outfilename, random=False,
         OIII_width = (fwhm_conv*speed_of_light*cat['SIG_OIIIR']/5007)
         OIII_FWHM = np.where(condition, OIII_width, np.nan)
     if GAMA_or_SDSS == 'SDSS' :
-        absmag_g = (cat['KCOR_MAG'][:,0] - 5*np.log10(D_Ls.to('pc')/u.pc) + 5)*u.mag
-        absmag_i = (cat['KCOR_MAG'][:,2] - 5*np.log10(D_Ls.to('pc')/u.pc) + 5)*u.mag
+        M_g = (cat['KCOR_MAG'][:,0] - 5*np.log10(D_Ls.to('pc')/u.pc) + 5)*u.mag # absolute g mag.
+        M_i = (cat['KCOR_MAG'][:,2] - 5*np.log10(D_Ls.to('pc')/u.pc) + 5)*u.mag # absolute i mag.
+        
+        # see mass_correction in 'mass_estimate_from-color.py'
+        g_slope_corr = 0.8125759463914866
+        g_int_corr = -4.961460348702913
+        i_slope_corr = 0.8492931852404171
+        i_int_corr = -4.343099872187622
+        
+        absmag_g = g_slope_corr*M_g + g_int_corr
+        absmag_i = i_slope_corr*M_i + i_int_corr
+        
         catMass = cat['MEDIAN_logmass']
         sfr = np.power(10, cat['MEDIAN_sfr'])
         condition = (cat['OIII_5007_FWHM']/cat['OIII_5007_FWHM_ERR'] >= 3)
@@ -218,13 +228,13 @@ def random_galaxy_mass_corr(g_slope_corr, g_int_corr, i_slope_corr, i_int_corr) 
 # random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', mass_limit_default)
 
 # subset the different objects types in SDSS with logMass >= 10
-random_galaxy_candidates('SDSS', 'comparison_BLAGN', 'BLAGN', 10)
-random_galaxy_candidates('SDSS', 'comparison_Seyferts', 'Seyfert', 10)
-random_galaxy_candidates('SDSS', 'comparison_LINERs', 'LINER', 10)
-random_galaxy_candidates('SDSS', 'comparison_Comps', 'Comp', 10)
-random_galaxy_candidates('SDSS', 'comparison_SFGs', 'SFG', 10)
-random_galaxy_candidates('SDSS', 'comparison_Passives', 'Passive', 10)
-random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', 10)
+# random_galaxy_candidates('SDSS', 'comparison_BLAGN', 'BLAGN', 10)
+# random_galaxy_candidates('SDSS', 'comparison_Seyferts', 'Seyfert', 10)
+# random_galaxy_candidates('SDSS', 'comparison_LINERs', 'LINER', 10)
+# random_galaxy_candidates('SDSS', 'comparison_Comps', 'Comp', 10)
+# random_galaxy_candidates('SDSS', 'comparison_SFGs', 'SFG', 10)
+# random_galaxy_candidates('SDSS', 'comparison_Passives', 'Passive', 10)
+# random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', 10)
 
 # determine env. params for the different objects types in GAMA with logMass >= 10
 # random_galaxy_comparison('GAMA', 'GAMA_comparison_BLAGN_logMass10', 'GAMA_comparison_BLAGN_logMass10')
