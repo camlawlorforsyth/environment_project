@@ -12,7 +12,7 @@ import search as srch
 
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3)
-mass_limit = 8.452021
+mass_limit = 9.071297
 
 def adaptive_gaussian(CARS_coords, CARS_dist, catalog) :
     
@@ -51,13 +51,26 @@ def basic_params(catalog) :
         closeness_catalog.sort('d3d')
         closest_mass = closeness_catalog['logMass'][0]
         closest_dist = (closeness_catalog['d3d'].to(u.kpc))[0]
+        
+        massive_1Mpc_catalog = catalog
+        mask = (catalog['d3d'].to(u.kpc) <= 1000*u.kpc)
+        massive_1Mpc_catalog = massive_1Mpc_catalog[mask]
+        if len(massive_1Mpc_catalog) > 0 :
+            massive_1Mpc_catalog.sort('logMass')
+            massive_1Mpc_mass = massive_1Mpc_catalog['logMass'][-1]
+            massive_1Mpc_dist = (massive_1Mpc_catalog['d3d'].to(u.kpc))[-1]
+        else :
+            massive_1Mpc_mass = np.nan
+            massive_1Mpc_dist = np.nan*u.kpc
     else :
         most_massive_mass = np.nan
         most_massive_dist = np.nan*u.kpc
         closest_mass = np.nan
         closest_dist = np.nan*u.kpc
+        massive_1Mpc_mass = np.nan
+        massive_1Mpc_dist = np.nan*u.kpc
     
-    return most_massive_mass, most_massive_dist, closest_mass, closest_dist
+    return most_massive_mass, most_massive_dist, closest_mass, closest_dist, massive_1Mpc_mass, massive_1Mpc_dist
 
 def center_of_mass_calc(companions_RA, companions_DEC, companions_D_As,
                         companions_log_masses, CARS_position, CARS_mass) :
@@ -159,7 +172,8 @@ def gama_params(cat_name, path, alpha, delta, zz, D_A, ID, CARS_mass,
     default_catalog = srch.catalog_search(catalog, zz, D_A, 1500, 2)
     
     (most_massive_mass, most_massive_dist,
-     closest_mass, closest_dist) = basic_params(default_catalog)
+     closest_mass, closest_dist,
+     massive_1Mpc_mass, massive_1Mpc_dist) = basic_params(default_catalog)
     
     sigma = sigma_2d(default_catalog, 2)
     rho = rho_3d(default_catalog, zz, 1500, 2)
@@ -198,6 +212,8 @@ def gama_params(cat_name, path, alpha, delta, zz, D_A, ID, CARS_mass,
     envs['Most_Massive_Distance'] = Column([most_massive_dist.value], unit=u.kpc)
     envs['Closest_Mass'] = Column([closest_mass], unit=u.solMass)
     envs['Closest_Distance'] = Column([closest_dist.value], unit=u.kpc)
+    envs['Massive_1Mpc_Mass'] = Column([massive_1Mpc_mass], unit=u.solMass)
+    envs['Massive_1Mpc_Distance'] = Column([massive_1Mpc_dist.value], unit=u.kpc)
     envs['sigma_2D'] = Column([sigma.value], unit=u.Mpc**(-2))
     envs['rho_3D'] = Column([rho.value], unit=u.Mpc**(-3))
     envs['d_CoM'] = Column([sep.value], unit=u.arcmin)

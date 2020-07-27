@@ -14,18 +14,19 @@ import plots as plt
 
 # constants
 currentFig = 1
-directory = 'BLAGN_candidate_spectra/'
-out_directory = 'BLAGN_spectra_plots/'
-# directory = 'CARS_DR7_spectra/'
-# out_directory = 'CARS_DR7_spectra_plots/'
+# directory = 'BLAGN_candidate_spectra/'
+# out_directory = 'BLAGN_spectra_plots/'
+directory = 'CARS_DR7_spectra/'
+out_directory = 'CARS_DR7_spectra_plots/'
 fwhm_conv = 2*np.sqrt( 2*np.log(2) )
 speed_of_light = const.c.to('km/s').value
 
 def main(method='new') :
     
-    # files = os.listdir(directory)
-    files = ['spSpec-54484-2656-469.fit', 'spSpec-53816-2219-071.fit',
-             'spSpec-54526-2884-160.fit']
+    files = os.listdir(directory)
+    # files = ['spSpec-51789-0398-010.fit']
+    # files = ['spSpec-54484-2656-469.fit', 'spSpec-53816-2219-071.fit',
+             # 'spSpec-54526-2884-160.fit']
     
     BL_FWHM, plates, mjds, fiberids = [], [], [], []
     for file in files :
@@ -35,6 +36,7 @@ def main(method='new') :
             waveint = header['COEFF1']
             zz = header['Z']
             data = hdu[0].data
+            print(header)
         
         spec = data[0] # spectra
         cs_spec = data[1] # continuum subtracted spectra
@@ -55,9 +57,9 @@ def main(method='new') :
                                -0.01, -0.01])
         
         # plt.plot(wave, r'Wavelength ($\rm \AA$)', cs_spec,
-        #          r'Flux Density ($10^{-17}$ erg s$^{-1}$ cm$^{-2}$ $\rm \AA^{-1}$)')
+        #           r'Flux Density ($10^{-17}$ erg s$^{-1}$ cm$^{-2}$ $\rm \AA^{-1}$)')
         
-        if HA_SN >= 3 :
+        if HA_SN >= 3e8 :
             if method == 'old' :
                 try :
                     popt, pcov = leastsq(complex_gauss_decoupled, x0_guesses,
@@ -180,4 +182,4 @@ def gauss(wave, amplitude, vel, vel_sigma, rest_wave, inst_res_fwhm) :
     
     return line
 
-# main()
+main()

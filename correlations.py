@@ -35,8 +35,8 @@ def correlations() :
     agep = catalog['AGEPar']
     
     z_label = 'Redshift'
-    g_mag_label = 'Absolute g Magnitude'
-    i_mag_label = 'Absolute i Magnitude'
+    g_mag_label = r'Absolute $g$ Magnitude'
+    i_mag_label = r'Absolute $i$ Magnitude'
     mass_label = r'CARS Host Mass $(\log_{10}[M_\odot])$'
     companions_label = 'Number of Companions'
     massive_mass_label = r'Most Massive Companion Mass $(\log_{10}[M_\odot])$'
@@ -63,25 +63,25 @@ def correlations() :
                     SD_label, GAMA_CiC_label, overdensity_label, agep_label,
                     atomic_label, molecular_label]
     
-    for i in [0] :#range(len(param_list)) :
-        plt.plot(param_list[i], param_labels[i], redshift, z_label)
-        plt.plot(param_list[i], param_labels[i], g_mag, g_mag_label)
-        plt.plot(param_list[i], param_labels[i], i_mag, i_mag_label)
-        plt.plot(param_list[i], param_labels[i], mass, mass_label)
-        plt.plot(param_list[i], param_labels[i], companions, companions_label)
-        plt.plot(param_list[i], param_labels[i], massive_mass, massive_mass_label)
-        plt.plot(param_list[i], param_labels[i], massive_dist, massive_dist_label)
-        plt.plot(param_list[i], param_labels[i], closest_mass, closest_mass_label)
-        plt.plot(param_list[i], param_labels[i], closest_dist, closest_dist_label)
-        plt.plot(param_list[i], param_labels[i], sigma, sigma_label)
-        plt.plot(param_list[i], param_labels[i], rho, rho_label)
-        plt.plot(param_list[i], param_labels[i], d_CoM, d_CoM_label)
-        plt.plot(param_list[i], param_labels[i], SD, SD_label)
-        plt.plot(param_list[i], param_labels[i], GAMA_CiC, GAMA_CiC_label)
-        plt.plot(param_list[i], param_labels[i], overdensity, overdensity_label)
-        plt.plot(param_list[i], param_labels[i], agep, agep_label)
-        plt.plot(param_list[i], param_labels[i], atomic, atomic_label)
-        plt.plot(param_list[i], param_labels[i], molecular, molecular_label)
+    # for i in [0] :#range(len(param_list)) :
+    #     plt.plot(param_list[i], param_labels[i], redshift, z_label)
+    #     plt.plot(param_list[i], param_labels[i], g_mag, g_mag_label)
+    #     plt.plot(param_list[i], param_labels[i], i_mag, i_mag_label)
+    #     plt.plot(param_list[i], param_labels[i], mass, mass_label)
+    #     plt.plot(param_list[i], param_labels[i], companions, companions_label)
+    #     plt.plot(param_list[i], param_labels[i], massive_mass, massive_mass_label)
+    #     plt.plot(param_list[i], param_labels[i], massive_dist, massive_dist_label)
+    #     plt.plot(param_list[i], param_labels[i], closest_mass, closest_mass_label)
+    #     plt.plot(param_list[i], param_labels[i], closest_dist, closest_dist_label)
+    #     plt.plot(param_list[i], param_labels[i], sigma, sigma_label)
+    #     plt.plot(param_list[i], param_labels[i], rho, rho_label)
+    #     plt.plot(param_list[i], param_labels[i], d_CoM, d_CoM_label)
+    #     plt.plot(param_list[i], param_labels[i], SD, SD_label)
+    #     plt.plot(param_list[i], param_labels[i], GAMA_CiC, GAMA_CiC_label)
+    #     plt.plot(param_list[i], param_labels[i], overdensity, overdensity_label)
+    #     plt.plot(param_list[i], param_labels[i], agep, agep_label)
+    #     plt.plot(param_list[i], param_labels[i], atomic, atomic_label)
+    #     plt.plot(param_list[i], param_labels[i], molecular, molecular_label)
     
     # possible correlations?
     # plt.plot(mass, mass_label, closest_mass, closest_mass_label)
@@ -94,6 +94,15 @@ def correlations() :
     # plt.plot(i_mag, i_mag_label, molecular, molecular_label)
     # plt.plot(mass, mass_label, molecular, molecular_label)
     # plt.plot(d_CoM, d_CoM_label, companions, companions_label)
+    
+    # plt.plot(atomic, atomic_label, closest_dist, closest_dist_label, logy=True,
+    #           xmin=8.3, xmax=10.5, ymin=100, ymax=1e4, correlation=True)
+    # plt.plot(molecular, molecular_label, closest_dist, closest_dist_label, logy=True,
+    #           xmin=8.3, xmax=10.5, ymin=100, ymax=1e4, correlation=True)
+    # plt.plot(atomic, atomic_label, SD, SD_label,
+    #           xmin=8.3, xmax=10.5, ymin=1e-5, ymax=10, logy=True, correlation=True)
+    # plt.plot(molecular, molecular_label, SD, SD_label,
+    #           xmin=8.3, xmax=10.5, ymin=1e-5, ymax=10, logy=True, correlation=True)
     
     return
 

@@ -10,9 +10,12 @@ import astropy.units as u
 
 import environmental_parameters as env_params
 
+import warnings
+warnings.filterwarnings('ignore')
+
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3)
-mass_limit_default = 8.452021
+mass_limit_default = 9.071297
 fwhm_conv = 2*np.sqrt( 2*np.log(2) )
 speed_of_light = const.c.to('km/s').value
 SDSS_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_logMass_vCam.fits'
@@ -28,7 +31,7 @@ def random_galaxy_candidates(GAMA_or_SDSS, outfilename, targettype, mass_limit) 
     base_cat = Table.read(in_path)
     
     # EmLineType==BLAGN, LINER, Seyfert, Comp, SFG, Passive, not_ELG
-    # mass >= 8.452021, 0.01 <= z <= 0.06
+    # mass >= 9.071297, 0.01 <= z <= 0.06
     mask = ( (base_cat['EmLineType'] == targettype) &
              (0.01 <= base_cat['Z']) & (base_cat['Z'] <= 0.06) &
              (base_cat['logMass'] >= mass_limit) )
@@ -161,6 +164,32 @@ def random_galaxy_join_tables(ext) :
     
     return
 
+def random_galaxy_mass_corr(g_slope_corr, g_int_corr, i_slope_corr, i_int_corr) :
+    
+    dir_path = 'catalogs/CARS_SDSS/'
+    
+    files = ['SDSS_comparison_BLAGN_logMass10_complete_0-223',
+             'SDSS_comparison_Comps_logMass10_complete_0-3587',
+             'SDSS_comparison_LINERs_logMass10_complete_0-6898',
+             'SDSS_comparison_not-ELGs_logMass10_complete_0-5263',
+             'SDSS_comparison_Passives_logMass10_complete_0-483',
+             'SDSS_comparison_Seyferts_logMass10_complete_0-573',
+             'SDSS_comparison_SFGs_logMass10_complete_0-890']
+    
+    for file in files :
+        catalog = Table.read(dir_path + file + '.fits')
+        
+        M_g = catalog['M_g']
+        M_i = catalog['M_i']
+        M_g_corr = g_slope_corr*M_g + g_int_corr
+        M_i_corr = i_slope_corr*M_i + i_int_corr
+        
+        logMass_corr = (1.15 + 0.7*(M_g_corr - M_i_corr) - 0.4*M_i_corr)*u.solMass
+        catalog['logMass_corr'] = logMass_corr
+        catalog.write(dir_path + file + '_logMasscorr.fits')
+    
+    return
+
 # subset the different objects types in GAMA
 # random_galaxy_candidates('GAMA', 'comparison_BLAGN', 'BLAGN  ', mass_limit_default)
 # random_galaxy_candidates('GAMA', 'comparison_Seyferts', 'Seyfert', mass_limit_default)
@@ -189,13 +218,13 @@ def random_galaxy_join_tables(ext) :
 # random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', mass_limit_default)
 
 # subset the different objects types in SDSS with logMass >= 10
-# random_galaxy_candidates('SDSS', 'comparison_BLAGN', 'BLAGN  ', 10)
-# random_galaxy_candidates('SDSS', 'comparison_Seyferts', 'Seyfert', 10)
-# random_galaxy_candidates('SDSS', 'comparison_LINERs', 'LINER  ', 10)
-# random_galaxy_candidates('SDSS', 'comparison_Comps', 'Comp   ', 10)
-# random_galaxy_candidates('SDSS', 'comparison_SFGs', 'SFG    ', 10)
-# random_galaxy_candidates('SDSS', 'comparison_Passives', 'Passive', 10)
-# random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', 10)
+random_galaxy_candidates('SDSS', 'comparison_BLAGN', 'BLAGN', 10)
+random_galaxy_candidates('SDSS', 'comparison_Seyferts', 'Seyfert', 10)
+random_galaxy_candidates('SDSS', 'comparison_LINERs', 'LINER', 10)
+random_galaxy_candidates('SDSS', 'comparison_Comps', 'Comp', 10)
+random_galaxy_candidates('SDSS', 'comparison_SFGs', 'SFG', 10)
+random_galaxy_candidates('SDSS', 'comparison_Passives', 'Passive', 10)
+random_galaxy_candidates('SDSS', 'comparison_not-ELGs', 'not_ELG', 10)
 
 # determine env. params for the different objects types in GAMA with logMass >= 10
 # random_galaxy_comparison('GAMA', 'GAMA_comparison_BLAGN_logMass10', 'GAMA_comparison_BLAGN_logMass10')
@@ -214,3 +243,6 @@ def random_galaxy_join_tables(ext) :
 # random_galaxy_comparison('SDSS', 'SDSS_comparison_SFGs_logMass10', 'SDSS_comparison_SFGs_logMass10')
 # random_galaxy_comparison('SDSS', 'SDSS_comparison_Passives_logMass10', 'SDSS_comparison_Passives_logMass10')
 # random_galaxy_comparison('SDSS', 'SDSS_comparison_not-ELGs_logMass10', 'SDSS_comparison_not-ELGs_logMass10')
+
+# random_galaxy_mass_corr(0.8125759463914866, -4.961460348702913,
+#                         0.8492931852404171, -4.343099872187622)

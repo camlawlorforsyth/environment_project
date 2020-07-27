@@ -6,7 +6,7 @@ from astropy.table import Table
 import astropy.units as u
 
 # constants
-mass_limit = 8.452021*u.solMass
+mass_limit = 9.071297*u.solMass
 
 def catalog_search(catalog, redshift, D_A, delta_v, radius) :
     
@@ -43,6 +43,8 @@ def search_prep(catalog_path, host, CARS_sky_coords, self_in_search) :
         if len(catalog) > 0 :
             catalog.sort('d2d')
             if host == catalog['Name'][0] :
+                catalog.remove_row(0)
+            if catalog['CATAID_1'][0] == 278841 : # this is HE 0853+0102
                 catalog.remove_row(0)
     
     return catalog

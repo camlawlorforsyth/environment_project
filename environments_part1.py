@@ -30,7 +30,7 @@ import search as srch
 # constants
 cosmo = FlatLambdaCDM(H0 = 70, Om0 = 0.3) # specify the cosmology being used
 currentFig = 1 # first figure will be numbered as 'Figure 1'
-mass_limit = 8.452021 # [dex(M_*)] ie. log(M_*) = 8.452021, 104 km/s away from HE 2222-0026
+mass_limit = 9.071297 # [dex(M_*)] ie. log(M_*) = 9.071297, 104 km/s away from HE 2222-0026
 SDSS_path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_logMass_vCam.fits'
 GAMA_path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_logMass_vCam.fits'
 
@@ -64,9 +64,11 @@ def main(cat_name, mass_check=False) :
     if (cat_name == 'SDSS') :
         indexes = range(len(galaxies))
         path = SDSS_path
+        GAMA_search = False
     if (cat_name == 'GAMA') :
         indexes = [8]
         path = GAMA_path
+        GAMA_search = True
     
     list_of_sub_cats = []
     tables = []
@@ -74,8 +76,12 @@ def main(cat_name, mass_check=False) :
         sub_catalog, table = env_params.gama_params(cat_name, path, RAs[index],
                                                     Decs[index], redshifts[index],
                                                     Dists[index], IDs[index],
-                                                    masses[index], self_in_search=False)
+                                                    masses[index], self_in_search=GAMA_search)
+        # if (cat_name == 'GAMA') :
+        #     where = np.where(sub_catalog['CATAID_1'] == 278841)[0][0]
+        #     sub_catalog.remove_row(where)
         list_of_sub_cats.append(sub_catalog)
+        # sub_catalog.write('catalogs/common_field/' + cat_name + '_common_field.fits')
 #        bins = int(np.ceil(np.sqrt( len(sub_catalog) )))
 #        plt.histo(sub_catalog['logMass'], r'$\log_{10}(\rm M_{*}/M_{\odot})$',
 #                    IDs[index], masses[index])        
@@ -108,10 +114,12 @@ def main(cat_name, mass_check=False) :
     # table that contains the determined parameters for the CARS galaxies
     CARS = vstack(tables)
     CARS['Companions'].description = 'number of companions in 2Mpc, +/-1500km/s cylinder'
-    CARS['Most_Massive_Mass'].description='mass of most massive companion'
-    CARS['Most_Massive_Distance'].description='distance to most massive companion'
+    CARS['Most_Massive_Mass'].description='mass of most massive galaxy in large-scale environment'
+    CARS['Most_Massive_Distance'].description='distance to most massive galaxy in large-scale environment'
     CARS['Closest_Mass'].description='mass of closest companion'
     CARS['Closest_Distance'].description='distance to closest companion'
+    CARS['Massive_1Mpc_Mass'].description='mass of most massive companion in 1 Mpc'
+    CARS['Massive_1Mpc_Distance'].description='distance to most massive companion in 1 Mpc'
     CARS['sigma_2D'].description='number of companions in default aperture over aperture area'
     CARS['rho_3D'].description='number of companions in default aperture over volume of aperture'
     CARS['d_CoM'].description='projected distance to the center of mass of the system from the CARS target'
@@ -190,18 +198,28 @@ def main(cat_name, mass_check=False) :
 def final_catalog_operations(cat_name) :
     
     if cat_name == 'SDSS' :
-        path = 'catalogs/joined_cats/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_vCam.fits'
+        path = 'catalogs/joined_cats/input/SDSS_gal-info_gal-line_totlgm_totsfr_SpecClassCam_vCam.fits'
     if cat_name == 'GAMA' :
-        path = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_vCam.fits'
+        path = 'catalogs/joined_cats/input/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_vCam.fits'
     
     catalog = Table.read(path)
+    
+    # see mass_correction in 'mass_estimate_from-color.py'
+    g_slope_corr = 0.8125759463914866
+    g_int_corr = -4.961460348702913
+    i_slope_corr = 0.8492931852404171
+    i_int_corr = -4.343099872187622
     
     if (cat_name == 'SDSS') :
         D_A = cosmo.angular_diameter_distance(catalog['Z'])
         D_L = cosmo.luminosity_distance(catalog['Z']).to(u.pc)/u.pc
+        M_g = catalog['KCOR_MAG'][:,0] - 5*np.log10(D_L) + 5 # absolute g mag.
         M_i = catalog['KCOR_MAG'][:,2] - 5*np.log10(D_L) + 5 # absolute i mag.
-        logMass = (1.15 + 0.7*(catalog['KCOR_MAG'][:,0] -
-                               catalog['KCOR_MAG'][:,2]) - 0.4*M_i)*u.solMass
+        
+        M_g_corr = g_slope_corr*M_g + g_int_corr
+        M_i_corr = i_slope_corr*M_i + i_int_corr
+        
+        logMass = (1.15 + 0.7*(M_g_corr - M_i_corr) - 0.4*M_i_corr)*u.solMass
     
     if (cat_name == 'GAMA') :
         D_A = cosmo.angular_diameter_distance(catalog['Z_1'])
@@ -239,7 +257,7 @@ def final_catalog_operations(cat_name) :
     if cat_name == 'GAMA' :
         outpath = 'catalogs/joined_cats/GAMA_GaussFitSimple_StellarMasses_MagPhys_SpecClassCam_logMass_vCam.fits'
     
-    catalog.write(outpath, overwrite=False)
+    catalog.write(outpath, overwrite=True)
     
     return
 
