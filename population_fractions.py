@@ -258,7 +258,7 @@ def population_fracs() :
     gama_pass_err = [CD_gama_LD_pass_err, CD_gama_LDMD_pass_err, CD_gama_MDHD_pass_err, CD_gama_HD_pass_err]
     plt.population_plot(gama_agn, gama_agn_err, gama_sfg, gama_sfg_err,
                         gama_pass, gama_pass_err,
-                        ['GAMA AGN', 'GAMA SFG', 'GAMA Passive'], ymin=0, ymax=0.8)
+                        ['GAMA AGN', 'GAMA SFG', 'GAMA Passive'], ymin=0, ymax=0.78)
 
     sdss_agn = [CD_sdss_LD[0], CD_sdss_LDMD[0], CD_sdss_MDHD[0], CD_sdss_HD[0]]
     sdss_agn_err = [CD_sdss_LD_agn_err, CD_sdss_LDMD_agn_err, CD_sdss_MDHD_agn_err, CD_sdss_HD_agn_err]
@@ -448,7 +448,7 @@ def population_fracs() :
     gama_pass_err = [SD_gama_LD_pass_err, SD_gama_LDMD_pass_err, SD_gama_MDHD_pass_err, SD_gama_HD_pass_err]
     plt.population_plot(gama_agn, gama_agn_err, gama_sfg, gama_sfg_err,
                         gama_pass, gama_pass_err,
-                        ['GAMA AGN', 'GAMA SFG', 'GAMA Passive'], ymin=0, ymax=0.8)
+                        ['GAMA AGN', 'GAMA SFG', 'GAMA Passive'], ymin=0, ymax=0.78)
 
     sdss_agn = [SD_sdss_LD[0], SD_sdss_LDMD[0], SD_sdss_MDHD[0], SD_sdss_HD[0]]
     sdss_agn_err = [SD_sdss_LD_agn_err, SD_sdss_LDMD_agn_err, SD_sdss_MDHD_agn_err, SD_sdss_HD_agn_err]
