@@ -18,7 +18,7 @@ plt.rcParams['axes.linewidth'] = 1.5
 # constants
 currentFig = 1
 
-def all_histograms(param, xlabel, mass_limit=10, loc=0, log=False,
+def all_histograms(param, xlabel, mass_limit=10, loc=0, log=False, sdss_bins=None,
                    xmin=None, xmax=None, ymin=None, ymax=None) :
     
     if mass_limit==10 :
@@ -106,13 +106,13 @@ def all_histograms(param, xlabel, mass_limit=10, loc=0, log=False,
     
     # SDSS
     sdss_dir = 'catalogs/CARS_SDSS/'
-    sdss_blagn = Table.read(sdss_dir + 'SDSS_comparison_BLAGN_logMass10_complete_0-223.fits')
-    sdss_sey = Table.read(sdss_dir + 'SDSS_comparison_Seyferts_logMass10_complete_0-573.fits')
-    sdss_lin = Table.read(sdss_dir + 'SDSS_comparison_LINERs_logMass10_complete_0-6898.fits')
-    sdss_comp = Table.read(sdss_dir + 'SDSS_comparison_Comps_logMass10_complete_0-3587.fits')
-    sdss_sfg = Table.read(sdss_dir + 'SDSS_comparison_SFGs_logMass10_complete_0-890.fits')
-    sdss_pass = Table.read(sdss_dir + 'SDSS_comparison_Passives_logMass10_complete_0-483.fits')
-    sdss_elg = Table.read(sdss_dir + 'SDSS_comparison_not-ELGs_logMass10_complete_0-5263.fits')
+    sdss_blagn = Table.read(sdss_dir + 'SDSS_comparison_BLAGN_logMass10_complete_0-519.fits')
+    sdss_sey = Table.read(sdss_dir + 'SDSS_comparison_Seyferts_logMass10_complete_0-2196.fits')
+    sdss_lin = Table.read(sdss_dir + 'SDSS_comparison_LINERs_logMass10_complete_0-12189.fits')
+    sdss_comp = Table.read(sdss_dir + 'SDSS_comparison_Comps_logMass10_complete_0-11611.fits')
+    sdss_sfg = Table.read(sdss_dir + 'SDSS_comparison_SFGs_logMass10_complete_0-11093.fits')
+    sdss_pass = Table.read(sdss_dir + 'SDSS_comparison_Passives_logMass10_complete_0-946.fits')
+    sdss_elg = Table.read(sdss_dir + 'SDSS_comparison_not-ELGs_logMass10_complete_0-13553.fits')
     
     sdss_blagn_len = len(sdss_blagn)
     sdss_sey_len = len(sdss_sey)
@@ -143,15 +143,15 @@ def all_histograms(param, xlabel, mass_limit=10, loc=0, log=False,
     (ad_sdss_blagn, critvals_sdss_blagn,
      siglvl_sdss_blagn) = sp.anderson_ksamp([SDSS_CARS[param], sdss_blagn[param]])
     (ad_sdss_sey, critvals_sdss_sey,
-     siglvl_sdss_sey) = sp.anderson_ksamp([SDSS_CARS[param], sdss_sey[param]])
+      siglvl_sdss_sey) = sp.anderson_ksamp([SDSS_CARS[param], sdss_sey[param]])
     (ad_sdss_lin, critvals_sdss_lin,
       siglvl_sdss_lin) = sp.anderson_ksamp([SDSS_CARS[param], sdss_lin[param]])
     (ad_sdss_comp, critvals_sdss_comp,
-     siglvl_sdss_comp) = sp.anderson_ksamp([SDSS_CARS[param], sdss_comp[param]])
+      siglvl_sdss_comp) = sp.anderson_ksamp([SDSS_CARS[param], sdss_comp[param]])
     (ad_sdss_sfg, critvals_sdss_sfg,
-     siglvl_sdss_sfg) = sp.anderson_ksamp([SDSS_CARS[param], sdss_sfg[param]])
+      siglvl_sdss_sfg) = sp.anderson_ksamp([SDSS_CARS[param], sdss_sfg[param]])
     (ad_sdss_pass, critvals_sdss_pass,
-     siglvl_sdss_pass) = sp.anderson_ksamp([SDSS_CARS[param], sdss_pass[param]])
+      siglvl_sdss_pass) = sp.anderson_ksamp([SDSS_CARS[param], sdss_pass[param]])
     (ad_sdss_elg, critvals_sdss_elg,
       siglvl_sdss_elg) = sp.anderson_ksamp([SDSS_CARS[param], sdss_elg[param]])
     
@@ -174,43 +174,43 @@ def all_histograms(param, xlabel, mass_limit=10, loc=0, log=False,
     multi_histo([SDSS_CARS[param], gama_blagn[param], sdss_blagn[param]],
                 [CARS_label, gama_blagn_label, sdss_blagn_label],
                 xlabel, ['k','cyan','darkcyan'],
-                [CARS_weight, gama_blagn_weight, sdss_blagn_weight], log=log,
-                outfile='histograms/histo_' + mass_string + param + '_BLAGN.png',
+                [CARS_weight, gama_blagn_weight, sdss_blagn_weight], log=log, nbins=sdss_bins,
+                outfile='histograms/histo_' + mass_string + param + '_BLAGN.png', 
                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
     multi_histo([SDSS_CARS[param], gama_sey[param], sdss_sey[param]],
                 [CARS_label, gama_sey_label, sdss_sey_label],
                 xlabel, ['k','red','darkred'],
-                [CARS_weight, gama_sey_weight, sdss_sey_weight], log=log,
+                [CARS_weight, gama_sey_weight, sdss_sey_weight], log=log, nbins=sdss_bins,
                 outfile='histograms/histo_' + mass_string + param + '_Seyferts.png',
                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
     multi_histo([SDSS_CARS[param], gama_lin[param], sdss_lin[param]],
                 [CARS_label, gama_lin_label, sdss_lin_label],
                 xlabel, ['k','springgreen','darkgreen'],
-                [CARS_weight, gama_lin_weight, sdss_lin_weight], log=log,
+                [CARS_weight, gama_lin_weight, sdss_lin_weight], log=log, nbins=sdss_bins,
                 outfile='histograms/histo_' + mass_string + param + '_LINERs.png',
                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
     multi_histo([SDSS_CARS[param], gama_comp[param], sdss_comp[param]],
                 [CARS_label, gama_comp_label, sdss_comp_label],
                 xlabel, ['k','magenta','purple'],
-                [CARS_weight, gama_comp_weight, sdss_comp_weight], log=log,
+                [CARS_weight, gama_comp_weight, sdss_comp_weight], log=log, nbins=sdss_bins,
                 outfile='histograms/histo_' + mass_string + param + '_Comps.png',
                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
     multi_histo([SDSS_CARS[param], gama_sfg[param], sdss_sfg[param]],
                 [CARS_label, gama_sfg_label, sdss_sfg_label],
                 xlabel, ['k','dodgerblue','darkblue'],
-                [CARS_weight, gama_sfg_weight, sdss_sfg_weight], log=log,
+                [CARS_weight, gama_sfg_weight, sdss_sfg_weight], log=log, nbins=sdss_bins,
                 outfile='histograms/histo_' + mass_string + param + '_SFGs.png',
                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
     multi_histo([SDSS_CARS[param], gama_pass[param], sdss_pass[param]],
                 [CARS_label, gama_pass_label, sdss_pass_label],
                 xlabel, ['k','orange','saddlebrown'],
-                [CARS_weight, gama_pass_weight, sdss_pass_weight], log=log,
+                [CARS_weight, gama_pass_weight, sdss_pass_weight], log=log, nbins=sdss_bins,
                 outfile='histograms/histo_' + mass_string + param + '_Passives.png',
                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
     multi_histo([SDSS_CARS[param], gama_elg[param], sdss_elg[param]],
                 [CARS_label, gama_elg_label, sdss_elg_label],
                 xlabel, ['k','gold','chocolate'],
-                [CARS_weight, gama_elg_weight, sdss_elg_weight], log=log,
+                [CARS_weight, gama_elg_weight, sdss_elg_weight], log=log, nbins=sdss_bins,
                 outfile='histograms/histo_' + mass_string + param + '_not-ELGs.png',
                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, location=loc)
     
@@ -256,24 +256,27 @@ def all_scatter_plots(catalog, xparam, yparam, loc=0,
     
     # SDSS
     sdss_dir = 'catalogs/CARS_SDSS/'
-    sdss_blagn = Table.read(sdss_dir + 'SDSS_comparison_BLAGN_logMass10_complete_0-223.fits')
-    sdss_sey = Table.read(sdss_dir + 'SDSS_comparison_Seyferts_logMass10_complete_0-573.fits')
-    sdss_lin = Table.read(sdss_dir + 'SDSS_comparison_LINERs_logMass10_complete_0-6898.fits')
-    sdss_comp = Table.read(sdss_dir + 'SDSS_comparison_Comps_logMass10_complete_0-3587.fits')
-    sdss_sfg = Table.read(sdss_dir + 'SDSS_comparison_SFGs_logMass10_complete_0-890.fits')
-    sdss_pass = Table.read(sdss_dir + 'SDSS_comparison_Passives_logMass10_complete_0-483.fits')
-    sdss_elg = Table.read(sdss_dir + 'SDSS_comparison_not-ELGs_logMass10_complete_0-5263.fits')
+    sdss_blagn = Table.read(sdss_dir + 'SDSS_comparison_BLAGN_logMass10_complete_0-519.fits')
+    sdss_sey = Table.read(sdss_dir + 'SDSS_comparison_Seyferts_logMass10_complete_0-2196.fits')
+    sdss_lin = Table.read(sdss_dir + 'SDSS_comparison_LINERs_logMass10_complete_0-12189.fits')
+    sdss_comp = Table.read(sdss_dir + 'SDSS_comparison_Comps_logMass10_complete_0-11611.fits')
+    sdss_sfg = Table.read(sdss_dir + 'SDSS_comparison_SFGs_logMass10_complete_0-11093.fits')
+    sdss_pass = Table.read(sdss_dir + 'SDSS_comparison_Passives_logMass10_complete_0-946.fits')
+    sdss_elg = Table.read(sdss_dir + 'SDSS_comparison_not-ELGs_logMass10_complete_0-13553.fits')
     
     if catalog == 'SDSS' :
-        colours = ['k', 'darkcyan', 'darkred', 'darkgreen',
-                   'purple', 'darkblue', 'saddlebrown', 'chocolate']
+        # colours = ['k', 'darkcyan', 'darkred', 'darkgreen',
+        #            'purple', 'darkblue', 'saddlebrown', 'chocolate']
+        colours = ['k', 'cyan', 'red', 'springgreen',
+                   'magenta', 'dodgerblue', 'orange', 'gold']
         xarrays = [SDSS_CARS[xparam], sdss_blagn[xparam], sdss_sey[xparam], sdss_lin[xparam],
-                   sdss_comp[xparam], sdss_sfg[xparam], sdss_pass[xparam], sdss_elg[xparam]]
+                    sdss_comp[xparam], sdss_sfg[xparam], sdss_pass[xparam], sdss_elg[xparam]]
         yarrays = [SDSS_CARS[yparam], sdss_blagn[yparam], sdss_sey[yparam], sdss_lin[yparam],
-                   sdss_comp[yparam], sdss_sfg[yparam], sdss_pass[yparam], sdss_elg[yparam]]
+                    sdss_comp[yparam], sdss_sfg[yparam], sdss_pass[yparam], sdss_elg[yparam]]
         labels = ['SDSS CARS', 'SDSS BLAGN', 'SDSS Seyferts', 'SDSS LINERs',
-                   'SDSS Composites', 'SDSS SFGs', 'SDSS Passives', 'SDSS not ELGs']
-        alpha = 0.1
+                    'SDSS Composites', 'SDSS SFGs', 'SDSS Passives', 'SDSS not ELGs']
+        alpha = 0.6
+        mark_every = 40 # use 2 for [O III] plots, otherwise use 30
     
     if catalog == 'GAMA' :
         colours = ['k', 'cyan', 'red', 'springgreen',
@@ -284,12 +287,13 @@ def all_scatter_plots(catalog, xparam, yparam, loc=0,
                    gama_comp[yparam], gama_sfg[yparam], gama_pass[yparam], gama_elg[yparam]]
         labels = ['SDSS CARS', 'GAMA BLAGN', 'GAMA Seyferts', 'GAMA LINERs',
                    'GAMA Composites', 'GAMA SFGs', 'GAMA Passives', 'GAMA not ELGs']
-        alpha = 0.3
+        alpha = 0.6
+        mark_every = 1
     
     multi_plot(xarrays, yarrays, labels, colours,
                dictionary[xparam], dictionary[yparam], location=loc,
-               outfile='correlation_plots/' + catalog + '_' + yparam + '_vs_' + xparam,
-               xlog=logx, ylog=logy, log=loglog, alph=alpha,
+               outfile='correlation_plots/' + catalog + '_' + yparam + '_vs_' + xparam + '.png',
+               xlog=logx, ylog=logy, log=loglog, alph=alpha, mark_nth=mark_every,
                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
     
     return
@@ -376,7 +380,7 @@ def diagram_BPT(x1, y1, x2, y2, x3, y3, x4, y4, standard=True,
                 xlabel=None, ylabel=None) :
     
     global currentFig
-    fig = plt.figure(currentFig, figsize=(8.5, 6.5))
+    fig = plt.figure(currentFig, figsize=(10.5, 6.5))
     currentFig += 1
     plt.clf()
     ax = fig.add_subplot(111)
@@ -389,9 +393,9 @@ def diagram_BPT(x1, y1, x2, y2, x3, y3, x4, y4, standard=True,
     
     # for the GAMA sample check
     # ax.hist2d(x1, y1, bins=5, cmap='Reds', norm=LogNorm())
-    # ax.hist2d(x2, y2, bins=2, cmap='Greens', norm=LogNorm())
-    # ax.hist2d(x3, y3, bins=16, cmap='Purples', norm=LogNorm())
-    # ax.hist2d(x4, y4, bins=100, cmap='Blues', norm=LogNorm())
+    # ax.hist2d(x2, y2, bins=3, cmap='Greens', norm=LogNorm())
+    # ax.hist2d(x3, y3, bins=12, cmap='Purples', norm=LogNorm())
+    # ax.hist2d(x4, y4, bins=35, cmap='Blues', norm=LogNorm())
     
     # unclass_x = [0.52699786, 0.6472921, 0.51526904, 0.10082114, 0.4783239,
     #               0.64564115, 0.47279504, 0.48915058, 0.5316156, 0.52157855,
@@ -401,56 +405,72 @@ def diagram_BPT(x1, y1, x2, y2, x3, y3, x4, y4, standard=True,
     #              -0.5899385, 0.4983, -0.36166635]
     # ax.plot(unclass_x, unclass_y, 'kx', label='BPT Classification Fails (13 galaxies)')
     
-    CARS_x_7p5 = [-0.2558046120106365, -0.3039520129538409, -0.2417594381357093,
-                  0.06476555533411806, 0.275461262291009, -0.3938455204465459,
-                  -0.05406315470653154, -1.0767286502681763, -0.21683621439121184,
-                  -0.2583153650781086, -0.3611262953855419, -0.041477366726339726]
-    CARS_y_7p5 = [1.0442984352563223, -0.4632845953092678, -0.17709178145221774,
-                  0.7852122081665016, 0.701362126702604, -0.3101074263261445,
-                  0.9213412646212272, 0.07531550781816444, 0.43745460649821044,
-                  0.6040263849321078, 0.02695921366978017, 0.8956928513689375]
+    # CARS_x_7p5 = [-0.2558046120106365, -0.3039520129538409, -0.2417594381357093,
+    #               0.06476555533411806, 0.275461262291009, -0.3938455204465459,
+    #               -0.05406315470653154, -1.0767286502681763, -0.21683621439121184,
+    #               -0.2583153650781086, -0.3611262953855419, -0.041477366726339726]
+    # CARS_y_7p5 = [1.0442984352563223, -0.4632845953092678, -0.17709178145221774,
+    #               0.7852122081665016, 0.701362126702604, -0.3101074263261445,
+    #               0.9213412646212272, 0.07531550781816444, 0.43745460649821044,
+    #               0.6040263849321078, 0.02695921366978017, 0.8956928513689375]
     # ax.plot(CARS_x_7p5, CARS_y_7p5, 'ko', label='Fluxes from .eline MUSE Tables in 3" Aperture')
     
     if (standard==True) :
         xmin, xmax, ymin, ymax = -2.2, 0.7, -1.5, 1.4
-        xlabel = r"$\log_{10}$([N II] $\lambda 6583 / \rm H\alpha$)"
-        ylabel = r"$\log_{10}$([O III] $\lambda 5007 / \rm H\beta$)"
+        xlabel = r'$\log_{10}$([N II] $\lambda 6583 / \rm H\alpha$)'
+        ylabel = r'$\log_{10}$([O III] $\lambda 5007 / \rm H\beta$)'
         
         kauff_x = np.linspace(xmin, xmax, 10000)
         kauff_y = 0.61/(kauff_x - 0.05) + 1.3 # from Kauffmann+ 2003
         #                       (http://adsabs.harvard.edu/abs/2003MNRAS.346.1055K)
         kauff_mask = ( (kauff_x > xmin) & (kauff_x < 0.05) )
-        ax.plot(kauff_x[kauff_mask], kauff_y[kauff_mask], 'k--',
-                label='Kauffmann et al. (2003)')
+        ax.plot(kauff_x[kauff_mask], kauff_y[kauff_mask], color='k', linestyle='--', lw=1.5,
+                label='Kauffmann et al. (2003)', zorder=4)
         
         kewl_x = np.linspace(xmin, xmax, 10000)
         kewl_y = 0.61/(kewl_x - 0.47) + 1.19 # from Kewley+ 2001
         #                       (http://adsabs.harvard.edu/abs/2001ApJ...556..121K)
         kewl_mask = ( (kewl_x > xmin) & (kewl_x < 0.47) )
-        ax.plot(kewl_x[kewl_mask], kewl_y[kewl_mask], 'k-',
-                label='Kewley et al. (2001)')
+        ax.plot(kewl_x[kewl_mask], kewl_y[kewl_mask], color='k', linestyle='-', lw=1.5,
+                label='Kewley et al. (2001)', zorder=4)
         
         schaw_x = np.linspace(-0.18380687748557267, xmax, 10000)
         schaw_y = 1.05*schaw_x + 0.45 # from Schawinski+ 2012
         #                       (http://adsabs.harvard.edu/abs/2007MNRAS.382.1415S)
-        ax.plot(schaw_x, schaw_y, 'k-.', label='Schawinski et al. (2007)')
+        ax.plot(schaw_x, schaw_y, color='k', linestyle='-.', lw=1.5,
+                label='Schawinski et al. (2007)', zorder=4)
         
-        ax.text(-0.8, 1.1, 'Seyfert', fontsize=15)
-        ax.text(0.2, -0.3, 'LINER', fontsize=15)
-        ax.text(-1.4, -0.4, 'SFG', fontsize=15)
-        ax.text(-0.225, -1, 'Comp', fontsize=15)
+        ax.text(-0.75, 1.1, 'Seyfert', fontsize=18)
+        ax.text(0.25, -0.4, 'LINER', fontsize=18)
+        ax.text(-1, -0.5, 'SFG', fontsize=18)
+        ax.text(-0.14, -1, 'Comp', fontsize=18)
         
         # ax.vlines(0.47, ymin, ymax, color='b', linestyle='-.')
         
-    ax.set_xlabel(xlabel, fontsize=15)
-    ax.set_ylabel(ylabel, fontsize=15)
+    ax.set_xlabel(xlabel, fontsize=19)
+    ax.set_ylabel(ylabel, fontsize=19)
         
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
-    ax.legend(loc = 'lower left')
+    
+    handles, labels = ax.get_legend_handles_labels()
+    
+    handles = [handles[1], handles[0], handles[2]]
+    labels = [labels[1], labels[0], labels[2]]
+    
+    ax.legend(handles, labels, facecolor='whitesmoke', framealpha=1, fontsize=16,
+              loc = 'lower left')
+    
+    # ax.grid(b=True, zorder=1)
+    ax.tick_params(axis='both',which='both',labelsize=19)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
     
     plt.tight_layout()
     plt.show()
+    # fig.savefig('correlation_plots/diagnostic_SDSS_BPT.pdf', overwrite=True)
+    # plt.close()
     
     return
 
@@ -459,58 +479,74 @@ def diagram_WHAN(x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, standard=True,
                  xlabel=None, ylabel=None) :
     
     global currentFig
-    fig = plt.figure(currentFig, figsize=(8.5, 6.5))
+    fig = plt.figure(currentFig, figsize=(10.5, 6.5))
     currentFig += 1
     plt.clf()
     ax = fig.add_subplot(111)  
     
     # for the SDSS sample check
-    ax.hist2d(x1, y1, bins=40, cmap='Reds', norm=LogNorm())
-    ax.hist2d(x2, y2, bins=113, cmap='Greens', norm=LogNorm())
-    ax.hist2d(x3, y3, bins=30, cmap='Purples', norm=LogNorm())
-    ax.hist2d(x4, y4, bins=86, cmap='Blues', norm=LogNorm())
-    ax.hist2d(x5, y5, bins=80, cmap='Oranges', norm=LogNorm())
+    # ax.hist2d(x1, y1, bins=40, cmap='Reds', norm=LogNorm())
+    # ax.hist2d(x2, y2, bins=113, cmap='Greens', norm=LogNorm())
+    # ax.hist2d(x3, y3, bins=30, cmap='Purples', norm=LogNorm())
+    # ax.hist2d(x4, y4, bins=86, cmap='Blues', norm=LogNorm())
+    # ax.hist2d(x5, y5, bins=80, cmap='Oranges', norm=LogNorm())
     
     # for the GAMA sample check
-    # ax.hist2d(x1, y1, bins=12, cmap='Reds', norm=LogNorm())
-    # ax.hist2d(x2, y2, bins=20, cmap='Greens', norm=LogNorm())
-    # ax.hist2d(x3, y3, bins=12, cmap='Purples', norm=LogNorm())
-    # ax.hist2d(x4, y4, bins=50, cmap='Blues', norm=LogNorm())
-    # ax.hist2d(x5, y5, bins=13, cmap='Oranges', norm=LogNorm())
+    ax.hist2d(x1, y1, bins=10, cmap='Reds', norm=LogNorm())
+    ax.hist2d(x2, y2, bins=20, cmap='Greens', norm=LogNorm())
+    ax.hist2d(x3, y3, bins=8, cmap='Purples', norm=LogNorm())
+    ax.hist2d(x4, y4, bins=35, cmap='Blues', norm=LogNorm())
+    ax.hist2d(x5, y5, bins=18, cmap='Oranges', norm=LogNorm())
     
     if (standard==True) :
         xmin, xmax, ymin, ymax = -2.2, 1, -0.7, 3.3
-        xlabel = r"$\log_{10}$([N II] $\lambda 6583 / \rm H\alpha$)"
+        xlabel = r'$\log_{10}$([N II] $\lambda 6583 / \rm H\alpha$)'
         ylabel = r'$\log_{10}(W_{\rm H\alpha}/ {\rm \AA})$'
         
         # regular WHAN
-        ax.vlines(-0.4, ymin, ymax, color='k', linestyle='-.',
-                  label=r'Stasi$\rm \'n$kska et al. (2006)$^{\rm T}$')
-        ax.vlines(-0.32, ymin, ymax, color='k', linestyle='-',
-                  label=r'Gordon et al. (2018)')
-        ax.hlines(np.log10(6), -0.32, xmax, color='k', linestyle='--',
-                  label=r'Kewley et al. (2006)$^{\rm T}$')
-        ax.hlines(np.log10(0.5), xmin, xmax, color='k', linestyle=':')
+        ax.vlines(-0.32, ymin, ymax, color='k', linestyle='--', lw=1.5,
+                  label=r'Kauffmann et al. (2003)$^{\rm T}$', zorder=2)
+        ax.hlines(np.log10(6), -0.32, xmax, color='k', linestyle='-', lw=1.5,
+                  label=r'Kewley et al. (2006)$^{\rm T}$', zorder=2)
+        ax.vlines(-0.4, ymin, ymax, color='k', linestyle='-.', lw=1.5,
+                  label=r'Stasi$\rm \'n$kska et al. (2006)$^{\rm T}$',
+                  zorder=2)
+        ax.hlines(np.log10(0.5), -2.2, xmax, color='k', linestyle=':', lw=1.5, zorder=2)
         
         xs = np.linspace(-3, 1.5, 1000)
         ys = -xs + np.log10(0.5)
-        ax.plot(xs, ys, 'k:')
+        ax.plot(xs, ys, 'k:', lw=1.5)
         
-        ax.text(-1, 2.75, 'SFG', fontsize=15)
-        ax.text(-0.4, 1.75, 'Composite', rotation='vertical', fontsize=15)
-        ax.text(0, 2.5, 'Seyfert', fontsize=15)
-        ax.text(0.55, 0.5, 'LINER', fontsize=15)
-        ax.text(-0.2, -0.6, 'Passive', fontsize=15)
+        ax.text(-1, 1.75, 'SFG', fontsize=18)
+        ax.text(-0.4, 1.75, 'Composite', rotation='vertical', fontsize=18)
+        ax.text(0, 1.5, 'Seyfert', fontsize=18)
+        ax.text(0.55, 0.25, 'LINER', fontsize=18)
+        ax.text(-0.9, -0.1, 'Passive', fontsize=18)
     
-    ax.set_xlabel(xlabel, fontsize=15)
-    ax.set_ylabel(ylabel, fontsize=15)
-    
+    ax.set_xlabel(xlabel, fontsize=19)
+    ax.set_ylabel(ylabel, fontsize=19)
+        
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
-    ax.legend(loc = 'lower left')
+    
+    handles, labels = ax.get_legend_handles_labels()
+    
+    # handles = [handles[1], handles[0], handles[2]]
+    # labels = [labels[1], labels[0], labels[2]]
+    
+    ax.legend(handles, labels, facecolor='whitesmoke', framealpha=1, fontsize=14,
+              loc = 'lower left')
+    
+    # ax.grid(b=True, zorder=1)
+    ax.tick_params(axis='both',which='both',labelsize=19)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
     
     plt.tight_layout()
     plt.show()
+    # fig.savefig('correlation_plots/diagnostic_SDSS_WHAN.pdf', overwrite=True)
+    # plt.close()
     
     return
 
@@ -591,14 +627,14 @@ def filter_curves() :
     ii = Table.read('SDSS_response_curves/filter_curves.fits', hdu=4)
     zz = Table.read('SDSS_response_curves/filter_curves.fits', hdu=5)
     
-    plot_multi([uu['wavelength'], gg['wavelength'], rr['wavelength'],
-                ii['wavelength'], zz['wavelength']],
-                [uu['respt'], gg['respt'], rr['respt'],
-                ii['respt'], zz['respt']],
-                [r'$u$', r'$g$', r'$r$', r'$i$', r'$z$'],
-                ['b', 'g', 'r', 'm', 'k'],
-                r'Wavelength $(\rm \AA)$', 'Quantum Efficiency',
-                xmin=2800, xmax=11500, ymin=0, ymax=0.58)
+    # plot_multi([uu['wavelength'], gg['wavelength'], rr['wavelength'],
+    #             ii['wavelength'], zz['wavelength']],
+    #             [uu['respt'], gg['respt'], rr['respt'],
+    #             ii['respt'], zz['respt']],
+    #             [r'$u$', r'$g$', r'$r$', r'$i$', r'$z$'],
+    #             ['b', 'g', 'r', 'm', 'k'],
+    #             r'Wavelength $(\rm \AA)$', 'Quantum Efficiency',
+    #             xmin=2800, xmax=11500, ymin=0, ymax=0.58)
     
     filters = Table.read('SDSS_response_curves/response_curves_Doi+_2010_AJ_139_1628.fits')
     
@@ -609,11 +645,12 @@ def filter_curves() :
                 [r'$u$', r'$g$', r'$r$', r'$i$', r'$z$'],
                 ['b', 'g', 'r', 'm', 'k'],
                 r'Wavelength $(\rm \AA)$', 'Quantum Efficiency',
+                outfile='correlation_plots/SDSS_filter_response_curves.pdf',
                 xmin=2800, xmax=11500, ymin=0, ymax=0.58)
     
     return
 
-def gaussian_plot(centers, sigmas) :
+def gaussian_plot(centers, sigmas, outfile) :
     
     global currentFig
     fig = plt.figure(currentFig, figsize=(10,6))
@@ -634,14 +671,24 @@ def gaussian_plot(centers, sigmas) :
     
     ax.set_xlabel(r'$x$', fontsize=21)
     ax.set_ylabel(r'$g(x)$', fontsize=21)
+        
     ax.set_xlim(-5, 5)
     ax.set_ylim(-0.05, 1)
     
-    ax.legend()
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels, facecolor='whitesmoke', framealpha=1, fontsize=17,
+              loc = 'upper right')
+    
+    # ax.grid(b=True, zorder=1)
+    ax.tick_params(axis='both',which='both',labelsize=16)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
     plt.tight_layout()
     plt.show()
-    # plt.savefig(outfile, overwrite=True)
-    # plt.close(fig)
+    # fig.savefig(outfile, overwrite=True)
+    # plt.close()
     
     return
 
@@ -666,6 +713,45 @@ def histo(param, label, title=None, vert_line=None, num_bins=None) :
     
     plt.tight_layout()
     plt.show()
+    
+    return
+
+def histo_with_fxn(param, label, weight, xs, ys, fit_label, loc=0,
+                   num_bins=None, outfile=None,
+                   xmin=None, xmax=None, ymin=None, ymax=None) :
+    
+    global currentFig
+    fig = plt.figure(currentFig, figsize=(10,6))
+    currentFig += 1
+    plt.clf()
+    ax = fig.add_subplot(111)
+    
+    ax.hist(param, weights=weight, histtype='step', linestyle='-', color='k',
+            linewidth=2, bins=num_bins)
+    
+    ax.plot(xs, ys, 'r--', label=fit_label)
+    
+    ax.set_xlabel('%s' % label, fontsize=21)
+    ax.set_ylabel('Fractional Frequency', fontsize=21)
+        
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+    
+    handles, labels = ax.get_legend_handles_labels()
+    
+    ax.legend(handles, labels, facecolor='whitesmoke', framealpha=1, fontsize=17,
+              loc = loc)
+    
+    # ax.grid(b=True, zorder=1)
+    ax.tick_params(axis='both',which='both',labelsize=16)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
+    plt.tight_layout()
+    plt.show()
+    # fig.savefig('correlation_plots/' + outfile, overwrite=True)
+    # plt.close()
     
     return
 
@@ -696,7 +782,7 @@ def histo2d(xvals, xlab, yvals, ylab, nbins=200, xmin=None, xmax=None,
     return
 
 def multi_histo(param_list, labels, xlab, colors, weights, location=0,
-                outfile=None, log=False, xmin=None, xmax=None, ymin=None, ymax=None) :
+                outfile=None, log=False, nbins=None, xmin=None, xmax=None, ymin=None, ymax=None) :
     
     first_param = param_list[0]
     second_param = param_list[1]
@@ -706,7 +792,7 @@ def multi_histo(param_list, labels, xlab, colors, weights, location=0,
     third_weight = weights[2]
     
     global currentFig
-    fig = plt.figure(currentFig)
+    fig = plt.figure(currentFig, figsize=(7,5))
     currentFig += 1
     plt.clf()
     ax = fig.add_subplot(111)    
@@ -722,7 +808,7 @@ def multi_histo(param_list, labels, xlab, colors, weights, location=0,
         third_param = 1 + param_list[2]
     
     if xlab == 'Projected Distance to the Center of Stellar Mass/arcmin' :
-        xlab = r'1 + Projected Dist. to the Center of $M_{*}$/arcmin'
+        xlab = r'1 + Proj. Dist. to the Center of $M_{*}$/arcmin'
         first_param = 1 + param_list[0]
         second_param = 1 + param_list[1]
         third_param = 1 + param_list[2]
@@ -743,28 +829,38 @@ def multi_histo(param_list, labels, xlab, colors, weights, location=0,
         ax.hist(np.log10(first_param), label=labels[0], weights=first_weight,
                 histtype='step', linestyle='-', color=colors[0])
         ax.hist(np.log10(second_param), label=labels[1], weights=second_weight,
-                histtype='step', linestyle='-', color=colors[1], linewidth=2)
+                histtype='step', linestyle='-', color=colors[1], linewidth=2)#, bins=int(1.5*nbins))
         ax.hist(np.log10(third_param), label=labels[2], weights=third_weight,
-                histtype='step', linestyle='--', color=colors[2], linewidth=2)
+                histtype='step', linestyle='--', color=colors[2], linewidth=2, bins=nbins)
         xlabel = r'$\log($' + xlab + ')'
     else :
         ax.hist(first_param, label=labels[0], weights=first_weight,
                 histtype='step', linestyle='-', color=colors[0], linewidth=1.5)
         ax.hist(second_param, label=labels[1], weights=second_weight,
-                histtype='step', linestyle='-', color=colors[1], linewidth=2.5)
+                histtype='step', linestyle='-', color=colors[1], linewidth=2.5)#, bins=int(1.5*nbins))
         ax.hist(third_param, label=labels[2], weights=third_weight,
-                histtype='step', linestyle='--', color=colors[2], linewidth=2)
+                histtype='step', linestyle='--', color=colors[2], linewidth=2, bins=nbins)
         xlabel = xlab
     
-    ax.set_xlabel('%s' % xlabel, fontsize=15)
-    ax.set_ylabel('Fractional Frequency', fontsize=15)
+    ax.set_xlabel('%s' % xlabel, fontsize=19)
+    ax.set_ylabel('Fractional Frequency', fontsize=19)
+    
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     
-    ax.legend(loc = location)
+    handles, labels = ax.get_legend_handles_labels()    
+    ax.legend(handles, labels, facecolor='whitesmoke', framealpha=1, fontsize=12,
+              loc = location)
+    
+    # ax.grid(b=True, zorder=1)
+    ax.tick_params(axis='both',which='both',labelsize=14)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
     plt.tight_layout()
     plt.show()
-    # plt.savefig(outfile, overwrite=True)
+    # fig.savefig(outfile, overwrite=True)
     # plt.close(fig)
     
     return
@@ -829,7 +925,7 @@ def multi2(xvals1, yvals1, label1, xvals2, yvals2, label2, xlab, ylab) :
     return
 
 def multi_plot(xarrays, yarrays, labels, colours, xlab, ylab, location=0, outfile=None,
-               xlog=False, ylog=False, log=False, alph=0.1,
+               xlog=False, ylog=False, log=False, alph=0.1, mark_nth=1,
                xmin=None, xmax=None, ymin=None, ymax=None) :
     
     global currentFig
@@ -839,28 +935,28 @@ def multi_plot(xarrays, yarrays, labels, colours, xlab, ylab, location=0, outfil
     ax = fig.add_subplot(111)
     
     if xlog == True :
-        ax.semilogx(xarrays[0], yarrays[0], 'o', color=colours[0], label = labels[0], alpha=1.0, zorder=4)
+        ax.semilogx(xarrays[0], yarrays[0], 'o', color=colours[0], label = labels[0], alpha=1.0, zorder=4, ms=9)
         i = 1
         while i < len(xarrays) : # add each dataset in a list to the plot
-            ax.semilogx(xarrays[i], yarrays[i], 'o', color=colours[i], label = labels[i], alpha=alph)
+            ax.semilogx(xarrays[i], yarrays[i], 'o', color=colours[i], label = labels[i], alpha=alph, markevery=mark_nth)
             i += 1
     elif ylog == True :
-        ax.semilogy(xarrays[0], yarrays[0], 'o', color=colours[0], label = labels[0], alpha=1.0, zorder=4)
+        ax.semilogy(xarrays[0], yarrays[0], 'o', color=colours[0], label = labels[0], alpha=1.0, zorder=4, ms=9)
         i = 1
         while i < len(xarrays) : # add each dataset in a list to the plot
-            ax.semilogy(xarrays[i], yarrays[i], 'o', color=colours[i], label = labels[i], alpha=alph)
+            ax.semilogy(xarrays[i], yarrays[i], 'o', color=colours[i], label = labels[i], alpha=alph, markevery=mark_nth)
             i += 1
     elif log == True :
-        ax.loglog(xarrays[0], yarrays[0], 'o', color=colours[0], label = labels[0], alpha=1.0, zorder=4)
+        ax.loglog(xarrays[0], yarrays[0], 'o', color=colours[0], label = labels[0], alpha=1.0, zorder=4, ms=9)
         i = 1
         while i < len(xarrays) : # add each dataset in a list to the plot
-            ax.loglog(xarrays[i], yarrays[i], 'o', color=colours[i], label = labels[i], alpha=alph)
+            ax.loglog(xarrays[i], yarrays[i], 'o', color=colours[i], label = labels[i], alpha=alph, markevery=mark_nth)
             i += 1
     else :
-        ax.plot(xarrays[0], yarrays[0], 'o', color=colours[0], label = labels[0], alpha=1.0, zorder=4)
+        ax.plot(xarrays[0], yarrays[0], 'o', color=colours[0], label = labels[0], alpha=1.0, zorder=4, ms=9)
         i = 1
         while i < len(xarrays) : # add each dataset in a list to the plot
-            ax.plot(xarrays[i], yarrays[i], 'o', color=colours[i], label = labels[i], alpha=alph)
+            ax.plot(xarrays[i], yarrays[i], 'o', color=colours[i], label = labels[i], alpha=alph, markevery=mark_nth)
             i += 1
     
     ax.set_xlabel('%s' % xlab, fontsize=21)
@@ -869,23 +965,32 @@ def multi_plot(xarrays, yarrays, labels, colours, xlab, ylab, location=0, outfil
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     
-    ax.legend(loc = location)
+    handles, labels = ax.get_legend_handles_labels()    
+    ax.legend(handles, labels, facecolor='whitesmoke', framealpha=1, fontsize=14,
+              loc = location)
+    
+    # ax.grid(b=True, zorder=1)
+    ax.tick_params(axis='both',which='both',labelsize=16)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
     plt.tight_layout()
-    # plt.show()
-    plt.savefig(outfile, overwrite=True)
-    plt.close(fig)
+    plt.show()
+    # fig.savefig(outfile, overwrite=True)
+    # plt.close(fig)
     
     return
 
 def plot(xvals, xlab, yvals, ylab, cat_name='SDSS', xmin=None, xmax=None,
-         ymin=None, ymax=None, hist2d=False, nbins=200, fit1=False, fit2=False,
+         ymin=None, ymax=None, hist2d=False, nbins=200, fit0=False, fit1=False, fit2=False,
          log=False, logy=False, correlation=False) :
     
     from matplotlib.colors import LogNorm
     import scipy.stats as sp
     
     global currentFig
-    fig = plt.figure(currentFig) # the current figure
+    fig = plt.figure(currentFig, figsize=(8,6)) # the current figure
     currentFig += 1
     plt.clf() # clear the figure before each run
     ax = fig.add_subplot(111) # set axes, figure location
@@ -913,29 +1018,52 @@ def plot(xvals, xlab, yvals, ylab, cat_name='SDSS', xmin=None, xmax=None,
     #     ax.plot(xs, xs + 0.65219703, 'r--', label='linear offset')
     #     ax.plot(xs, 0.13952656*(xs - 5.80306785)**2 + 8.16238619, 'r--', label='parabolic fit')
     
+    if fit0 == True :
+        start = min(np.min(xvals), np.min(yvals))
+        stop = max(np.max(xvals), np.max(yvals))
+        xs = np.linspace(start, stop, 1000)
+        ax.plot(xs, xs, 'k--', label='equality')
+    
     if fit1 == True :
         start = min(np.min(xvals), np.min(yvals))
         stop = max(np.max(xvals), np.max(yvals))
         xs = np.linspace(start, stop, 1000)
-        ax.plot(xs, xs-1.2722659777062275, 'k-', label='linear offset fit')
-        # ax.plot(xs, 0.8125759463914866*xs-4.961460348702913, 'b-', label='linear fit')
+        ax.plot(xs, xs, 'k--', label='equality')
+        # ax.plot(xs, xs-1.2722659777062275, 'k-', label='linear offset fit')
+        ax.plot(xs, 0.8125759463914866*xs-4.961460348702913, 'k-', label=r'fit: $0.82x-4.96$')
     
     if fit2 == True :
         start = min(np.min(xvals), np.min(yvals))
         stop = max(np.max(xvals), np.max(yvals))
         xs = np.linspace(start, stop, 1000)
-        ax.plot(xs, xs-1.2179114940900249, 'k-', label='linear offset fit')
-        # ax.plot(xs, 0.8492931852404171*xs-4.343099872187622, 'b-', label='linear fit')
+        ax.plot(xs, xs, 'k--', label='equality')
+        # ax.plot(xs, xs-1.2179114940900249, 'k-', label='linear offset fit')
+        ax.plot(xs, 0.8492931852404171*xs-4.343099872187622, 'k-', label=r'fit: $0.85x-4.34$')
     
-    ax.set_xlabel('%s' % xlab, fontsize=15)
-    ax.set_ylabel('%s' % ylab, fontsize=15)
-    
+    ax.set_xlabel('%s' % xlab, fontsize=21)
+    ax.set_ylabel('%s' % ylab, fontsize=21)
+        
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     
-    # ax.legend()
+    handles, labels = ax.get_legend_handles_labels()
+    
+    # handles = [handles[1], handles[0], handles[2]]
+    # labels = [labels[1], labels[0], labels[2]]
+    
+    ax.legend(handles, labels, facecolor='whitesmoke', framealpha=1, fontsize=17,
+               loc = 'upper left')
+    
+    # ax.grid(b=True, zorder=1)
+    ax.tick_params(axis='both',which='both',labelsize=16)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
     plt.tight_layout()
     plt.show()
+    # fig.savefig('correlation_plots/diagnostic_SDSS_WHAN.pdf', overwrite=True)
+    # plt.close()
     
     return
 
@@ -1048,16 +1176,25 @@ def plot_multi(xarrays, yarrays, labels, colours, xlab, ylab, location=0, outfil
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     
-    ax.legend(loc = location)
+    handles, labels = ax.get_legend_handles_labels()    
+    ax.legend(handles, labels, facecolor='whitesmoke', framealpha=1, fontsize=14,
+              loc = location)
+    
+    # ax.grid(b=True, zorder=1)
+    ax.tick_params(axis='both',which='both',labelsize=16)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
     plt.tight_layout()
     plt.show()
-    # plt.savefig(outfile, overwrite=True)
+    # fig.savefig(outfile, overwrite=True)
     # plt.close(fig)
     
     return
 
 def plot_with_errors(xvals, xlab, yvals, ylab, upper_errors, lower_errors,
-                     xmin=None, xmax=None, ymin=None, ymax=None) :
+                     outfile=None, xmin=None, xmax=None, ymin=None, ymax=None) :
     
     global currentFig
     fig = plt.figure(currentFig, figsize=(11.54, 8))
@@ -1085,10 +1222,93 @@ def plot_with_errors(xvals, xlab, yvals, ylab, upper_errors, lower_errors,
     ax.legend(facecolor='whitesmoke', framealpha=1, fontsize=19, loc = 'upper left')
     plt.tight_layout()
     plt.show()
+    # plt.savefig(outfile, overwrite=True)
+    # plt.close(fig)
     
     return
 
-def sample_projection(list_of_catalogs, labels) :
+def plot_with_errorbars(xvals, x_errors, xlab, yvals, y_errors, ylab,
+                        outfile=None, xmin=None, xmax=None, ymin=None, ymax=None) :
+    
+    global currentFig
+    fig = plt.figure(currentFig, figsize=(8,6))
+    currentFig += 1
+    plt.clf()
+    ax = fig.add_subplot(111)
+    
+    ax.errorbar(xvals, yvals, xerr=x_errors, yerr=y_errors,
+                fmt='ko', elinewidth=0.3, capsize=1.5, errorevery=1)
+    
+    ax.vlines(0.35, 0, 2, color='grey', linestyle='-', label='A=0.35')
+    equality = np.linspace(0, 2, 1000)
+    ax.plot(equality, equality, color='grey', linestyle='--', label='Equality')
+    
+    ax.annotate('Merger Region', xy=(1,1.75), size=15)
+    
+    ax.set_xlabel('%s' % xlab, fontsize=21)
+    ax.set_ylabel('%s' % ylab, fontsize=21)
+    
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+    
+    ax.tick_params(axis='both',which='both',labelsize=17)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
+    ax.legend(facecolor='whitesmoke', framealpha=1, fontsize=15, loc = 'upper left')
+    plt.tight_layout()
+    plt.show()
+    # plt.savefig(outfile, overwrite=True)
+    # plt.close(fig)
+    
+    return
+
+def population_plot(y1, y1err, y2, y2err, y3, y3err, labels,
+                    outfile=None, xmin=None, xmax=None, ymin=None, ymax=None) :
+    
+    global currentFig
+    fig = plt.figure(currentFig, figsize=(8,6))
+    currentFig += 1
+    plt.clf()
+    ax = fig.add_subplot(111)
+    
+    xs = [1, 2, 3, 4]
+    xlab = 'Environmental Density'
+    ylab = 'Fraction'
+    colours = ['red', 'dodgerblue', 'gold']
+    
+    # for GAMA AGN
+    ax.errorbar(xs, y1, yerr=y1err, fmt='-', color=colours[0], label=labels[0],
+                elinewidth=1, capsize=1.5, errorevery=1)
+    # for GAMA SFG
+    ax.errorbar(xs, y2, yerr=y2err, fmt='-', color=colours[1], label=labels[1],
+                elinewidth=1, capsize=1.5, errorevery=1)
+    # for GAMA Passive
+    ax.errorbar(xs, y3, yerr=y3err, fmt='-', color=colours[2], label=labels[2],
+                elinewidth=1, capsize=1.5, errorevery=1)
+    
+    ax.set_xlabel('%s' % xlab, fontsize=21)
+    ax.set_ylabel('%s' % ylab, fontsize=21)
+    
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+    
+    plt.xticks(xs, ['Low', '', '', 'High'])
+    ax.tick_params(axis='both',which='both',labelsize=17)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
+    ax.legend(facecolor='whitesmoke', framealpha=1, fontsize=15, loc = 'upper left')
+    plt.tight_layout()
+    plt.show()
+    # plt.savefig(outfile, overwrite=True)
+    # plt.close(fig)
+    
+    return
+
+def sample_projection(list_of_catalogs, labels, outfile=None) :
     
     list_of_RA = []
     list_of_dec = []
@@ -1100,14 +1320,14 @@ def sample_projection(list_of_catalogs, labels) :
         list_of_RA.append(sub_ra)
         list_of_dec.append(sub_dec)
     
-    plt.sky_projection(list_of_RA, list_of_dec, labels)
+    sky_projection(list_of_RA, list_of_dec, labels, outfile)
     
     return
 
-def sky_projection(list_of_RA, list_of_dec, labels) :
+def sky_projection(list_of_RA, list_of_dec, labels, outfile=None) :
     
     global currentFig
-    fig = plt.figure(currentFig, figsize=(16,8))
+    fig = plt.figure(currentFig, figsize=(12,6))
     currentFig += 1
     plt.clf()
     ax = fig.add_subplot(111, projection='aitoff') # aitoff or mollweide
@@ -1116,15 +1336,22 @@ def sky_projection(list_of_RA, list_of_dec, labels) :
                     'k^', 'b^', 'r^', 'g^', 'm^', 'c^', 'y^']
     for i in range(len(list_of_RA)) : # add each dataset to the plot
         ax.plot(list_of_RA[i].radian, list_of_dec[i].radian,
-                marker_style[i], label = labels[i])
+                marker_style[i], label = labels[i], ms=7)
     
     ax.set_xticklabels(['14h','16h','18h','20h','22h','0h','2h','4h','6h',
                         '8h','10h'])
     ax.grid(True)
     
-    ax.legend(fontsize=15)
+    ax.tick_params(axis='both',which='both',labelsize=19)
+    ax.tick_params(axis='both',which='major',direction='in',width=1.5,length=10)
+    ax.tick_params(axis='both',which='minor',direction='in',width=1.5,length=6)
+    ax.minorticks_on()
+    
+    ax.legend(facecolor='whitesmoke', framealpha=1, fontsize=19, loc = 'upper right')
     plt.tight_layout()
-    plt.show()
+    # plt.show()
+    plt.savefig(outfile, overwrite=True)
+    plt.close(fig)
     
     return
 
@@ -1190,9 +1417,10 @@ def view_all_3d_plots() :
 # env_hists('Companions', log=True)
 
 # sample_projection(['catalogs/raw_cats/HES_sample.fits',
-#                    'catalogs/raw_cats/CARS_sample.fits',
-#                    'catalogs/CARS_SDSS/CARS_SDSS_base.fits'],
-#                   ['HES','CARS','Thesis Sample'])
+#                     'catalogs/raw_cats/CARS_sample.fits',
+#                     'catalogs/CARS_SDSS/CARS_SDSS_base.fits'],
+#                   ['HES','CARS','Thesis Sample'],
+#                   'correlation_plots/HES_CARS_thesis_samples.pdf')
 
 # sample_projection([#'catalogs/CARS_SDSS/CARS-compliments_base.fits',
                    # 'catalogs/CARS_SDSS/SDSS-galaxies_base_random_2500.fits',
@@ -1216,26 +1444,30 @@ def view_all_3d_plots() :
 
 # to include as-is in thesis
 # all_histograms('Z', 'Redshift', loc=2, xmin=0.01, xmax=0.062, ymin=0, ymax=0.44)
-# all_histograms('M_g', r'Absolute $g$ Magnitude', xmin=-23, xmax=-16, ymin=0, ymax=0.45)
-# all_histograms('M_i', r'Absolute $i$ Magnitude', xmin=-24.6, xmax=-16.5, ymin=0, ymax=0.48)
+# all_histograms('M_g', r'Absolute $g$ Magnitude', xmin=-23, xmax=-17, ymin=0, ymax=0.45)
+# all_histograms('M_i', r'Absolute $i$ Magnitude', loc=2, xmin=-24.6, xmax=-18, ymin=0, ymax=0.48)
 # all_histograms('logMass', r'$\log($Stellar Mass of Target$/M_\odot)$', xmin=9.9, xmax=12.4, ymin=0, ymax=0.5)
 # all_histograms('Companions', 'Number of Companions', log=True, xmin=-0.1, xmax=2.7, ymin=0, ymax=0.38)
-# all_histograms('Most_Massive_Mass', r'$\log($Stellar Mass of Most Massive Companion$/M_\odot)$',
-#                 loc=2, xmin=8.4, xmax=12.4, ymin=0, ymax=0.4)
-# all_histograms('Most_Massive_Distance', 'Distance to Most Massive Companion/kpc',
-#                 log=True, loc=2, xmin=0, xmax=4.5, ymin=0, ymax=0.55)
+# all_histograms('Most_Massive_Mass', r'$\log($Stellar Mass of MMG in LSE$/M_\odot)$',
+#                 loc=2, xmin=9, xmax=12.4, ymin=0, ymax=0.4)
+# all_histograms('Most_Massive_Distance', 'Distance to MMG in LSE/kpc',
+#                 log=True, loc=2, sdss_bins=22, xmin=0, xmax=4.5, ymin=0, ymax=0.35)
 # all_histograms('Closest_Mass', r'$\log($Stellar Mass of Closest Companion$/M_\odot)$',
-#                 xmin=8.4, xmax=11.6, ymin=0, ymax=0.28)
+#                 xmin=9, xmax=12, ymin=0, ymax=0.28)
 # all_histograms('Closest_Distance', 'Distance to Closest Companion/kpc',
-#                 log=True, loc=2, xmin=0, xmax=4.4, ymin=0, ymax=0.78)
+#                 log=True, loc=2, sdss_bins=22, xmin=0, xmax=4.4, ymin=0, ymax=0.5)
+# all_histograms('Massive_1Mpc_Mass', r'$\log($Stellar Mass of MMC in 1 Mpc$/M_\odot)$',
+#                 xmin=9, xmax=12, ymin=0, ymax=0.2)
+# all_histograms('Massive_1Mpc_Distance', 'Distance to MMC in 1 Mpc/kpc',
+#                 log=True, loc=2, sdss_bins=42, xmin=1.5, xmax=3.1, ymin=0, ymax=0.33)
 # all_histograms('d_CoM', 'Projected Distance to the Center of Stellar Mass/arcmin',
-#                 log=True, loc=2, xmin=-0.05, xmax=1.85, ymin=0, ymax=0.43)
+#                 log=True, loc=2, xmin=-0.05, xmax=1.85, ymin=0, ymax=0.3)
 # all_histograms('CountInCyl', 'Companions in the GAMA Cyl.', log=True, xmin=-0.1, xmax=2.25, ymin=0, ymax=0.43)
 # all_histograms('SurfaceDensity', r'Surface Density/Mpc$^{-2}$',
-#                 log=True, xmin=-4.8, xmax=2, ymin=0, ymax=0.55)
+#                 log=True, sdss_bins=18, xmin=-4.8, xmax=1, ymin=0, ymax=0.4)
 # all_histograms('Overdensity', 'Overdensity', log=True, xmin=-0.9, xmax=1.45, ymin=0, ymax=0.43)
-# all_histograms('AGEPar', r'AGE Parameter/Mpc$^{-1}$',
-#                 log=True, loc=2, xmin=-3.5, xmax=1.7, ymin=0, ymax=0.7)
+# all_histograms('AGEPar', r'AGE Parameter/Mpc$^{-1}$', # must change number of bins only for GAMA passives
+#                 log=True, loc=2, sdss_bins=18, xmin=-3, xmax=2, ymin=0, ymax=0.48)
 
 # alternatives (ie. not using a log-scale, for example)
 # all_histograms('Companions', 'Number of Companions', xmin=-5, xmax=440, ymin=0, ymax=0.9)
@@ -1265,7 +1497,7 @@ def view_all_3d_plots() :
 
 # all_scatter_plots('GAMA', 'Z', 'SurfaceDensity', xmin=0.009, xmax=0.061, ymin=1e-5, ymax=10, logy=True)
 # all_scatter_plots('GAMA', 'logMass', 'SurfaceDensity', xmin=9.95, xmax=12, ymin=1e-5, ymax=10, logy=True)
-# all_scatter_plots('GAMA', 'SFR', 'SurfaceDensity', xmin=0.0006, xmax=100, ymin=1e-5, ymax=10, loglog=True)
+# all_scatter_plots('GAMA', 'SFR', 'SurfaceDensity', loc=2, xmin=0.0006, xmax=100, ymin=1e-5, ymax=10, loglog=True)
 # all_scatter_plots('GAMA', 'OIII_FWHM', 'SurfaceDensity', xmin=100, xmax=800, ymin=1e-5, ymax=10, logy=True)
 
 # all_scatter_plots('SDSS', 'Z', 'Closest_Distance', xmin=0.009, xmax=0.061, ymin=30, ymax=2e4, logy=True)
@@ -1275,7 +1507,7 @@ def view_all_3d_plots() :
 
 # all_scatter_plots('SDSS', 'Z', 'SurfaceDensity', xmin=0.009, xmax=0.061, ymin=1e-5, ymax=10, logy=True)
 # all_scatter_plots('SDSS', 'logMass', 'SurfaceDensity', xmin=9.95, xmax=12, ymin=1e-5, ymax=10, logy=True)
-# all_scatter_plots('SDSS', 'SFR', 'SurfaceDensity', xmin=0.0006, xmax=100, ymin=1e-5, ymax=10, loglog=True)
+# all_scatter_plots('SDSS', 'SFR', 'SurfaceDensity', loc=2, xmin=0.0006, xmax=100, ymin=1e-5, ymax=10, loglog=True)
 # all_scatter_plots('SDSS', 'OIII_FWHM', 'SurfaceDensity', xmin=100, xmax=800, ymin=1e-5, ymax=10, logy=True)
 
 # unused
@@ -1296,5 +1528,6 @@ def view_all_3d_plots() :
 # all_scatter_plots('GAMA', 'Overdensity', 'Closest_Mass', xmin=0.1, xmax=100, logx=True)
 # all_scatter_plots('GAMA', 'Closest_Mass', 'Most_Massive_Mass')
 
-# gaussian_plot(np.array([0, 0, 0, -2]), np.array([0.2, 1, 5, 0.5]))
+# gaussian_plot(np.array([0, 0, 0, -2]), np.array([0.2, 1, 5, 0.5]),
+#               'correlation_plots/gaussian_shape.pdf')
 # filter_curves()

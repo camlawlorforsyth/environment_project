@@ -11,8 +11,10 @@ def correlations() :
     masses = Table.read('catalogs/raw_cats/CARS_thesis_sample_atomicMolecularMasses.fits')
     atomic = masses['HI_mass']
     molecular = masses['H2_mass']
-    atomic_label = r'Mass of Atomic Hydrogren $(\log_{10}[M_\odot])$'
-    molecular_label = r'Mass of Molecular Hydrogren $(\log_{10}[M_\odot])$'
+    # atomic_label = r'Mass of Atomic Hydrogren $(\log_{10}[M_\odot])$'
+    # molecular_label = r'Mass of Molecular Hydrogren $(\log_{10}[M_\odot])$'
+    atomic_label = r'$\log($Mass of Atomic Hydrogen$/M_\odot)$'
+    molecular_label = r'$\log($Mass of Molecular Hydrogen$/M_\odot)$'
     
     redshift = catalog['Z']
     g_mag = catalog['M_g']

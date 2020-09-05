@@ -109,9 +109,13 @@ venv.bak/
 *.fits
 *.fits.gz
 
-# generated and saved Numpy arrays
+# data files
+*.csv
+*.txt
+
+# generated and saved Numpy arrays, PDF, PNG, and TeX files
 *.npy
 *.npz
-
-# generated and saved PNG files
+*.pdf
 *.png
+*.tex

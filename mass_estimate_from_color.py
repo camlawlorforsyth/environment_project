@@ -47,9 +47,11 @@ def mass_comparison(cat_name, intercept_corr=False, linear_corr=False, n_bins=25
             i_int_corr = linear_corr[3]
             M_g = g_slope_corr*(catalog['KCOR_MAG'][:,0] - 5*np.log10(D_L) + 5) + g_int_corr
             M_i = i_slope_corr*(catalog['KCOR_MAG'][:,2] - 5*np.log10(D_L) + 5) + i_int_corr
+            corr_label = '_corr'
         else :
             M_g = catalog['KCOR_MAG'][:,0] - 5*np.log10(D_L) + 5 # absolute g mag.
             M_i = catalog['KCOR_MAG'][:,2] - 5*np.log10(D_L) + 5 # absolute i mag.
+            corr_label = ''
         
         logMass = (1.15 + 0.7*(M_g - M_i) - 0.4*M_i)*u.solMass
         catalog['colourMass'] = logMass
@@ -70,8 +72,8 @@ def mass_comparison(cat_name, intercept_corr=False, linear_corr=False, n_bins=25
         logMass = (1.15 + 0.7*catalog['gminusi'] - 0.4*M_i)/u.mag*u.solMass
                     # based on relation from Taylor+ 2011, MNRAS, 418, 1587
         catalog['colourMass'] = logMass
-        
         catmass = catalog['logmstar']
+        corr_label = ''
     
     logmass = catalog['colourMass']
     residual = logmass - catmass
@@ -83,9 +85,10 @@ def mass_comparison(cat_name, intercept_corr=False, linear_corr=False, n_bins=25
     lo, lo_edge, lo_bn = sp.binned_statistic(logmass, residual, lower, nbins, [(9,12)])
     hi, hi_edge, hi_bn = sp.binned_statistic(logmass, residual, upper, nbins, [(9,12)])
     
+    outpath = 'correlation_plots/mass_difference_' + cat_name + corr_label + '.pdf'
     plt.plot_with_errors(bin_edge[:-1], r'$\log{(M_*/M_\odot)} = 1.15 + 0.70(g-i) - 0.4M_i$',
                           meds, r'$\Delta \log{(M_*/M_\odot)}$', lo, hi,
-                          xmin=8.9, xmax=12, ymin=-1, ymax=1)
+                          outfile=outpath, xmin=8.9, xmax=12, ymin=-1, ymax=1)
     
     return
 
@@ -135,7 +138,7 @@ def mass_correction() :
     popt_lin, pcov_lin = curve_fit(funcs.line, catalog['M_g_sdss'], catalog['M_g_gama'])
     print('m=%s  b=%s' % (str(popt_lin[0]), str(popt_lin[1]) ))
     
-    plt.plot(catalog['M_g_sdss'], r'Absolute $g$ Magnitude from SDSS',
+    plt.plot(catalog['M_g_sdss'], r'Absolute $g$ Magnitude from MPA/JHU',
               catalog['M_g_gama'], r'Absolute $g$ Magnitude from GAMA',
               hist2d=True, fit1=True, xmin=-26, xmax=-11, ymin=-26, ymax=-11)
     
@@ -148,9 +151,20 @@ def mass_correction() :
     popt_lin, pcov_lin = curve_fit(funcs.line, catalog['M_i_sdss'], catalog['M_i_gama'])
     print('m=%s  b=%s' % (str(popt_lin[0]), str(popt_lin[1]) ))
     
-    plt.plot(catalog['M_i_sdss'], r'Absolute $i$ Magnitude from SDSS',
+    plt.plot(catalog['M_i_sdss'], r'Absolute $i$ Magnitude from MPA/JHU',
               catalog['M_i_gama'], r'Absolute $i$ Magnitude from GAMA',
               hist2d=True, fit2=True, xmin=-26, xmax=-11, ymin=-26, ymax=-11)
+    
+    # after correcting the data
+    sdss_g_corr = 0.8125759463914866*catalog['M_g_sdss']-4.961460348702913
+    plt.plot(sdss_g_corr, r'Corrected Absolute $g$ Magnitude from MPA/JHU',
+              catalog['M_g_gama'], r'Absolute $g$ Magnitude from GAMA',
+              hist2d=True, fit0=True, xmin=-26, xmax=-11, ymin=-26, ymax=-11)
+    
+    sdss_i_corr = 0.8492931852404171*catalog['M_i_sdss']-4.343099872187622
+    plt.plot(sdss_i_corr, r'Corrected Absolute $i$ Magnitude from MPA/JHU',
+              catalog['M_i_gama'], r'Absolute $i$ Magnitude from GAMA',
+              hist2d=True, fit0=True, xmin=-26, xmax=-11, ymin=-26, ymax=-11)
     
     return
 
@@ -163,7 +177,7 @@ def lower(array) :
 # mass_comparison('SDSS', n_bins=25)
 # mass_comparison('SDSS', intercept_corr=[-1.2722659777062275, -1.2179114940900249])
 # mass_comparison('SDSS', linear_corr=[0.8125759463914866, -4.961460348702913,
-#                                       0.8492931852404171, -4.343099872187622], n_bins=23)
+#                                      0.8492931852404171, -4.343099872187622], n_bins=23)
 # mass_comparison('GAMA', n_bins=23)
 
 # mass_correction()

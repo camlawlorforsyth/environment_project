@@ -17,7 +17,7 @@ currentFig = 1
 # directory = 'BLAGN_candidate_spectra/'
 # out_directory = 'BLAGN_spectra_plots/'
 directory = 'CARS_DR7_spectra/'
-out_directory = 'CARS_DR7_spectra_plots/'
+# out_directory = 'CARS_DR7_spectra_plots/'
 fwhm_conv = 2*np.sqrt( 2*np.log(2) )
 speed_of_light = const.c.to('km/s').value
 
@@ -28,6 +28,9 @@ def main(method='new') :
     # files = ['spSpec-54484-2656-469.fit', 'spSpec-53816-2219-071.fit',
              # 'spSpec-54526-2884-160.fit']
     
+    # Type II spectrum
+    # files = ['Type2/spSpec-51885-0434-437.fit']
+    
     BL_FWHM, plates, mjds, fiberids = [], [], [], []
     for file in files :
         with fits.open(directory + file) as hdu :
@@ -36,7 +39,7 @@ def main(method='new') :
             waveint = header['COEFF1']
             zz = header['Z']
             data = hdu[0].data
-            print(header)
+            # print(header)
         
         spec = data[0] # spectra
         cs_spec = data[1] # continuum subtracted spectra
@@ -56,8 +59,8 @@ def main(method='new') :
                                10, 0, 1000, # 0.1, 0, 1000, # 0.1, 0, 1000,
                                -0.01, -0.01])
         
-        # plt.plot(wave, r'Wavelength ($\rm \AA$)', cs_spec,
-        #           r'Flux Density ($10^{-17}$ erg s$^{-1}$ cm$^{-2}$ $\rm \AA^{-1}$)')
+        plt.plot(wave, r'Wavelength ($\rm \AA$)', cs_spec,
+                  r'Flux Density ($10^{-17}$ erg s$^{-1}$ cm$^{-2}$ $\rm \AA^{-1}$)')
         
         if HA_SN >= 3e8 :
             if method == 'old' :

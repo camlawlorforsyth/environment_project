@@ -24,6 +24,10 @@ def gaussian(xx, mu, sigma_sqr) :
     norm = 1/np.sqrt(2*np.pi*sigma_sqr)
     return norm*np.exp(exponent)
 
+def gaussian_fit(xx, mu, sigma) :
+    exponent = -0.5*np.square(xx - mu)/sigma**2
+    return np.exp(exponent)
+
 def image_scale() :
     
     galaxies = Table.read('catalogs/raw_cats/CARS_thesis_sample.fits')
